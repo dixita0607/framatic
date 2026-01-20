@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:framatic/models/frame_preset.dart';
 import 'package:framatic/utils/constants.dart';
 
-/// Widget that displays a frame overlay over the camera preview
+/// Widget that displays a polaroid-style frame border over the camera preview
 class FrameOverlay extends StatelessWidget {
   final FramePreset preset;
-  final double opacity;
+  final double borderWidth;
 
   const FrameOverlay({
     super.key,
     required this.preset,
-    this.opacity = AppConstants.defaultFrameOpacity,
+    this.borderWidth = AppConstants.frameBorderWidth,
   });
 
   @override
@@ -18,29 +18,25 @@ class FrameOverlay extends StatelessWidget {
     return CustomPaint(
       painter: FrameOverlayPainter(
         preset: preset,
-        opacity: opacity,
+        borderWidth: borderWidth,
       ),
       child: Container(),
     );
   }
 }
 
-/// Custom painter for drawing the frame overlay
+/// Custom painter for drawing the polaroid-style frame border
 class FrameOverlayPainter extends CustomPainter {
   final FramePreset preset;
-  final double opacity;
+  final double borderWidth;
 
   FrameOverlayPainter({
     required this.preset,
-    required this.opacity,
+    required this.borderWidth,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = preset.frameColor.withValues(alpha: opacity)
-      ..style = PaintingStyle.fill;
-
     // Calculate frame dimensions based on aspect ratio
     final frameSize = _calculateFrameSize(size);
     final frameRect = Rect.fromCenter(
@@ -49,35 +45,72 @@ class FrameOverlayPainter extends CustomPainter {
       height: frameSize.height,
     );
 
-    // Create path for the overlay (everything except the frame area)
-    final path = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
-      ..addRect(frameRect)
-      ..fillType = PathFillType.evenOdd;
-
-    // Draw the solid white overlay outside the frame
-    canvas.drawPath(path, paint);
-
-    // Draw frame border (thin line to define frame edge)
+    // Draw solid white border using filled rectangles for consistent thickness
     final borderPaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
 
-    canvas.drawRect(frameRect, borderPaint);
+    // Top border
+    canvas.drawRect(
+      Rect.fromLTRB(
+        frameRect.left - borderWidth,
+        frameRect.top - borderWidth,
+        frameRect.right + borderWidth,
+        frameRect.top,
+      ),
+      borderPaint,
+    );
 
-    // Optionally draw aspect ratio label
+    // Bottom border
+    canvas.drawRect(
+      Rect.fromLTRB(
+        frameRect.left - borderWidth,
+        frameRect.bottom,
+        frameRect.right + borderWidth,
+        frameRect.bottom + borderWidth,
+      ),
+      borderPaint,
+    );
+
+    // Left border
+    canvas.drawRect(
+      Rect.fromLTRB(
+        frameRect.left - borderWidth,
+        frameRect.top,
+        frameRect.left,
+        frameRect.bottom,
+      ),
+      borderPaint,
+    );
+
+    // Right border
+    canvas.drawRect(
+      Rect.fromLTRB(
+        frameRect.right,
+        frameRect.top,
+        frameRect.right + borderWidth,
+        frameRect.bottom,
+      ),
+      borderPaint,
+    );
+
+    // Draw aspect ratio label below frame
     _drawLabel(canvas, size, frameRect);
   }
 
   /// Calculate frame size that fits within the screen while maintaining aspect ratio
+  /// Accounts for border width so the border doesn't get clipped
   Size _calculateFrameSize(Size screenSize) {
-    double frameWidth = screenSize.width * AppConstants.maxFramePadding;
+    // Available space after accounting for border on both sides
+    final availableWidth = screenSize.width * AppConstants.maxFramePadding - (borderWidth * 2);
+    final availableHeight = screenSize.height * AppConstants.maxFramePadding - (borderWidth * 2);
+
+    double frameWidth = availableWidth;
     double frameHeight = frameWidth / preset.aspectRatio;
 
-    // If height exceeds screen bounds, scale based on height instead
-    if (frameHeight > screenSize.height * AppConstants.maxFramePadding) {
-      frameHeight = screenSize.height * AppConstants.maxFramePadding;
+    // If height exceeds available bounds, scale based on height instead
+    if (frameHeight > availableHeight) {
+      frameHeight = availableHeight;
       frameWidth = frameHeight * preset.aspectRatio;
     }
 
@@ -109,10 +142,10 @@ class FrameOverlayPainter extends CustomPainter {
 
     textPainter.layout();
 
-    // Position label at bottom center of frame
+    // Position label below the border
     final offset = Offset(
       frameRect.center.dx - textPainter.width / 2,
-      frameRect.bottom + 12,
+      frameRect.bottom + borderWidth + 8,
     );
 
     textPainter.paint(canvas, offset);
@@ -120,6 +153,6 @@ class FrameOverlayPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(FrameOverlayPainter oldDelegate) {
-    return oldDelegate.preset != preset || oldDelegate.opacity != opacity;
+    return oldDelegate.preset != preset || oldDelegate.borderWidth != borderWidth;
   }
 }

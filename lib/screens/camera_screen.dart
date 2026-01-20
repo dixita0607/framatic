@@ -3,6 +3,9 @@ import 'package:camera/camera.dart';
 import 'package:provider/provider.dart';
 import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/services/camera_service.dart';
+import 'package:framatic/services/photo_service.dart';
+import 'package:framatic/screens/photo_preview_screen.dart';
+import 'package:framatic/utils/constants.dart';
 import 'package:framatic/utils/permissions.dart';
 import 'package:framatic/widgets/frame_overlay.dart';
 import 'package:framatic/widgets/frame_selector.dart';
@@ -16,7 +19,9 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> {
   final CameraService _cameraService = CameraService();
+  final PhotoService _photoService = PhotoService();
   bool _isLoading = true;
+  bool _isCapturing = false;
   String? _errorMessage;
 
   @override
@@ -60,6 +65,68 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+
+  Future<void> _capturePhoto() async {
+    if (_isCapturing) return;
+
+    final frameProvider = context.read<FrameProvider>();
+    final preset = frameProvider.activePreset;
+
+    setState(() {
+      _isCapturing = true;
+    });
+
+    try {
+      // Take the picture
+      final xFile = await _cameraService.takePicture();
+      if (xFile == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to capture photo')),
+          );
+        }
+        return;
+      }
+
+      // Process with overlay
+      final processedBytes = await _photoService.processPhotoWithOverlay(
+        imagePath: xFile.path,
+        preset: preset,
+      );
+
+      if (processedBytes == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to process photo')),
+          );
+        }
+        return;
+      }
+
+      // Navigate to preview screen
+      if (mounted) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => PhotoPreviewScreen(
+              imageBytes: processedBytes,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCapturing = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -147,6 +214,7 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   /// Build camera preview that is clipped to the selected aspect ratio
+  /// Uses same frame calculation as FrameOverlay to ensure alignment
   Widget _buildClippedCameraPreview(
     CameraController controller,
     double targetAspectRatio,
@@ -155,18 +223,22 @@ class _CameraScreenState extends State<CameraScreen> {
     final previewWidth = controller.value.previewSize?.height ?? 1920;
     final previewHeight = controller.value.previewSize?.width ?? 1080;
     final cameraAspectRatio = previewWidth / previewHeight;
+    const borderWidth = AppConstants.frameBorderWidth;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calculate the size for the target aspect ratio that fits within screen
-        final maxWidth = constraints.maxWidth * 0.95;
-        final maxHeight = constraints.maxHeight * 0.95;
+        // Calculate frame size exactly like FrameOverlay does
+        // Account for border width so camera stays within the border
+        final availableWidth =
+            constraints.maxWidth * AppConstants.maxFramePadding - (borderWidth * 2);
+        final availableHeight =
+            constraints.maxHeight * AppConstants.maxFramePadding - (borderWidth * 2);
 
-        double frameWidth = maxWidth;
+        double frameWidth = availableWidth;
         double frameHeight = frameWidth / targetAspectRatio;
 
-        if (frameHeight > maxHeight) {
-          frameHeight = maxHeight;
+        if (frameHeight > availableHeight) {
+          frameHeight = availableHeight;
           frameWidth = frameHeight * targetAspectRatio;
         }
 
@@ -280,9 +352,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
                   // Capture button
                   GestureDetector(
-                    onTap: () {
-                      // TODO: Implement photo capture
-                    },
+                    onTap: _isCapturing ? null : _capturePhoto,
                     child: Container(
                       width: 70,
                       height: 70,
@@ -290,13 +360,24 @@ class _CameraScreenState extends State<CameraScreen> {
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 4),
                       ),
-                      child: Container(
-                        margin: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: _isCapturing
+                          ? const Center(
+                              child: SizedBox(
+                                width: 30,
+                                height: 30,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 3,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              margin: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
 
