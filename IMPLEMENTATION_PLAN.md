@@ -178,23 +178,7 @@ lib/
 2. Use existing `switchCamera()` method in CameraService
 3. Re-initialize zoom levels after camera switch
 
-### Phase 6: Settings & Configuration
-
-**Files to create:**
-
-- `screens/settings_screen.dart` - App configuration
-- `models/camera_settings.dart` - User preferences model
-
-**Implementation:**
-
-1. Add settings screen (default frame color, opacity, grid options)
-2. Implement frame color picker for different lighting conditions
-3. Add frame opacity slider
-4. Optional: Rule of thirds grid overlay
-5. App tutorial/onboarding for first-time users
-6. Handle camera orientation changes gracefully
-
-### Phase 7: UI/UX Polish & Styling
+### Phase 6: UI/UX Polish & Styling
 
 **Files to update:**
 
@@ -215,7 +199,7 @@ lib/
 9. Add haptic feedback for better tactile response
 10. Polish icons and visual elements
 
-### Phase 8: Split-Screen Comparison Mode (Future)
+### Phase 7: Split-Screen Comparison Mode (Future)
 
 > **TODO**: This phase is deferred for future implementation.
 
@@ -407,8 +391,9 @@ dependencies:
 - **Phase 2 (Frame Management)**: Low complexity - Basic CRUD with SharedPreferences
 - **Phase 3 (Photo Capture)**: Medium complexity - Image manipulation and gallery export
 - **Phase 4 (Zoom)**: Low complexity - Camera API provides zoom control
-- **Phase 5 (Comparison Mode)**: Medium-High complexity - Dual preview requires careful state management
-- **Phase 6 (Polish)**: Low-Medium complexity - UI refinements and settings
+- **Phase 5 (Camera Flip)**: Low complexity - Simple camera switching with zoom reset
+- **Phase 6 (UI/UX Polish)**: Low-Medium complexity - UI refinements and styling
+- **Phase 7 (Comparison Mode)**: Medium-High complexity - Dual preview requires careful state management
 
 ## Critical Success Factors
 
