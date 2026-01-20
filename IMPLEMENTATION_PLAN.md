@@ -158,10 +158,12 @@ lib/
 
 **Implementation:**
 
-1. Implement zoom using camera controller's zoom capabilities
-2. Create intuitive zoom slider widget (pinch gesture + slider)
-3. Display zoom level indicator
-4. Add exposure/focus tap controls (optional enhancement)
+1. Query device min/max zoom levels (support 0.5x ultra-wide on capable devices)
+2. Implement zoom using camera controller's zoom capabilities
+3. Create intuitive zoom slider widget (pinch gesture + slider)
+4. Display zoom level indicator (0.5x, 1.0x, 2.0x, etc.)
+5. Start at minimum zoom (0.5x if available) to give artists wider field of view
+6. Add exposure/focus tap controls (optional enhancement)
 
 ### Phase 5: Split-Screen Comparison Mode
 

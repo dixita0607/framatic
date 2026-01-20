@@ -9,6 +9,7 @@ import 'package:framatic/utils/constants.dart';
 import 'package:framatic/utils/permissions.dart';
 import 'package:framatic/widgets/frame_overlay.dart';
 import 'package:framatic/widgets/frame_selector.dart';
+import 'package:framatic/widgets/zoom_slider.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -23,6 +24,10 @@ class _CameraScreenState extends State<CameraScreen> {
   bool _isLoading = true;
   bool _isCapturing = false;
   String? _errorMessage;
+
+  // Zoom state
+  double _currentZoom = 1.0;
+  double _baseZoom = 1.0; // For pinch gesture
 
   @override
   void initState() {
@@ -54,7 +59,9 @@ class _CameraScreenState extends State<CameraScreen> {
       await _cameraService.initializeCameras();
       await _cameraService.initializeController();
 
+      // Set initial zoom to minimum (widest view)
       setState(() {
+        _currentZoom = _cameraService.currentZoom;
         _isLoading = false;
       });
     } catch (e) {
@@ -128,6 +135,35 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+  /// Handle zoom slider change
+  Future<void> _onZoomChanged(double zoom) async {
+    await _cameraService.setZoomLevel(zoom);
+    setState(() {
+      _currentZoom = zoom;
+    });
+  }
+
+  /// Handle pinch gesture start
+  void _onScaleStart(ScaleStartDetails details) {
+    _baseZoom = _currentZoom;
+  }
+
+  /// Handle pinch gesture update
+  Future<void> _onScaleUpdate(ScaleUpdateDetails details) async {
+    // Calculate new zoom based on pinch scale
+    final newZoom = (_baseZoom * details.scale).clamp(
+      _cameraService.minZoom,
+      _cameraService.maxZoom,
+    );
+
+    if ((newZoom - _currentZoom).abs() > 0.01) {
+      await _cameraService.setZoomLevel(newZoom);
+      setState(() {
+        _currentZoom = newZoom;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _cameraService.dispose();
@@ -192,22 +228,41 @@ class _CameraScreenState extends State<CameraScreen> {
       builder: (context, frameProvider, child) {
         final selectedAspectRatio = frameProvider.activePreset.aspectRatio;
 
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            // Camera preview - clipped to selected aspect ratio
-            Center(
-              child: _buildClippedCameraPreview(controller, selectedAspectRatio),
-            ),
+        return GestureDetector(
+          onScaleStart: _onScaleStart,
+          onScaleUpdate: _onScaleUpdate,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Camera preview - clipped to selected aspect ratio
+              Center(
+                child: _buildClippedCameraPreview(controller, selectedAspectRatio),
+              ),
 
-            // Frame overlay (just the white border area outside the frame)
-            FrameOverlay(
-              preset: frameProvider.activePreset,
-            ),
+              // Frame overlay (just the white border area outside the frame)
+              FrameOverlay(
+                preset: frameProvider.activePreset,
+              ),
 
-            // Controls overlay
-            _buildControls(),
-          ],
+              // Zoom slider on the right side
+              Positioned(
+                right: 16,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: ZoomSlider(
+                    minZoom: _cameraService.minZoom,
+                    maxZoom: _cameraService.maxZoom,
+                    currentZoom: _currentZoom,
+                    onZoomChanged: _onZoomChanged,
+                  ),
+                ),
+              ),
+
+              // Controls overlay
+              _buildControls(),
+            ],
+          ),
         );
       },
     );

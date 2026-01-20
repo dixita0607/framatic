@@ -7,10 +7,23 @@ class CameraService {
   List<CameraDescription>? _cameras;
   int _selectedCameraIndex = 0;
 
+  // Zoom state
+  double _minZoom = 1.0;
+  double _maxZoom = 1.0;
+  double _currentZoom = 1.0;
+
   CameraController? get controller => _controller;
   bool get isInitialized => _controller?.value.isInitialized ?? false;
   List<CameraDescription>? get cameras => _cameras;
   int get selectedCameraIndex => _selectedCameraIndex;
+
+  // Zoom getters
+  double get minZoom => _minZoom;
+  double get maxZoom => _maxZoom;
+  double get currentZoom => _currentZoom;
+
+  /// Check if device supports ultra-wide (0.5x) zoom
+  bool get supportsUltraWide => _minZoom < 1.0;
 
   /// Initialize available cameras
   Future<void> initializeCameras() async {
@@ -46,6 +59,8 @@ class CameraService {
 
     try {
       await _controller!.initialize();
+      // Initialize zoom levels after controller is ready
+      await _initializeZoomLevels();
     } catch (e) {
       debugPrint('Error initializing camera controller: $e');
       rethrow;
@@ -62,29 +77,45 @@ class CameraService {
     await initializeController(cameraIndex: _selectedCameraIndex);
   }
 
-  /// Set zoom level (0.0 to 1.0)
+  /// Query and store device zoom capabilities
+  Future<void> _initializeZoomLevels() async {
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return;
+    }
+
+    try {
+      _minZoom = await _controller!.getMinZoomLevel();
+      _maxZoom = await _controller!.getMaxZoomLevel();
+      // Start at minimum zoom to give widest field of view
+      _currentZoom = _minZoom;
+      await _controller!.setZoomLevel(_minZoom);
+      debugPrint('Zoom range: $_minZoom - $_maxZoom (ultra-wide: $supportsUltraWide)');
+    } catch (e) {
+      debugPrint('Error getting zoom levels: $e');
+      _minZoom = 1.0;
+      _maxZoom = 1.0;
+      _currentZoom = 1.0;
+    }
+  }
+
+  /// Set zoom level (actual zoom value, e.g., 0.5, 1.0, 2.0)
   Future<void> setZoomLevel(double zoom) async {
     if (_controller == null || !_controller!.value.isInitialized) {
       return;
     }
 
     try {
-      final maxZoom = await _controller!.getMaxZoomLevel();
-      final minZoom = await _controller!.getMinZoomLevel();
-      final zoomLevel = minZoom + (zoom * (maxZoom - minZoom));
-      await _controller!.setZoomLevel(zoomLevel.clamp(minZoom, maxZoom));
-      _currentZoom = zoom;
+      final clampedZoom = zoom.clamp(_minZoom, _maxZoom);
+      await _controller!.setZoomLevel(clampedZoom);
+      _currentZoom = clampedZoom;
     } catch (e) {
       debugPrint('Error setting zoom level: $e');
     }
   }
 
-  // Store current zoom level
-  double _currentZoom = 0.0;
-
-  /// Get current zoom level (normalized 0.0 to 1.0)
-  double getZoomLevel() {
-    return _currentZoom;
+  /// Get formatted zoom level string (e.g., "0.5x", "1.0x", "2.0x")
+  String get zoomLevelString {
+    return '${_currentZoom.toStringAsFixed(1)}x';
   }
 
   /// Set flash mode
