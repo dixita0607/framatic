@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:framatic/models/frame_preset.dart';
+import 'package:provider/provider.dart';
+import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/services/camera_service.dart';
-import 'package:framatic/utils/constants.dart';
 import 'package:framatic/utils/permissions.dart';
 import 'package:framatic/widgets/frame_overlay.dart';
+import 'package:framatic/widgets/frame_selector.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -17,8 +18,6 @@ class _CameraScreenState extends State<CameraScreen> {
   final CameraService _cameraService = CameraService();
   bool _isLoading = true;
   String? _errorMessage;
-  int _currentPresetIndex = 1; // Default to 16:9
-  final List<FramePreset> _presets = AspectRatios.predefinedFrames;
 
   @override
   void initState() {
@@ -61,18 +60,6 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  void _switchFrame() {
-    setState(() {
-      _currentPresetIndex = (_currentPresetIndex + 1) % _presets.length;
-    });
-  }
-
-  void _previousFrame() {
-    setState(() {
-      _currentPresetIndex =
-          (_currentPresetIndex - 1 + _presets.length) % _presets.length;
-    });
-  }
 
   @override
   void dispose() {
@@ -134,25 +121,85 @@ class _CameraScreenState extends State<CameraScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Camera preview
-        Center(
-          child: AspectRatio(
-            aspectRatio: controller.value.aspectRatio,
-            child: CameraPreview(controller),
+    return Consumer<FrameProvider>(
+      builder: (context, frameProvider, child) {
+        final selectedAspectRatio = frameProvider.activePreset.aspectRatio;
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // Camera preview - clipped to selected aspect ratio
+            Center(
+              child: _buildClippedCameraPreview(controller, selectedAspectRatio),
+            ),
+
+            // Frame overlay (just the white border area outside the frame)
+            FrameOverlay(
+              preset: frameProvider.activePreset,
+            ),
+
+            // Controls overlay
+            _buildControls(),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Build camera preview that is clipped to the selected aspect ratio
+  Widget _buildClippedCameraPreview(
+    CameraController controller,
+    double targetAspectRatio,
+  ) {
+    // Camera preview size (note: width/height are swapped for portrait)
+    final previewWidth = controller.value.previewSize?.height ?? 1920;
+    final previewHeight = controller.value.previewSize?.width ?? 1080;
+    final cameraAspectRatio = previewWidth / previewHeight;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate the size for the target aspect ratio that fits within screen
+        final maxWidth = constraints.maxWidth * 0.95;
+        final maxHeight = constraints.maxHeight * 0.95;
+
+        double frameWidth = maxWidth;
+        double frameHeight = frameWidth / targetAspectRatio;
+
+        if (frameHeight > maxHeight) {
+          frameHeight = maxHeight;
+          frameWidth = frameHeight * targetAspectRatio;
+        }
+
+        // Calculate camera preview size to minimize cropping
+        // We want the camera to just cover the frame, not be overly zoomed
+        double cameraWidth, cameraHeight;
+
+        if (targetAspectRatio > cameraAspectRatio) {
+          // Target is wider than camera - match width, crop height
+          cameraWidth = frameWidth;
+          cameraHeight = cameraWidth / cameraAspectRatio;
+        } else {
+          // Target is taller than camera - match height, crop width
+          cameraHeight = frameHeight;
+          cameraWidth = cameraHeight * cameraAspectRatio;
+        }
+
+        return ClipRect(
+          child: SizedBox(
+            width: frameWidth,
+            height: frameHeight,
+            child: OverflowBox(
+              maxWidth: cameraWidth,
+              maxHeight: cameraHeight,
+              child: SizedBox(
+                width: cameraWidth,
+                height: cameraHeight,
+                child: CameraPreview(controller),
+              ),
+            ),
           ),
-        ),
-
-        // Frame overlay
-        FrameOverlay(
-          preset: _presets[_currentPresetIndex],
-        ),
-
-        // Controls overlay
-        _buildControls(),
-      ],
+        );
+      },
     );
   }
 
@@ -178,7 +225,7 @@ class _CameraScreenState extends State<CameraScreen> {
         children: [
           // App name/title
           const Text(
-            AppConstants.appName,
+            'Framatic',
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -207,94 +254,65 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Widget _buildBottomControls() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Frame selector chips
-          _buildFrameSelector(),
-
-          const SizedBox(height: 16),
-
-          // Main action buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Consumer<FrameProvider>(
+      builder: (context, frameProvider, child) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Previous frame
-              IconButton(
-                onPressed: _previousFrame,
-                icon: const Icon(Icons.arrow_back_ios),
-                color: Colors.white,
-                iconSize: 32,
-              ),
+              // Frame selector
+              const FrameSelector(),
 
-              // Capture button
-              GestureDetector(
-                onTap: () {
-                  // TODO: Implement photo capture
-                },
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 4),
+              const SizedBox(height: 16),
+
+              // Main action buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Previous frame
+                  IconButton(
+                    onPressed: frameProvider.previousPreset,
+                    icon: const Icon(Icons.arrow_back_ios),
+                    color: Colors.white,
+                    iconSize: 32,
                   ),
-                  child: Container(
-                    margin: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
+
+                  // Capture button
+                  GestureDetector(
+                    onTap: () {
+                      // TODO: Implement photo capture
+                    },
+                    child: Container(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 4),
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-              // Next frame
-              IconButton(
-                onPressed: _switchFrame,
-                icon: const Icon(Icons.arrow_forward_ios),
-                color: Colors.white,
-                iconSize: 32,
+                  // Next frame
+                  IconButton(
+                    onPressed: frameProvider.nextPreset,
+                    icon: const Icon(Icons.arrow_forward_ios),
+                    color: Colors.white,
+                    iconSize: 32,
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFrameSelector() {
-    return SizedBox(
-      height: 40,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _presets.length,
-        itemBuilder: (context, index) {
-          final isSelected = index == _currentPresetIndex;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: ChoiceChip(
-              label: Text(_presets[index].name),
-              selected: isSelected,
-              onSelected: (selected) {
-                if (selected) {
-                  setState(() {
-                    _currentPresetIndex = index;
-                  });
-                }
-              },
-              selectedColor: Colors.white,
-              backgroundColor: Colors.black.withValues(alpha: 0.5),
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.black : Colors.white,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          );
-        },
-      ),
+        );
+      },
     );
   }
 }

@@ -7,6 +7,8 @@ class FramePreset {
   final bool isCustom;
   final Color frameColor;
   final String? id;
+  final int? widthRatio;  // Original width value for custom presets
+  final int? heightRatio; // Original height value for custom presets
 
   FramePreset({
     required this.name,
@@ -14,6 +16,8 @@ class FramePreset {
     this.isCustom = false,
     this.frameColor = Colors.white,
     this.id,
+    this.widthRatio,
+    this.heightRatio,
   });
 
   /// Create a copy of this preset with modified properties
@@ -23,6 +27,8 @@ class FramePreset {
     bool? isCustom,
     Color? frameColor,
     String? id,
+    int? widthRatio,
+    int? heightRatio,
   }) {
     return FramePreset(
       name: name ?? this.name,
@@ -30,6 +36,8 @@ class FramePreset {
       isCustom: isCustom ?? this.isCustom,
       frameColor: frameColor ?? this.frameColor,
       id: id ?? this.id,
+      widthRatio: widthRatio ?? this.widthRatio,
+      heightRatio: heightRatio ?? this.heightRatio,
     );
   }
 
@@ -41,6 +49,8 @@ class FramePreset {
       'isCustom': isCustom,
       'frameColor': frameColor.toARGB32(),
       'id': id,
+      'widthRatio': widthRatio,
+      'heightRatio': heightRatio,
     };
   }
 
@@ -52,15 +62,22 @@ class FramePreset {
       isCustom: json['isCustom'] as bool? ?? false,
       frameColor: Color(json['frameColor'] as int? ?? Colors.white.toARGB32()),
       id: json['id'] as String?,
+      widthRatio: json['widthRatio'] as int?,
+      heightRatio: json['heightRatio'] as int?,
     );
   }
 
-  /// Get formatted aspect ratio string (e.g., "16:9" or "1.618:1")
+  /// Get formatted aspect ratio string (e.g., "16:9" or "2:8")
   String get formattedRatio {
+    // Use stored width/height for custom presets
+    if (widthRatio != null && heightRatio != null) {
+      return '$widthRatio:$heightRatio';
+    }
+
     if (name == 'Golden') {
       return '${aspectRatio.toStringAsFixed(3)}:1';
     }
-    // Try to find simple ratio
+    // Try to find simple ratio for predefined
     if (aspectRatio == 1.0) return '1:1';
     if ((aspectRatio - 4 / 3).abs() < 0.01) return '4:3';
     if ((aspectRatio - 16 / 9).abs() < 0.01) return '16:9';

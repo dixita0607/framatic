@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/screens/camera_screen.dart';
 import 'package:framatic/utils/constants.dart';
 
@@ -20,15 +22,22 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: AppConstants.appName,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => FrameProvider()..initialize(),
+        ),
+      ],
+      child: MaterialApp(
+        title: AppConstants.appName,
+        theme: ThemeData(
+          brightness: Brightness.dark,
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+        ),
+        home: const CameraScreen(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: const CameraScreen(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }
