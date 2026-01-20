@@ -164,6 +164,27 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+  /// Switch between front and back cameras
+  Future<void> _flipCamera() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _cameraService.switchCamera();
+      // Update zoom state after camera switch (new camera may have different zoom range)
+      setState(() {
+        _currentZoom = _cameraService.currentZoom;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to switch camera: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _cameraService.dispose();
@@ -367,13 +388,24 @@ class _CameraScreenState extends State<CameraScreen> {
             ),
           ),
 
-          // Settings icon placeholder
-          IconButton(
-            onPressed: () {
-              // TODO: Open settings
-            },
-            icon: const Icon(Icons.settings),
-            color: Colors.white,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Flip camera button
+              IconButton(
+                onPressed: _flipCamera,
+                icon: const Icon(Icons.flip_camera_ios),
+                color: Colors.white,
+              ),
+              // Settings icon placeholder
+              IconButton(
+                onPressed: () {
+                  // TODO: Open settings
+                },
+                icon: const Icon(Icons.settings),
+                color: Colors.white,
+              ),
+            ],
           ),
         ],
       ),

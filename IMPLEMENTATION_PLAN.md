@@ -165,20 +165,18 @@ lib/
 5. Start at minimum zoom (0.5x if available) to give artists wider field of view
 6. Add exposure/focus tap controls (optional enhancement)
 
-### Phase 5: Split-Screen Comparison Mode
+### Phase 5: Camera Flip (Front/Back Toggle)
 
-**Files to create:**
+**Files to update:**
 
-- `screens/comparison_screen.dart` - Dual camera preview
-- `widgets/comparison_controls.dart` - Frame selection for each view
+- `screens/camera_screen.dart` - Add flip camera button
+- `services/camera_service.dart` - Camera switching logic (already exists)
 
 **Implementation:**
 
-1. Create split-screen layout (horizontal or vertical split)
-2. Display two camera previews with different frames
-3. Implement synchronized zoom across both views
-4. Add toggle to switch between single and comparison mode
-5. Capture comparison shots (both frames in one image)
+1. Add flip camera button to camera screen UI
+2. Use existing `switchCamera()` method in CameraService
+3. Re-initialize zoom levels after camera switch
 
 ### Phase 6: Settings & Configuration
 
@@ -216,6 +214,23 @@ lib/
 8. Improve error state presentations
 9. Add haptic feedback for better tactile response
 10. Polish icons and visual elements
+
+### Phase 8: Split-Screen Comparison Mode (Future)
+
+> **TODO**: This phase is deferred for future implementation.
+
+**Files to create:**
+
+- `screens/comparison_screen.dart` - Dual camera preview
+- `widgets/comparison_controls.dart` - Frame selection for each view
+
+**Implementation:**
+
+1. Create split-screen layout (horizontal or vertical split)
+2. Display two camera previews with different frames
+3. Implement synchronized zoom across both views
+4. Add toggle to switch between single and comparison mode
+5. Capture comparison shots (both frames in one image)
 
 ## Key Technical Decisions
 
