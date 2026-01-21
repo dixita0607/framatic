@@ -29,27 +29,11 @@ class FrameSelector extends StatelessWidget {
               final preset = presets[index];
               final isSelected =
                   frameProvider.activePreset == preset;
-              final presetId = preset.id ?? preset.name;
-              final isFavorite = frameProvider.isFavorite(presetId);
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: ChoiceChip(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isFavorite)
-                        const Padding(
-                          padding: EdgeInsets.only(right: 4),
-                          child: Icon(
-                            Icons.star,
-                            size: 14,
-                            color: Colors.amber,
-                          ),
-                        ),
-                      Text(preset.name),
-                    ],
-                  ),
+                  label: Text(preset.name),
                   selected: isSelected,
                   onSelected: (selected) {
                     if (selected) {
@@ -58,6 +42,7 @@ class FrameSelector extends StatelessWidget {
                   },
                   selectedColor: Colors.white,
                   backgroundColor: Colors.black.withValues(alpha: 0.5),
+                  showCheckmark: false,
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.black : Colors.white,
                     fontWeight:
