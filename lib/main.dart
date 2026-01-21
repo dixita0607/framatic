@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/screens/camera_screen.dart';
 import 'package:framatic/utils/constants.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

@@ -10,6 +10,7 @@ import 'package:framatic/utils/permissions.dart';
 import 'package:framatic/widgets/frame_overlay.dart';
 import 'package:framatic/widgets/frame_selector.dart';
 import 'package:framatic/widgets/zoom_slider.dart';
+import 'package:framatic/widgets/camera_controls/capture_button.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -191,6 +192,122 @@ class _CameraScreenState extends State<CameraScreen> {
     super.dispose();
   }
 
+  /// Build simplified header with logo and flip camera button
+  Widget _buildSimplifiedHeader() {
+    return Container(
+      height: 60,
+      color: Colors.black,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Logo only (camera icon)
+          const Icon(
+            Icons.camera_alt,
+            size: 28,
+            color: Colors.white,
+          ),
+
+          // Flip camera button
+          IconButton(
+            onPressed: _flipCamera,
+            icon: const Icon(Icons.flip_camera_ios, size: 20),
+            color: Colors.white,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build camera area with max height constraints
+  Widget _buildCameraArea() {
+    final controller = _cameraService.controller;
+    if (controller == null || !controller.value.isInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxHeight = constraints.maxHeight;
+
+        return Consumer<FrameProvider>(
+          builder: (context, frameProvider, child) {
+            final selectedAspectRatio = frameProvider.activePreset.aspectRatio;
+
+            return GestureDetector(
+              onScaleStart: _onScaleStart,
+              onScaleUpdate: _onScaleUpdate,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Camera preview - clipped to selected aspect ratio
+                  Center(
+                    child: _buildClippedCameraPreview(
+                      controller,
+                      selectedAspectRatio,
+                      maxHeight,
+                    ),
+                  ),
+
+                  // Frame overlay (aligned to top)
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: FrameOverlay(
+                      preset: frameProvider.activePreset,
+                      maxHeight: maxHeight,
+                    ),
+                  ),
+
+                  // Zoom slider on the right side
+                  Positioned(
+                    right: 16,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: ZoomSlider(
+                        minZoom: _cameraService.minZoom,
+                        maxZoom: _cameraService.maxZoom,
+                        currentZoom: _currentZoom,
+                        onZoomChanged: _onZoomChanged,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Build simplified bottom controls (no arrows)
+  Widget _buildSimplifiedBottomControls() {
+    return Container(
+      height: 140,
+      color: Colors.black,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Frame selector (48px)
+          const SizedBox(
+            height: 48,
+            child: FrameSelector(),
+          ),
+
+          // Capture button (centered, no arrows)
+          Center(
+            child: CaptureButton(
+              isCapturing: _isCapturing,
+              onPressed: _capturePhoto,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -200,7 +317,13 @@ class _CameraScreenState extends State<CameraScreen> {
             ? const Center(child: CircularProgressIndicator())
             : _errorMessage != null
                 ? _buildErrorWidget()
-                : _buildCameraPreview(),
+                : Column(
+                    children: [
+                      _buildSimplifiedHeader(),
+                      Expanded(child: _buildCameraArea()),
+                      _buildSimplifiedBottomControls(),
+                    ],
+                  ),
       ),
     );
   }
@@ -239,61 +362,13 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  Widget _buildCameraPreview() {
-    final controller = _cameraService.controller;
-    if (controller == null || !controller.value.isInitialized) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return Consumer<FrameProvider>(
-      builder: (context, frameProvider, child) {
-        final selectedAspectRatio = frameProvider.activePreset.aspectRatio;
-
-        return GestureDetector(
-          onScaleStart: _onScaleStart,
-          onScaleUpdate: _onScaleUpdate,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Camera preview - clipped to selected aspect ratio
-              Center(
-                child: _buildClippedCameraPreview(controller, selectedAspectRatio),
-              ),
-
-              // Frame overlay (just the white border area outside the frame)
-              FrameOverlay(
-                preset: frameProvider.activePreset,
-              ),
-
-              // Zoom slider on the right side
-              Positioned(
-                right: 16,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: ZoomSlider(
-                    minZoom: _cameraService.minZoom,
-                    maxZoom: _cameraService.maxZoom,
-                    currentZoom: _currentZoom,
-                    onZoomChanged: _onZoomChanged,
-                  ),
-                ),
-              ),
-
-              // Controls overlay
-              _buildControls(),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   /// Build camera preview that is clipped to the selected aspect ratio
   /// Uses same frame calculation as FrameOverlay to ensure alignment
   Widget _buildClippedCameraPreview(
     CameraController controller,
     double targetAspectRatio,
+    double maxHeight,
   ) {
     // Camera preview size (note: width/height are swapped for portrait)
     final previewWidth = controller.value.previewSize?.height ?? 1920;
@@ -351,136 +426,4 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  Widget _buildControls() {
-    return Column(
-      children: [
-        // Top bar
-        _buildTopBar(),
-
-        const Spacer(),
-
-        // Bottom controls
-        _buildBottomControls(),
-      ],
-    );
-  }
-
-  Widget _buildTopBar() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // App name/title
-          const Text(
-            'Framatic',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              shadows: [
-                Shadow(
-                  color: Colors.black,
-                  offset: Offset(1, 1),
-                  blurRadius: 3,
-                ),
-              ],
-            ),
-          ),
-
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Flip camera button
-              IconButton(
-                onPressed: _flipCamera,
-                icon: const Icon(Icons.flip_camera_ios),
-                color: Colors.white,
-              ),
-              // Settings icon placeholder
-              IconButton(
-                onPressed: () {
-                  // TODO: Open settings
-                },
-                icon: const Icon(Icons.settings),
-                color: Colors.white,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomControls() {
-    return Consumer<FrameProvider>(
-      builder: (context, frameProvider, child) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Frame selector
-              const FrameSelector(),
-
-              const SizedBox(height: 16),
-
-              // Main action buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Previous frame
-                  IconButton(
-                    onPressed: frameProvider.previousPreset,
-                    icon: const Icon(Icons.arrow_back_ios),
-                    color: Colors.white,
-                    iconSize: 32,
-                  ),
-
-                  // Capture button
-                  GestureDetector(
-                    onTap: _isCapturing ? null : _capturePhoto,
-                    child: Container(
-                      width: 70,
-                      height: 70,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 4),
-                      ),
-                      child: _isCapturing
-                          ? const Center(
-                              child: SizedBox(
-                                width: 30,
-                                height: 30,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 3,
-                                ),
-                              ),
-                            )
-                          : Container(
-                              margin: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-
-                  // Next frame
-                  IconButton(
-                    onPressed: frameProvider.nextPreset,
-                    icon: const Icon(Icons.arrow_forward_ios),
-                    color: Colors.white,
-                    iconSize: 32,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }

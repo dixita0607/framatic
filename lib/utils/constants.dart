@@ -61,6 +61,6 @@ class AppConstants {
   static const double maxFramePadding = 0.95; // 95% of screen
 
   // Polaroid border width (used in both preview and saved photos)
-  static const double frameBorderWidth = 32.0;
-  static const int frameBorderWidthInt = 32; // For image processing
+  static const double frameBorderWidth = 16.0;
+  static const int frameBorderWidthInt = 16; // For image processing
 }

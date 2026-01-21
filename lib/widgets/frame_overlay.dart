@@ -6,11 +6,13 @@ import 'package:framatic/utils/constants.dart';
 class FrameOverlay extends StatelessWidget {
   final FramePreset preset;
   final double borderWidth;
+  final double? maxHeight;
 
   const FrameOverlay({
     super.key,
     required this.preset,
     this.borderWidth = AppConstants.frameBorderWidth,
+    this.maxHeight,
   });
 
   @override
@@ -19,6 +21,7 @@ class FrameOverlay extends StatelessWidget {
       painter: FrameOverlayPainter(
         preset: preset,
         borderWidth: borderWidth,
+        maxHeight: maxHeight,
       ),
       child: Container(),
     );
@@ -29,10 +32,12 @@ class FrameOverlay extends StatelessWidget {
 class FrameOverlayPainter extends CustomPainter {
   final FramePreset preset;
   final double borderWidth;
+  final double? maxHeight;
 
   FrameOverlayPainter({
     required this.preset,
     required this.borderWidth,
+    this.maxHeight,
   });
 
   @override
@@ -103,7 +108,9 @@ class FrameOverlayPainter extends CustomPainter {
   Size _calculateFrameSize(Size screenSize) {
     // Available space after accounting for border on both sides
     final availableWidth = screenSize.width * AppConstants.maxFramePadding - (borderWidth * 2);
-    final availableHeight = screenSize.height * AppConstants.maxFramePadding - (borderWidth * 2);
+    // Use maxHeight if provided (for camera area with fixed height), otherwise use screen height
+    final heightConstraint = maxHeight ?? screenSize.height;
+    final availableHeight = heightConstraint * AppConstants.maxFramePadding - (borderWidth * 2);
 
     double frameWidth = availableWidth;
     double frameHeight = frameWidth / preset.aspectRatio;
@@ -153,6 +160,8 @@ class FrameOverlayPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(FrameOverlayPainter oldDelegate) {
-    return oldDelegate.preset != preset || oldDelegate.borderWidth != borderWidth;
+    return oldDelegate.preset != preset ||
+           oldDelegate.borderWidth != borderWidth ||
+           oldDelegate.maxHeight != maxHeight;
   }
 }
