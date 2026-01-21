@@ -5,6 +5,7 @@ import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/services/camera_service.dart';
 import 'package:framatic/services/photo_service.dart';
 import 'package:framatic/screens/photo_preview_screen.dart';
+import 'package:framatic/screens/preset_manager_screen.dart';
 import 'package:framatic/utils/constants.dart';
 import 'package:framatic/utils/permissions.dart';
 import 'package:framatic/widgets/frame_overlay.dart';
@@ -192,33 +193,6 @@ class _CameraScreenState extends State<CameraScreen> {
     super.dispose();
   }
 
-  /// Build simplified header with logo and flip camera button
-  Widget _buildSimplifiedHeader() {
-    return Container(
-      height: 60,
-      color: Colors.black,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Logo only (camera icon)
-          const Icon(
-            Icons.camera_alt,
-            size: 28,
-            color: Colors.white,
-          ),
-
-          // Flip camera button
-          IconButton(
-            onPressed: _flipCamera,
-            icon: const Icon(Icons.flip_camera_ios, size: 20),
-            color: Colors.white,
-          ),
-        ],
-      ),
-    );
-  }
-
   /// Build camera area with max height constraints
   Widget _buildCameraArea() {
     final controller = _cameraService.controller;
@@ -284,11 +258,11 @@ class _CameraScreenState extends State<CameraScreen> {
   /// Build simplified bottom controls (no arrows)
   Widget _buildSimplifiedBottomControls() {
     return Container(
-      height: 140,
+      height: 200,
       color: Colors.black,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // Frame selector (48px)
           const SizedBox(
@@ -296,12 +270,41 @@ class _CameraScreenState extends State<CameraScreen> {
             child: FrameSelector(),
           ),
 
-          // Capture button (centered, no arrows)
-          Center(
-            child: CaptureButton(
-              isCapturing: _isCapturing,
-              onPressed: _capturePhoto,
-            ),
+          // Gap between frame selector and control buttons
+          const SizedBox(height: 32),
+
+          // Control buttons row (settings, capture, flip camera)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Settings button (left)
+              IconButton(
+                icon: const Icon(Icons.settings, size: 28),
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const PresetManagerScreen(),
+                    ),
+                  );
+                },
+                tooltip: 'Manage Presets',
+              ),
+
+              // Capture button (center)
+              CaptureButton(
+                isCapturing: _isCapturing,
+                onPressed: _capturePhoto,
+              ),
+
+              // Flip camera button (right)
+              IconButton(
+                onPressed: _flipCamera,
+                icon: const Icon(Icons.flip_camera_ios, size: 28),
+                color: Colors.white,
+              ),
+            ],
           ),
         ],
       ),
@@ -319,7 +322,6 @@ class _CameraScreenState extends State<CameraScreen> {
                 ? _buildErrorWidget()
                 : Column(
                     children: [
-                      _buildSimplifiedHeader(),
                       Expanded(child: _buildCameraArea()),
                       _buildSimplifiedBottomControls(),
                     ],

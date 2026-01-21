@@ -99,7 +99,7 @@ class FrameOverlayPainter extends CustomPainter {
       borderPaint,
     );
 
-    // Draw aspect ratio label below frame
+    // Draw aspect ratio label above frame
     _drawLabel(canvas, size, frameRect);
   }
 
@@ -124,7 +124,7 @@ class FrameOverlayPainter extends CustomPainter {
     return Size(frameWidth, frameHeight);
   }
 
-  /// Draw aspect ratio label at bottom of frame
+  /// Draw aspect ratio label at top of frame
   void _drawLabel(Canvas canvas, Size screenSize, Rect frameRect) {
     final textSpan = TextSpan(
       text: preset.name,
@@ -149,10 +149,10 @@ class FrameOverlayPainter extends CustomPainter {
 
     textPainter.layout();
 
-    // Position label below the border
+    // Position label above the border
     final offset = Offset(
       frameRect.center.dx - textPainter.width / 2,
-      frameRect.bottom + borderWidth + 8,
+      frameRect.top - borderWidth - 8 - textPainter.height,
     );
 
     textPainter.paint(canvas, offset);

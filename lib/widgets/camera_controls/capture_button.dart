@@ -49,8 +49,8 @@ class _CaptureButtonState extends State<CaptureButton>
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: Container(
-          width: 80,
-          height: 80,
+          width: 88,
+          height: 88,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white.withValues(alpha: 0.3),
