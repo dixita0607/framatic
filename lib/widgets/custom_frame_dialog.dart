@@ -54,86 +54,87 @@ class _CustomFrameDialogState extends State<CustomFrameDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(_isEditing ? 'Edit Frame' : 'Add Custom Frame'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Name field
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Frame Name',
-                  hintText: 'e.g., "My Custom Frame"',
-                  border: OutlineInputBorder(),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Name field
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Frame Name',
+                    hintText: 'e.g., "My Custom Frame"',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Frame name is required';
+                    }
+                    return null;
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a name';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Aspect ratio input
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _widthController,
-                      decoration: const InputDecoration(
-                        labelText: 'Width',
-                        border: OutlineInputBorder(),
+                const SizedBox(height: 16),
+                // Aspect ratio input
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _widthController,
+                        decoration: const InputDecoration(
+                          labelText: 'Width',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Enter width';
+                          }
+                          final number = int.tryParse(value);
+                          if (number == null || number <= 0) {
+                            return 'Must be > 0';
+                          }
+                          return null;
+                        },
                       ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Required';
-                        }
-                        final number = int.tryParse(value);
-                        if (number == null || number <= 0) {
-                          return 'Invalid';
-                        }
-                        return null;
-                      },
                     ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(':', style: TextStyle(fontSize: 24)),
-                  ),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _heightController,
-                      decoration: const InputDecoration(
-                        labelText: 'Height',
-                        border: OutlineInputBorder(),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(':', style: TextStyle(fontSize: 24)),
+                    ),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _heightController,
+                        decoration: const InputDecoration(
+                          labelText: 'Height',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Enter height';
+                          }
+                          final number = int.tryParse(value);
+                          if (number == null || number <= 0) {
+                            return 'Must be > 0';
+                          }
+                          return null;
+                        },
                       ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Required';
-                        }
-                        final number = int.tryParse(value);
-                        if (number == null || number <= 0) {
-                          return 'Invalid';
-                        }
-                        return null;
-                      },
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

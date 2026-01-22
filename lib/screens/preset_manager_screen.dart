@@ -11,14 +11,7 @@ class PresetManagerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Frame Presets'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showAddCustomPresetDialog(context),
-            tooltip: 'Add Custom Preset',
-          ),
-        ],
+        title: const Text('Manage Frames'),
       ),
       body: Consumer<FrameProvider>(
         builder: (context, frameProvider, child) {
@@ -26,75 +19,32 @@ class PresetManagerScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return ListView(
-            children: [
-              // Predefined Presets Section
-              _buildSection(
+          // Merge predefined and custom frames into a single list
+          final allFrames = [
+            ...frameProvider.predefinedPresets,
+            ...frameProvider.customPresets,
+          ];
+
+          return ListView.builder(
+            itemCount: allFrames.length,
+            itemBuilder: (context, index) {
+              final preset = allFrames[index];
+              final isPredefined = frameProvider.predefinedPresets.contains(preset);
+              return _buildPresetTile(
                 context,
-                title: 'Predefined Frames',
-                presets: frameProvider.predefinedPresets,
+                preset: preset,
                 frameProvider: frameProvider,
-                isPredefined: true,
-              ),
-
-              const Divider(height: 32),
-
-              // Custom Presets Section
-              _buildSection(
-                context,
-                title: 'Custom Frames',
-                presets: frameProvider.customPresets,
-                frameProvider: frameProvider,
-                isPredefined: false,
-              ),
-
-              if (frameProvider.customPresets.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(24.0),
-                  child: Center(
-                    child: Text(
-                      'No custom frames yet.\nTap + to create one.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+                isPredefined: isPredefined,
+              );
+            },
           );
         },
       ),
-    );
-  }
-
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required List<FramePreset> presets,
-    required FrameProvider frameProvider,
-    required bool isPredefined,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ),
-        ...presets.map((preset) => _buildPresetTile(
-              context,
-              preset: preset,
-              frameProvider: frameProvider,
-              isPredefined: isPredefined,
-            )),
-      ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddCustomPresetDialog(context),
+        tooltip: 'Add Custom Preset',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
@@ -104,10 +54,6 @@ class PresetManagerScreen extends StatelessWidget {
     required FrameProvider frameProvider,
     required bool isPredefined,
   }) {
-    final presetId = preset.id ?? preset.name;
-    final isFavorite = frameProvider.isFavorite(presetId);
-    final isActive = frameProvider.activePreset == preset;
-
     return ListTile(
       leading: Container(
         width: 48,
@@ -122,28 +68,8 @@ class PresetManagerScreen extends StatelessWidget {
       ),
       title: Text(preset.name),
       subtitle: Text(preset.formattedRatio),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Favorite icon
-          IconButton(
-            icon: Icon(
-              isFavorite ? Icons.star : Icons.star_border,
-              color: isFavorite ? Colors.amber : Colors.grey,
-            ),
-            onPressed: () => frameProvider.toggleFavorite(presetId),
-          ),
-
-          // Active indicator
-          if (isActive)
-            const Padding(
-              padding: EdgeInsets.only(right: 8),
-              child: Icon(Icons.check_circle, color: Colors.green),
-            ),
-
-          // Edit/delete menu for custom presets (always shown)
-          if (!isPredefined)
-            PopupMenuButton<String>(
+      trailing: !isPredefined
+          ? PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'edit') {
                   _showEditCustomPresetDialog(context, preset);
@@ -173,18 +99,8 @@ class PresetManagerScreen extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-        ],
-      ),
-      onTap: () {
-        frameProvider.setActivePreset(preset);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Active frame: ${preset.name}'),
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      },
+            )
+          : null,
     );
   }
 

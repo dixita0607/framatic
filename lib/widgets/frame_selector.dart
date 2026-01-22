@@ -80,22 +80,6 @@ class FrameSelectorBottomSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Favorites section (if any)
-              if (frameProvider.favoritePresets.isNotEmpty) ...[
-                const Text(
-                  'Favorites',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white70,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                _buildPresetGrid(context, frameProvider.favoritePresets, frameProvider),
-                const Divider(height: 32, color: Colors.white30),
-              ],
-
-              // All presets
               const Text(
                 'All Frames',
                 style: TextStyle(

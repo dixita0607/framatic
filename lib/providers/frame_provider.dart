@@ -9,7 +9,6 @@ class FrameProvider extends ChangeNotifier {
 
   List<FramePreset> _allPresets = [];
   List<FramePreset> _customPresets = [];
-  List<String> _favoritePresetIds = [];
   FramePreset _activePreset = AspectRatios.predefinedFrames[1]; // Default to 16:9
   bool _isLoading = true;
 
@@ -17,17 +16,8 @@ class FrameProvider extends ChangeNotifier {
   List<FramePreset> get allPresets => _allPresets;
   List<FramePreset> get customPresets => _customPresets;
   List<FramePreset> get predefinedPresets => AspectRatios.predefinedFrames;
-  List<String> get favoritePresetIds => _favoritePresetIds;
   FramePreset get activePreset => _activePreset;
   bool get isLoading => _isLoading;
-
-  /// Get favorite presets
-  List<FramePreset> get favoritePresets {
-    return _allPresets.where((preset) {
-      final id = preset.id ?? preset.name;
-      return _favoritePresetIds.contains(id);
-    }).toList();
-  }
 
   /// Initialize provider and load presets from storage
   Future<void> initialize() async {
@@ -36,7 +26,6 @@ class FrameProvider extends ChangeNotifier {
 
     try {
       _customPresets = await _presetService.loadCustomPresets();
-      _favoritePresetIds = await _presetService.loadFavoritePresetIds();
       _allPresets = [...AspectRatios.predefinedFrames, ..._customPresets];
     } catch (e) {
       debugPrint('Error initializing FrameProvider: $e');
@@ -112,37 +101,9 @@ class FrameProvider extends ChangeNotifier {
         _activePreset = AspectRatios.predefinedFrames[1]; // 16:9
       }
 
-      // Remove from favorites if it was favorited
-      _favoritePresetIds.remove(presetId);
-      await _presetService.saveFavoritePresetIds(_favoritePresetIds);
-
       notifyListeners();
     }
     return success;
-  }
-
-  /// Toggle favorite status of a preset
-  Future<bool> toggleFavorite(String presetId) async {
-    if (_favoritePresetIds.contains(presetId)) {
-      final success = await _presetService.removeFromFavorites(presetId);
-      if (success) {
-        _favoritePresetIds.remove(presetId);
-        notifyListeners();
-      }
-      return success;
-    } else {
-      final success = await _presetService.addToFavorites(presetId);
-      if (success) {
-        _favoritePresetIds.add(presetId);
-        notifyListeners();
-      }
-      return success;
-    }
-  }
-
-  /// Check if a preset is favorited
-  bool isFavorite(String presetId) {
-    return _favoritePresetIds.contains(presetId);
   }
 
   /// Clear all custom presets
@@ -150,7 +111,6 @@ class FrameProvider extends ChangeNotifier {
     final success = await _presetService.clearAllCustomPresets();
     if (success) {
       _customPresets.clear();
-      _favoritePresetIds.clear();
       _allPresets = [...AspectRatios.predefinedFrames];
 
       // Reset to default if active was custom

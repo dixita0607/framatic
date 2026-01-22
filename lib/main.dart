@@ -32,7 +32,6 @@ class MainApp extends StatelessWidget {
         title: AppConstants.appName,
         theme: ThemeData(
           brightness: Brightness.dark,
-          primarySwatch: Colors.blue,
           useMaterial3: true,
         ),
         home: const CameraScreen(),
