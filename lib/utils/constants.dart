@@ -10,41 +10,22 @@ class AspectRatios {
   static const double ratio5x7 = 5 / 7;
   static const double goldenRatio = 1.618;
 
-  /// List of predefined frame presets
+  /// List of predefined frame presets (minimal defaults)
+  /// Additional ratios can be added by users as custom presets
   static List<FramePreset> get predefinedFrames => [
-        FramePreset(
-          name: '4:3',
-          aspectRatio: ratio4x3,
-          isCustom: false,
-        ),
         FramePreset(
           name: '16:9',
           aspectRatio: ratio16x9,
           isCustom: false,
         ),
         FramePreset(
+          name: '4:3',
+          aspectRatio: ratio4x3,
+          isCustom: false,
+        ),
+        FramePreset(
           name: '1:1',
           aspectRatio: ratio1x1,
-          isCustom: false,
-        ),
-        FramePreset(
-          name: '3:2',
-          aspectRatio: ratio3x2,
-          isCustom: false,
-        ),
-        FramePreset(
-          name: '2:3',
-          aspectRatio: ratio2x3,
-          isCustom: false,
-        ),
-        FramePreset(
-          name: '5:7',
-          aspectRatio: ratio5x7,
-          isCustom: false,
-        ),
-        FramePreset(
-          name: 'Golden',
-          aspectRatio: goldenRatio,
           isCustom: false,
         ),
       ];

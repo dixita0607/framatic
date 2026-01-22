@@ -1,7 +1,8 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:framatic/models/frame_preset.dart';
 import 'package:framatic/utils/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service for managing frame preset storage using SharedPreferences
 class FramePresetService {
@@ -32,8 +33,9 @@ class FramePresetService {
   Future<bool> saveCustomPresets(List<FramePreset> presets) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final List<Map<String, dynamic>> presetsList =
-          presets.map((preset) => preset.toJson()).toList();
+      final List<Map<String, dynamic>> presetsList = presets
+          .map((preset) => preset.toJson())
+          .toList();
       final String presetsJson = jsonEncode(presetsList);
       return await prefs.setString(_customPresetsKey, presetsJson);
     } catch (e) {

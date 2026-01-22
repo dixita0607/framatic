@@ -9,7 +9,7 @@ class FrameProvider extends ChangeNotifier {
 
   List<FramePreset> _allPresets = [];
   List<FramePreset> _customPresets = [];
-  FramePreset _activePreset = AspectRatios.predefinedFrames[1]; // Default to 16:9
+  FramePreset _activePreset = AspectRatios.predefinedFrames[0]; // Default to first preset
   bool _isLoading = true;
 
   // Getters
@@ -28,6 +28,11 @@ class FrameProvider extends ChangeNotifier {
       _customPresets = await _presetService.loadCustomPresets();
       // Load presets with user-defined order
       _allPresets = await _presetService.getAllPresetsWithOrder();
+
+      // Always set active preset to first in list
+      if (_allPresets.isNotEmpty) {
+        _activePreset = _allPresets.first;
+      }
     } catch (e) {
       debugPrint('Error initializing FrameProvider: $e');
     }
@@ -97,9 +102,9 @@ class FrameProvider extends ChangeNotifier {
       _customPresets.removeWhere((p) => p.id == presetId);
       _allPresets = await _presetService.getAllPresetsWithOrder();
 
-      // If the deleted preset was active, switch to default
+      // If the deleted preset was active, switch to first in list
       if (_activePreset.id == presetId) {
-        _activePreset = AspectRatios.predefinedFrames[1]; // 16:9
+        _activePreset = _allPresets.isNotEmpty ? _allPresets.first : AspectRatios.predefinedFrames[0];
       }
 
       notifyListeners();
@@ -114,9 +119,9 @@ class FrameProvider extends ChangeNotifier {
       _customPresets.clear();
       _allPresets = await _presetService.getAllPresetsWithOrder();
 
-      // Reset to default if active was custom
+      // Reset to first in list if active was custom
       if (_activePreset.isCustom) {
-        _activePreset = AspectRatios.predefinedFrames[1]; // 16:9
+        _activePreset = _allPresets.isNotEmpty ? _allPresets.first : AspectRatios.predefinedFrames[0];
       }
 
       notifyListeners();

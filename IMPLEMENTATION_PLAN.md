@@ -7,7 +7,7 @@ A Flutter mobile application that replaces physical frame cutouts artists use fo
 ## Core Requirements
 
 - **Live camera viewfinder** with real-time aspect ratio overlays
-- **Multiple aspect ratios**: 4:3, 16:9, 1:1, 3:2, Golden ratio (1.618:1), 2:3, 5:7, plus custom ratios
+- **Multiple aspect ratios**: 16:9, 4:3, 1:1 as defaults; users can add custom ratios
 - **Photo capture** with frame overlay baked into the saved image
 - **Zoom control** for composition adjustment
 - **Quick frame switching** between saved presets
