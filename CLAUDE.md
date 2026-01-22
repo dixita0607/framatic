@@ -38,3 +38,7 @@ Photos are saved to a dedicated "Artist Frames" album using the `gal` package fo
 ## Implementation Status
 
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for full roadmap.
+
+## Development workflow notes
+
+- Don't commit the files after finishing a chunk of work. Only commit when asked.

@@ -98,6 +98,8 @@ lib/
 
 ### Phase 1: Core Camera & Basic Overlay
 
+**Status: ✅ COMPLETED**
+
 **Files to create:**
 
 - `main.dart` - App entry point with navigation
@@ -118,6 +120,8 @@ lib/
 
 ### Phase 2: Frame Management & Presets
 
+**Status: ✅ COMPLETED**
+
 **Files to create:**
 
 - `services/frame_preset_service.dart` - SharedPreferences storage
@@ -135,6 +139,8 @@ lib/
 
 ### Phase 3: Photo Capture & Export
 
+**Status: ✅ COMPLETED**
+
 **Files to create:**
 
 - `services/photo_service.dart` - Capture + overlay rendering + gallery export
@@ -149,6 +155,8 @@ lib/
 5. Gallery access button to view captured photos
 
 ### Phase 4: Zoom & Enhanced Controls
+
+**Status: ✅ COMPLETED**
 
 **Files to update:**
 
@@ -167,6 +175,8 @@ lib/
 
 ### Phase 5: Camera Flip (Front/Back Toggle)
 
+**Status: ✅ COMPLETED**
+
 **Files to update:**
 
 - `screens/camera_screen.dart` - Add flip camera button
@@ -180,28 +190,126 @@ lib/
 
 ### Phase 6: UI/UX Polish & Styling
 
-**Files to update:**
+**Status: ⏳ IN PROGRESS**
 
-- All screens and widgets for consistent styling
-- Create theme configuration file
-- Update color scheme and typography
+**Overview:**
+Redesign of the camera screen UI with proper layout constraints and a clean, modern interface optimized for outdoor use using Flutter Material components.
 
-**Implementation:**
+**User Requirements:**
 
-1. Create consistent design system (colors, typography, spacing)
-2. Standardize button styles and controls across all screens
-3. Improve visual hierarchy and readability
-4. Add smooth transitions and animations
-5. Ensure consistent spacing and alignment
-6. Optimize for outdoor visibility (high contrast, large touch targets)
-7. Add loading states and skeleton screens
-8. Improve error state presentations
-9. Add haptic feedback for better tactile response
-10. Polish icons and visual elements
+1. No Header
+2. Solid black background - Pure black (#000000) throughout entire app
+3. Fix frame positioning - Frame should start immediately from the top
+4. Add max height constraints - Prevent camera frame area from bleeding behind bottom controls
+5. Redesign capture button - Circular button with translucent background, no icon/text
+6. Remove frame navigation arrows - Users select frames by clicking chips only
+7. Keep zoom slider position - on top of the capture button UI (currently implemented)
+
+**Implementation Steps:**
+
+- ✅ Step 1-10: Camera screen redesign (completed)
+- ⏳ Step 11: Update Frame Preset Configuration Screens UI - IN PROGRESS
+
+### Phase 6.1: Frame Preset Configuration Screens UI Update
+
+**Status: ⏳ IN PROGRESS**
+
+**Overview:**
+Redesign the frame preset manager and custom frame builder screens to match the main camera screen's black-and-white minimalist design with consistent Flutter Material components.
+
+**Current Issues:**
+
+- Frame preset configuration screens don't match the main camera screen design
+- Inconsistent color scheme and typography across the app
+- Frame preset manager lacks proper visual hierarchy
+- Custom frame builder UI needs modernization
+
+**Screens to Update:**
+
+1. **Preset Manager Screen** (`lib/screens/preset_manager_screen.dart`)
+   - Single unified list of all frame presets (predefined + custom)
+   - Predefined presets included in the list (cannot be deleted)
+   - Edit/delete options for custom presets
+   - No favorites/star functionality
+   - Add button in bottom right corner (Material Design FAB style)
+   - No selected state indicator
+
+2. **Edit Frame Modal/Drawer** (modal or bottom sheet)
+   - Input fields for aspect ratio (width:height or decimal)
+   - Name input for the preset
+   - Save/cancel buttons
+   - Live preview of frame overlay
+   - Wider layout to reduce visual clutter
+
+**Design Requirements:**
+
+- Consistent black and white theme throughout
+  - Pure black background (#000000)
+  - White text on black, black text on white (high contrast)
+  - All fonts use consistent styling
+  - Widget styles follow theme
+- Use Flutter Material components with custom theming
+- All buttons use primary color of theme
+- Consistent spacing and padding with main camera screen
+- Minimal, clean UI focused on functionality
+- Proper touch targets (minimum 48x48dp)
+
+**Implementation Steps:**
+
+1. Update preset manager screen layout with black background + white typography
+   - Add screen title "Manage Frames"
+2. Merge predefined and custom frames into single list
+3. Redesign list items with Material ListTile and custom styling
+   - Remove star/favorite icons completely
+   - Remove green checkmark (selected state indicator)
+   - Show edit/delete buttons or action menu for custom presets only
+4. Remove on-tap gesture from list items
+   - Remove the logic that changes the active/selected frame state
+   - Remove snackbar showing active state change message
+5. Move add button to bottom right corner (Material FAB or icon button)
+6. Rebuild edit frame modal/drawer with wider layout
+7. Rebuild custom frame builder form with Material TextFormField
+   - Apply consistent theme colors
+   - Ensure primary color buttons
+8. Add live preview of frame overlay during configuration
+9. Implement form validation with error messages
+10. Remove all favorite/star related code and state management
+11. Test across different screen sizes and orientations
+
+**Files to Modify:**
+
+- `lib/screens/preset_manager_screen.dart` - Main preset list screen with merged lists and FAB
+- `lib/widgets/custom_frame_builder.dart` - Custom frame creation widget with wider layout
+- `lib/providers/frame_provider.dart` - Remove favorite functionality from state management
+- `lib/models/frame_preset.dart` - Remove favorite field from data model (if present)
+- Theme configuration file - Ensure primary color is applied consistently
+
+**Verification Checklist:**
+
+- [ ] Preset manager screen has pure black background
+- [ ] All text is white on black or black text on white (high contrast)
+- [ ] Predefined and custom frames in single unified list
+- [ ] Add button in bottom right corner (FAB or icon button style)
+- [ ] No star/favorite icons visible anywhere
+- [ ] No green checkmark or selected state indicator on list items
+- [ ] Edit/delete options only visible for custom presets
+- [ ] Edit modal/drawer has wider layout (less cluttered)
+- [ ] All buttons use primary color of theme
+- [ ] List items use Material components with custom styling
+- [ ] Custom frame builder uses Material form components
+- [ ] Form has consistent theme colors
+- [ ] Live preview shows frame overlay in real-time
+- [ ] Form validation works correctly
+- [ ] All buttons have minimum 48x48dp touch target
+- [ ] Spacing and alignment matches main camera screen
+- [ ] Screens are responsive on different screen sizes
+- [ ] No favorite-related code remains in state management
 
 ### Phase 7: Split-Screen Comparison Mode (Future)
 
-> **TODO**: This phase is deferred for future implementation.
+**Status: 📋 DEFERRED - Future Implementation**
+
+> This phase is deferred for future implementation.
 
 **Files to create:**
 
