@@ -23,15 +23,15 @@ class ZoomSlider extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Column(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Zoom level indicator
+          // Zoom level indicator (left side)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
@@ -47,33 +47,30 @@ class ZoomSlider extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          // Vertical slider
+          const SizedBox(width: 8),
+          // Horizontal slider
           SizedBox(
-            height: 150,
-            child: RotatedBox(
-              quarterTurns: 3,
-              child: SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  trackHeight: 4,
-                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-                  activeTrackColor: Colors.white,
-                  inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
-                  thumbColor: Colors.white,
-                  overlayColor: Colors.white.withValues(alpha: 0.2),
-                ),
-                child: Slider(
-                  value: currentZoom,
-                  min: minZoom,
-                  max: maxZoom,
-                  onChanged: onZoomChanged,
-                ),
+            width: 100,
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 4,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                activeTrackColor: Colors.white,
+                inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+                thumbColor: Colors.white,
+                overlayColor: Colors.white.withValues(alpha: 0.2),
+              ),
+              child: Slider(
+                value: currentZoom,
+                min: minZoom,
+                max: maxZoom,
+                onChanged: onZoomChanged,
               ),
             ),
           ),
-          const SizedBox(height: 4),
-          // Quick zoom buttons
+          const SizedBox(width: 8),
+          // Quick zoom buttons (right side)
           _buildQuickZoomButtons(),
         ],
       ),
@@ -89,16 +86,21 @@ class ZoomSlider extends StatelessWidget {
     }
 
     // Always show 1x
-    buttons.add(_buildZoomButton(1.0, '1'));
+    buttons.add(_buildZoomButton(1.0, '1x'));
 
     // Show 2x if within range
     if (maxZoom >= 2.0) {
-      buttons.add(_buildZoomButton(2.0, '2'));
+      buttons.add(_buildZoomButton(2.0, '2x'));
     }
 
-    return Column(
+    return Row(
       mainAxisSize: MainAxisSize.min,
-      children: buttons,
+      children: [
+        for (int i = 0; i < buttons.length; i++) ...[
+          buttons[i],
+          if (i < buttons.length - 1) const SizedBox(width: 4),
+        ],
+      ],
     );
   }
 

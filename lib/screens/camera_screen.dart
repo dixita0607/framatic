@@ -232,20 +232,6 @@ class _CameraScreenState extends State<CameraScreen> {
                     ),
                   ),
 
-                  // Zoom slider on the right side
-                  Positioned(
-                    right: 16,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: ZoomSlider(
-                        minZoom: _cameraService.minZoom,
-                        maxZoom: _cameraService.maxZoom,
-                        currentZoom: _currentZoom,
-                        onZoomChanged: _onZoomChanged,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             );
@@ -258,20 +244,21 @@ class _CameraScreenState extends State<CameraScreen> {
   /// Build simplified bottom controls (no arrows)
   Widget _buildSimplifiedBottomControls() {
     return Container(
-      height: 200,
       color: Colors.black,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 64),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          // Frame selector (48px)
-          const SizedBox(
-            height: 48,
-            child: FrameSelector(),
+          // Zoom slider
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: ZoomSlider(
+              minZoom: _cameraService.minZoom,
+              maxZoom: _cameraService.maxZoom,
+              currentZoom: _currentZoom,
+              onZoomChanged: _onZoomChanged,
+            ),
           ),
-
-          // Gap between frame selector and control buttons
-          const SizedBox(height: 32),
 
           // Control buttons row (settings, capture, flip camera)
           Row(
@@ -305,6 +292,15 @@ class _CameraScreenState extends State<CameraScreen> {
                 color: Colors.white,
               ),
             ],
+          ),
+
+          // Gap between control buttons and frame selector
+          const SizedBox(height: 32),
+
+          // Frame selector (48px)
+          const SizedBox(
+            height: 48,
+            child: FrameSelector(),
           ),
         ],
       ),
