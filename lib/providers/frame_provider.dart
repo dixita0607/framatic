@@ -26,7 +26,8 @@ class FrameProvider extends ChangeNotifier {
 
     try {
       _customPresets = await _presetService.loadCustomPresets();
-      _allPresets = [...AspectRatios.predefinedFrames, ..._customPresets];
+      // Load presets with user-defined order
+      _allPresets = await _presetService.getAllPresetsWithOrder();
     } catch (e) {
       debugPrint('Error initializing FrameProvider: $e');
     }
@@ -58,12 +59,12 @@ class FrameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Add a custom preset
+  /// Add a custom preset (prepends to order, appears at top)
   Future<bool> addCustomPreset(FramePreset preset) async {
     final success = await _presetService.addCustomPreset(preset);
     if (success) {
       _customPresets.add(preset);
-      _allPresets = [...AspectRatios.predefinedFrames, ..._customPresets];
+      _allPresets = await _presetService.getAllPresetsWithOrder();
       notifyListeners();
     }
     return success;
@@ -76,7 +77,7 @@ class FrameProvider extends ChangeNotifier {
       final index = _customPresets.indexWhere((p) => p.id == preset.id);
       if (index != -1) {
         _customPresets[index] = preset;
-        _allPresets = [...AspectRatios.predefinedFrames, ..._customPresets];
+        _allPresets = await _presetService.getAllPresetsWithOrder();
 
         // Update active preset if it was the one being edited
         if (_activePreset.id == preset.id) {
@@ -91,10 +92,10 @@ class FrameProvider extends ChangeNotifier {
 
   /// Delete a custom preset
   Future<bool> deleteCustomPreset(String presetId) async {
-    final success = await _presetService.deleteCustomPreset(presetId);
+    final success = await _presetService.deleteCustomPresetWithOrder(presetId);
     if (success) {
       _customPresets.removeWhere((p) => p.id == presetId);
-      _allPresets = [...AspectRatios.predefinedFrames, ..._customPresets];
+      _allPresets = await _presetService.getAllPresetsWithOrder();
 
       // If the deleted preset was active, switch to default
       if (_activePreset.id == presetId) {
@@ -111,7 +112,7 @@ class FrameProvider extends ChangeNotifier {
     final success = await _presetService.clearAllCustomPresets();
     if (success) {
       _customPresets.clear();
-      _allPresets = [...AspectRatios.predefinedFrames];
+      _allPresets = await _presetService.getAllPresetsWithOrder();
 
       // Reset to default if active was custom
       if (_activePreset.isCustom) {
@@ -129,5 +130,15 @@ class FrameProvider extends ChangeNotifier {
       (preset) => (preset.id ?? preset.name) == id,
       orElse: () => AspectRatios.predefinedFrames[1], // Default to 16:9
     );
+  }
+
+  /// Reorder presets and persist the new order
+  Future<bool> reorderPresets(List<FramePreset> orderedPresets) async {
+    final success = await _presetService.reorderPresets(orderedPresets);
+    if (success) {
+      _allPresets = orderedPresets;
+      notifyListeners();
+    }
+    return success;
   }
 }

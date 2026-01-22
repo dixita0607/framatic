@@ -19,14 +19,19 @@ class PresetManagerScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Merge predefined and custom frames into a single list
-          final allFrames = [
-            ...frameProvider.predefinedPresets,
-            ...frameProvider.customPresets,
-          ];
+          final allFrames = frameProvider.allPresets;
 
-          return ListView.builder(
+          return ReorderableListView.builder(
             itemCount: allFrames.length,
+            onReorder: (oldIndex, newIndex) async {
+              // Handle reordering
+              final List<FramePreset> items = List.from(allFrames);
+              final FramePreset item = items.removeAt(oldIndex);
+              items.insert(newIndex, item);
+
+              // Persist new order
+              await frameProvider.reorderPresets(items);
+            },
             itemBuilder: (context, index) {
               final preset = allFrames[index];
               final isPredefined = frameProvider.predefinedPresets.contains(preset);
@@ -35,6 +40,7 @@ class PresetManagerScreen extends StatelessWidget {
                 preset: preset,
                 frameProvider: frameProvider,
                 isPredefined: isPredefined,
+                key: ValueKey(preset.id ?? preset.name),
               );
             },
           );
@@ -53,18 +59,30 @@ class PresetManagerScreen extends StatelessWidget {
     required FramePreset preset,
     required FrameProvider frameProvider,
     required bool isPredefined,
+    required Key key,
   }) {
     return ListTile(
-      leading: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: CustomPaint(
-          painter: _PresetPreviewPainter(preset.aspectRatio),
-        ),
+      key: key,
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ReorderableDragStartListener(
+            index: frameProvider.allPresets.indexOf(preset),
+            child: const Icon(Icons.drag_handle),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: CustomPaint(
+              painter: _PresetPreviewPainter(preset.aspectRatio),
+            ),
+          ),
+        ],
       ),
       title: Text(preset.name),
       subtitle: Text(preset.formattedRatio),

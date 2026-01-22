@@ -299,24 +299,68 @@ Redesign the frame preset manager and custom frame builder screens to match the 
 - [x] No favorite-related code remains in services layer
 - [x] Theme uses Material 3 dark mode defaults (no custom color overrides)
 
-### Phase 7: Split-Screen Comparison Mode (Future)
+### Phase 7: Frame Preset Reordering
 
-**Status: 📋 DEFERRED - Future Implementation**
+**Status: 📋 PENDING - Next Implementation Phase**
 
-> This phase is deferred for future implementation.
+**Overview:**
+Add drag-and-drop reordering functionality to the frame preset manager screen, allowing users to customize the order of presets. The custom order will be persisted and reflected on the camera screen's frame selector.
 
-**Files to create:**
+**User Requirements:**
 
-- `screens/comparison_screen.dart` - Dual camera preview
-- `widgets/comparison_controls.dart` - Frame selection for each view
+1. Drag-and-drop reordering of frame presets in the preset manager screen
+2. Drag handle icon visible on the left side of each list item
+3. Visual feedback during dragging (elevated state, opacity change)
+4. Persistent storage of custom preset order
+5. Order preserved on camera screen's frame selector
 
-**Implementation:**
+**Files to modify:**
 
-1. Create split-screen layout (horizontal or vertical split)
-2. Display two camera previews with different frames
-3. Implement synchronized zoom across both views
-4. Add toggle to switch between single and comparison mode
-5. Capture comparison shots (both frames in one image)
+- `lib/screens/preset_manager_screen.dart` - Add ReorderableListView and drag handles
+- `lib/providers/frame_provider.dart` - Add reorder method to state management
+- `lib/services/frame_preset_service.dart` - Save/load preset order
+- `lib/models/frame_preset.dart` - Add order field if needed (optional)
+
+**Implementation Steps:**
+
+1. Update FramePresetService to manage preset order
+   - Add method to reorder presets in storage
+   - Load presets in saved order on app startup
+
+2. Add reorder method to FrameProvider
+   - `Future<bool> reorderPresets(List<FramePreset> orderedPresets)`
+   - Call service to persist new order
+
+3. Update preset_manager_screen.dart
+   - Replace ListView.builder with ReorderableListView.builder
+   - Add drag handle icon (Icons.drag_handle) on the left of each tile
+   - Use onReorder callback to persist new order
+
+4. Update frame_selector.dart on camera screen
+   - Ensure frame order matches saved preference from preset manager
+
+5. Add visual feedback
+   - Drag handle becomes visible/highlighted during drag
+   - List item shows subtle elevation or opacity change
+
+**Design Requirements:**
+
+- Drag handle icon positioned consistently on the left (before preview)
+- Material 3 compliant drag behavior
+- Clear visual feedback that preset is draggable
+- Maintain minimum 48x48dp touch target for drag handle
+- Smooth animation when reordering
+
+**Verification Checklist:**
+
+- [ ] Drag handle icon visible on all list items
+- [ ] Dragging reorders items in real-time
+- [ ] Order persists after app restart
+- [ ] Order reflected on camera screen frame selector
+- [ ] Predefined presets maintain their positions
+- [ ] Custom presets can be freely reordered
+- [ ] Smooth drag animation with visual feedback
+- [ ] No horizontal scroll within list items during drag
 
 ## Key Technical Decisions
 
