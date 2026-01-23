@@ -138,12 +138,14 @@ class FrameProvider extends ChangeNotifier {
   }
 
   /// Reorder presets and persist the new order
+  /// Updates UI immediately, persists in background to avoid animation jank
   Future<bool> reorderPresets(List<FramePreset> orderedPresets) async {
+    // Update state immediately (synchronous) so animation and data stay in sync
+    _allPresets = orderedPresets;
+    notifyListeners();
+
+    // Persist in background without blocking the UI
     final success = await _presetService.reorderPresets(orderedPresets);
-    if (success) {
-      _allPresets = orderedPresets;
-      notifyListeners();
-    }
     return success;
   }
 }

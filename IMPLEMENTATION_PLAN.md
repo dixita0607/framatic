@@ -301,66 +301,106 @@ Redesign the frame preset manager and custom frame builder screens to match the 
 
 ### Phase 7: Frame Preset Reordering
 
-**Status: 📋 PENDING - Next Implementation Phase**
+**Status: ✅ COMPLETED**
 
 **Overview:**
 Add drag-and-drop reordering functionality to the frame preset manager screen, allowing users to customize the order of presets. The custom order will be persisted and reflected on the camera screen's frame selector.
 
 **User Requirements:**
 
-1. Drag-and-drop reordering of frame presets in the preset manager screen
-2. Drag handle icon visible on the left side of each list item
-3. Visual feedback during dragging (elevated state, opacity change)
-4. Persistent storage of custom preset order
-5. Order preserved on camera screen's frame selector
+1. ✅ Drag-and-drop reordering of frame presets in the preset manager screen
+2. ✅ Drag handle icon visible on the left side of each list item
+3. ✅ Visual feedback during dragging (elevated state, opacity change)
+4. ✅ Persistent storage of custom preset order
+5. ✅ Order preserved on camera screen's frame selector
+6. ✅ Full-item drag capability (drag from anywhere, not just handle)
+7. ✅ Smooth animations without text flicker or lag
+8. ✅ Correct drop positioning for items dragged in both directions
 
-**Files to modify:**
+**Files Modified:**
 
-- `lib/screens/preset_manager_screen.dart` - Add ReorderableListView and drag handles
-- `lib/providers/frame_provider.dart` - Add reorder method to state management
-- `lib/services/frame_preset_service.dart` - Save/load preset order
-- `lib/models/frame_preset.dart` - Add order field if needed (optional)
+- ✅ `lib/screens/preset_manager_screen.dart` - ReorderableListView with performance optimizations and full-item drag
+- ✅ `lib/providers/frame_provider.dart` - Reorder method with background persistence
+- ✅ `lib/services/frame_preset_service.dart` - Order persistence layer
 
 **Implementation Steps:**
 
-1. Update FramePresetService to manage preset order
-   - Add method to reorder presets in storage
-   - Load presets in saved order on app startup
+- ✅ Step 1: Update FramePresetService to manage preset order
+  - Added `_loadPresetOrder()` and `_savePresetOrder()` for persistence
+  - Added `getAllPresetsWithOrder()` to load presets in user-defined order
+  - Added `deleteCustomPresetWithOrder()` to maintain order on deletion
+  - Updated `addCustomPreset()` to prepend new custom presets to order list
 
-2. Add reorder method to FrameProvider
-   - `Future<bool> reorderPresets(List<FramePreset> orderedPresets)`
-   - Call service to persist new order
+- ✅ Step 2: Add reorder method to FrameProvider
+  - Added `reorderPresets(List<FramePreset> orderedPresets)` method
+  - **OPTIMIZED**: Updates UI immediately, persists in background (fire-and-forget pattern)
+  - Prevents animation jank by decoupling data updates from persistence
 
-3. Update preset_manager_screen.dart
-   - Replace ListView.builder with ReorderableListView.builder
-   - Add drag handle icon (Icons.drag_handle) on the left of each tile
-   - Use onReorder callback to persist new order
+- ✅ Step 3: Update preset_manager_screen.dart
+  - Replaced ListView.builder with ReorderableListView.builder
+  - Added drag handle icon (Icons.drag_handle) on left
+  - **OPTIMIZED**: Removed await from onReorder callback (non-blocking)
+  - **OPTIMIZED**: Wrapped entire ListTile in ReorderableDragStartListener for full-item drag
+  - **OPTIMIZED**: Fixed ReorderableListView index adjustment bug (subtract 1 when dragging down)
+  - **OPTIMIZED**: Eliminated O(n) indexOf() calls in itemBuilder
+  - **OPTIMIZED**: Changed isPredefined check to use preset.isCustom property (order-independent)
+  - **OPTIMIZED**: Added RepaintBoundary to prevent cascading repaints during drag
 
-4. Update frame_selector.dart on camera screen
-   - Ensure frame order matches saved preference from preset manager
+- ✅ Step 4: Update frame_selector.dart on camera screen
+  - Automatically uses ordered list via `frameProvider.allPresets`
+  - No changes needed - already reflects user-defined order
 
-5. Add visual feedback
-   - Drag handle becomes visible/highlighted during drag
-   - List item shows subtle elevation or opacity change
+- ✅ Step 5: Added visual feedback
+  - ReorderableListView provides built-in drag animation
+  - Material 3 compliant drag behavior
+
+**Performance Optimizations:**
+
+- ✅ **Eliminated O(n) indexOf() search**: Used dragIndex directly from itemBuilder (O(1))
+- ✅ **Eliminated O(n) contains() check**: Replaced with isPredefined = !preset.isCustom (O(1))
+- ✅ **Added RepaintBoundary**: Prevents widget rebuild cascades during drag animation
+- ✅ **Added ListTile key**: Ensures PopupMenuButton state is properly tracked during reordering
+- ✅ **Fire-and-forget persistence**: UI updates immediately, persistence happens in background
+- ✅ **Index adjustment for downward drag**: Fixed ReorderableListView quirk where newIndex is post-removal
+
+**Bug Fixes:**
+
+- ✅ Fixed text flicker during drop: Separated UI update from persistence timing
+- ✅ Fixed menu state persistence: Added key to ListTile for proper PopupMenuButton tracking
+- ✅ Fixed isPredefined indicator: Changed from position-based to property-based check (works after reordering)
+- ✅ Fixed incorrect drop positioning: Added index adjustment when dragging down (oldIndex < newIndex)
 
 **Design Requirements:**
 
-- Drag handle icon positioned consistently on the left (before preview)
-- Material 3 compliant drag behavior
-- Clear visual feedback that preset is draggable
-- Maintain minimum 48x48dp touch target for drag handle
-- Smooth animation when reordering
+- ✅ Drag handle icon positioned consistently on the left (before preview)
+- ✅ Drag from any point on the item (full-item drag support)
+- ✅ Material 3 compliant drag behavior
+- ✅ Clear visual feedback that preset is draggable
+- ✅ Maintain minimum 48x48dp touch target
+- ✅ Smooth animation when reordering (no flicker, no lag)
+
+**Additional Features:**
+
+- ✅ Default behavior: App always defaults to first preset in ordered list on startup
+- ✅ Order strategy: Separate list of preset identifiers (names for predefined, IDs for custom)
+- ✅ Graceful fallback: If order list missing, uses predefined first + custom
 
 **Verification Checklist:**
 
-- [ ] Drag handle icon visible on all list items
-- [ ] Dragging reorders items in real-time
-- [ ] Order persists after app restart
-- [ ] Order reflected on camera screen frame selector
-- [ ] Predefined presets maintain their positions
-- [ ] Custom presets can be freely reordered
-- [ ] Smooth drag animation with visual feedback
-- [ ] No horizontal scroll within list items during drag
+- [x] Drag handle icon visible on all list items
+- [x] Dragging reorders items in real-time
+- [x] Order persists after app restart
+- [x] Order reflected on camera screen frame selector
+- [x] Predefined presets can be reordered together with custom presets
+- [x] Custom presets can be freely reordered
+- [x] Smooth drag animation with visual feedback (no flicker)
+- [x] No horizontal scroll within list items during drag
+- [x] New custom presets appear at the top of the list
+- [x] Full-item drag from any point on the ListTile
+- [x] No lag during drag operation (optimized O(1) checks)
+- [x] Menu (three dots) stays with correct item after reordering
+- [x] Drop position is accurate in both upward and downward drag directions
+- [x] No text flicker when dropping items
 
 ## Key Technical Decisions
 

@@ -23,24 +23,39 @@ class PresetManagerScreen extends StatelessWidget {
 
           return ReorderableListView.builder(
             itemCount: allFrames.length,
-            onReorder: (oldIndex, newIndex) async {
-              // Handle reordering
+            onReorder: (oldIndex, newIndex) {
+              // Handle reordering - don't await to avoid blocking the animation
+              // The provider updates the UI immediately and persists in background
               final List<FramePreset> items = List.from(allFrames);
               final FramePreset item = items.removeAt(oldIndex);
-              items.insert(newIndex, item);
 
-              // Persist new order
-              await frameProvider.reorderPresets(items);
+              // Adjust newIndex when dragging down: ReorderableListView reports the index
+              // AFTER removal, so we need to subtract 1 when moving to a higher index
+              var adjustedIndex = newIndex;
+              if (oldIndex < newIndex) {
+                adjustedIndex -= 1;
+              }
+
+              items.insert(adjustedIndex, item);
+
+              // Fire and forget - UI updates immediately, persistence happens in background
+              frameProvider.reorderPresets(items);
             },
             itemBuilder: (context, index) {
               final preset = allFrames[index];
-              final isPredefined = frameProvider.predefinedPresets.contains(preset);
-              return _buildPresetTile(
-                context,
-                preset: preset,
-                frameProvider: frameProvider,
-                isPredefined: isPredefined,
+              // Check if custom using preset's own property (not position-based)
+              // This works correctly even after reordering
+              final isPredefined = !preset.isCustom;
+
+              return RepaintBoundary(
                 key: ValueKey(preset.id ?? preset.name),
+                child: _buildPresetTile(
+                  context,
+                  preset: preset,
+                  frameProvider: frameProvider,
+                  isPredefined: isPredefined,
+                  dragIndex: index,
+                ),
               );
             },
           );
@@ -59,66 +74,69 @@ class PresetManagerScreen extends StatelessWidget {
     required FramePreset preset,
     required FrameProvider frameProvider,
     required bool isPredefined,
-    required Key key,
+    required int dragIndex,
   }) {
-    return ListTile(
-      key: key,
-      leading: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ReorderableDragStartListener(
-            index: frameProvider.allPresets.indexOf(preset),
-            child: const Icon(Icons.drag_handle),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(4),
+    // Use same key as parent RepaintBoundary to ensure PopupMenuButton state is properly tracked
+    final itemKey = ValueKey(preset.id ?? preset.name);
+
+    return ReorderableDragStartListener(
+      index: dragIndex,
+      child: ListTile(
+        key: itemKey,
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.drag_handle),
+            const SizedBox(width: 8),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: CustomPaint(
+                painter: _PresetPreviewPainter(preset.aspectRatio),
+              ),
             ),
-            child: CustomPaint(
-              painter: _PresetPreviewPainter(preset.aspectRatio),
-            ),
-          ),
-        ],
+          ],
+        ),
+        title: Text(preset.name),
+        subtitle: Text(preset.formattedRatio),
+        trailing: !isPredefined
+            ? PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    _showEditCustomPresetDialog(context, preset);
+                  } else if (value == 'delete') {
+                    _showDeleteConfirmation(context, preset, frameProvider);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit),
+                        SizedBox(width: 8),
+                        Text('Edit'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Delete', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            : null,
       ),
-      title: Text(preset.name),
-      subtitle: Text(preset.formattedRatio),
-      trailing: !isPredefined
-          ? PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'edit') {
-                  _showEditCustomPresetDialog(context, preset);
-                } else if (value == 'delete') {
-                  _showDeleteConfirmation(context, preset, frameProvider);
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit),
-                      SizedBox(width: 8),
-                      Text('Edit'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Delete', style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
-                ),
-              ],
-            )
-          : null,
     );
   }
 
