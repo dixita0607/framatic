@@ -3,41 +3,45 @@ import 'package:flutter/material.dart';
 /// Model representing a frame preset with aspect ratio information
 class FramePreset {
   final String name;
-  final double aspectRatio;
+  final int width;
+  final int height;
   final bool isCustom;
   final Color frameColor;
-  final String? id;
-  final int? widthRatio;  // Original width value for custom presets
-  final int? heightRatio; // Original height value for custom presets
+  final String id;
 
   FramePreset({
     required this.name,
-    required this.aspectRatio,
+    required this.width,
+    required this.height,
+    required this.id,
     this.isCustom = false,
     this.frameColor = Colors.white,
-    this.id,
-    this.widthRatio,
-    this.heightRatio,
-  });
+  }) : assert(name.trim().isNotEmpty, 'name cannot be empty'),
+       assert(width > 0, 'width must be positive'),
+       assert(height > 0, 'height must be positive');
+
+  /// Computed aspect ratio from width and height
+  double get aspectRatio => width / height;
+
+  /// Get formatted aspect ratio string (e.g., "16:9" or "2:8")
+  String get formattedRatio => '$width:$height';
 
   /// Create a copy of this preset with modified properties
   FramePreset copyWith({
     String? name,
-    double? aspectRatio,
     bool? isCustom,
     Color? frameColor,
     String? id,
-    int? widthRatio,
-    int? heightRatio,
+    int? width,
+    int? height,
   }) {
     return FramePreset(
       name: name ?? this.name,
-      aspectRatio: aspectRatio ?? this.aspectRatio,
+      width: width ?? this.width,
+      height: height ?? this.height,
       isCustom: isCustom ?? this.isCustom,
       frameColor: frameColor ?? this.frameColor,
       id: id ?? this.id,
-      widthRatio: widthRatio ?? this.widthRatio,
-      heightRatio: heightRatio ?? this.heightRatio,
     );
   }
 
@@ -45,12 +49,11 @@ class FramePreset {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'aspectRatio': aspectRatio,
       'isCustom': isCustom,
       'frameColor': frameColor.toARGB32(),
       'id': id,
-      'widthRatio': widthRatio,
-      'heightRatio': heightRatio,
+      'width': width,
+      'height': height,
     };
   }
 
@@ -58,34 +61,12 @@ class FramePreset {
   factory FramePreset.fromJson(Map<String, dynamic> json) {
     return FramePreset(
       name: json['name'] as String,
-      aspectRatio: json['aspectRatio'] as double,
+      width: json['width'] as int,
+      height: json['height'] as int,
+      id: json['id'] as String,
       isCustom: json['isCustom'] as bool? ?? false,
       frameColor: Color(json['frameColor'] as int? ?? Colors.white.toARGB32()),
-      id: json['id'] as String?,
-      widthRatio: json['widthRatio'] as int?,
-      heightRatio: json['heightRatio'] as int?,
     );
-  }
-
-  /// Get formatted aspect ratio string (e.g., "16:9" or "2:8")
-  String get formattedRatio {
-    // Use stored width/height for custom presets
-    if (widthRatio != null && heightRatio != null) {
-      return '$widthRatio:$heightRatio';
-    }
-
-    if (name == 'Golden') {
-      return '${aspectRatio.toStringAsFixed(3)}:1';
-    }
-    // Try to find simple ratio for predefined
-    if (aspectRatio == 1.0) return '1:1';
-    if ((aspectRatio - 4 / 3).abs() < 0.01) return '4:3';
-    if ((aspectRatio - 16 / 9).abs() < 0.01) return '16:9';
-    if ((aspectRatio - 3 / 2).abs() < 0.01) return '3:2';
-    if ((aspectRatio - 2 / 3).abs() < 0.01) return '2:3';
-    if ((aspectRatio - 5 / 7).abs() < 0.01) return '5:7';
-
-    return '${aspectRatio.toStringAsFixed(2)}:1';
   }
 
   @override
@@ -94,15 +75,16 @@ class FramePreset {
       other is FramePreset &&
           runtimeType == other.runtimeType &&
           name == other.name &&
-          aspectRatio == other.aspectRatio &&
-          isCustom == other.isCustom;
+          width == other.width &&
+          height == other.height &&
+          isCustom == other.isCustom &&
+          id == other.id;
 
   @override
-  int get hashCode =>
-      name.hashCode ^ aspectRatio.hashCode ^ isCustom.hashCode;
+  int get hashCode => id.hashCode;
 
   @override
   String toString() {
-    return 'FramePreset(name: $name, aspectRatio: $aspectRatio, isCustom: $isCustom)';
+    return 'FramePreset(id: $id, name: $name, width: $width, height: $height, isCustom: $isCustom)';
   }
 }

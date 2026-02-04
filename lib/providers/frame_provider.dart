@@ -129,10 +129,10 @@ class FrameProvider extends ChangeNotifier {
     return success;
   }
 
-  /// Get preset by ID (either custom ID or name for predefined)
+  /// Get preset by ID
   FramePreset? getPresetById(String id) {
     return _allPresets.firstWhere(
-      (preset) => (preset.id ?? preset.name) == id,
+      (preset) => preset.id == id,
       orElse: () => AspectRatios.predefinedFrames[1], // Default to 16:9
     );
   }

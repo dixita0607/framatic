@@ -49,10 +49,10 @@ class FramePresetService {
     presets.add(preset);
     final success = await saveCustomPresets(presets);
 
-    if (success && preset.id != null) {
+    if (success) {
       // Prepend new preset to order list
       final order = await _loadPresetOrder();
-      order.insert(0, preset.id!);
+      order.insert(0, preset.id);
       await _savePresetOrder(order);
     }
 
@@ -61,8 +61,6 @@ class FramePresetService {
 
   /// Update an existing custom preset
   Future<bool> updateCustomPreset(FramePreset preset) async {
-    if (preset.id == null) return false;
-
     final presets = await loadCustomPresets();
     final index = presets.indexWhere((p) => p.id == preset.id);
 
@@ -98,7 +96,7 @@ class FramePresetService {
   }
 
   /// Load preset order from storage
-  /// Returns list of preset identifiers (predefined frame names + custom frame IDs)
+  /// Returns list of preset identifiers (all presets use IDs)
   Future<List<String>> _loadPresetOrder() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -143,7 +141,7 @@ class FramePresetService {
   Future<bool> reorderPresets(List<FramePreset> orderedPresets) async {
     try {
       final order = orderedPresets
-          .map((p) => p.id ?? p.name) // Use ID for custom, name for predefined
+          .map((p) => p.id) // Use ID for custom
           .toList();
       return await _savePresetOrder(order);
     } catch (e) {
@@ -165,12 +163,12 @@ class FramePresetService {
     final allPresets = <FramePreset>[];
     final presetMap = <String, FramePreset>{};
 
-    // Build map for quick lookup by ID (custom) or name (predefined)
+    // Build map for quick lookup by ID (custom)
     for (final preset in customPresets) {
-      presetMap[preset.id ?? preset.name] = preset;
+      presetMap[preset.id] = preset;
     }
     for (final preset in predefinedFrames) {
-      presetMap[preset.name] = preset;
+      presetMap[preset.id] = preset;
     }
 
     // Add presets in order specified

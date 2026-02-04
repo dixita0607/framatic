@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 import 'package:framatic/models/frame_preset.dart';
 import 'package:framatic/providers/frame_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class CustomFrameDialog extends StatefulWidget {
   final FramePreset? existingPreset;
@@ -29,16 +29,8 @@ class _CustomFrameDialogState extends State<CustomFrameDialog> {
 
     if (_isEditing) {
       _nameController.text = widget.existingPreset!.name;
-      // Use stored width/height if available
-      if (widget.existingPreset!.widthRatio != null &&
-          widget.existingPreset!.heightRatio != null) {
-        _widthController.text = widget.existingPreset!.widthRatio.toString();
-        _heightController.text = widget.existingPreset!.heightRatio.toString();
-      } else {
-        // Fallback for old presets without stored values
-        _widthController.text = '1';
-        _heightController.text = '1';
-      }
+      _widthController.text = widget.existingPreset!.width.toString();
+      _heightController.text = widget.existingPreset!.height.toString();
     }
   }
 
@@ -159,17 +151,15 @@ class _CustomFrameDialogState extends State<CustomFrameDialog> {
     final name = _nameController.text.trim();
     final width = int.parse(_widthController.text);
     final height = int.parse(_heightController.text);
-    final aspectRatio = width / height;
 
     final frameProvider = context.read<FrameProvider>();
 
     final preset = FramePreset(
       name: name,
-      aspectRatio: aspectRatio,
+      width: width,
+      height: height,
       isCustom: true,
       id: _isEditing ? widget.existingPreset!.id : const Uuid().v4(),
-      widthRatio: width,
-      heightRatio: height,
     );
 
     bool success;
@@ -186,8 +176,8 @@ class _CustomFrameDialogState extends State<CustomFrameDialog> {
           content: Text(
             success
                 ? _isEditing
-                    ? 'Frame updated'
-                    : 'Frame added'
+                      ? 'Frame updated'
+                      : 'Frame added'
                 : 'Failed to save frame',
           ),
         ),

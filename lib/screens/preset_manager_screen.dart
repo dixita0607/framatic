@@ -48,7 +48,7 @@ class PresetManagerScreen extends StatelessWidget {
               final isPredefined = !preset.isCustom;
 
               return RepaintBoundary(
-                key: ValueKey(preset.id ?? preset.name),
+                key: ValueKey(preset.id),
                 child: _buildPresetTile(
                   context,
                   preset: preset,
@@ -77,7 +77,7 @@ class PresetManagerScreen extends StatelessWidget {
     required int dragIndex,
   }) {
     // Use same key as parent RepaintBoundary to ensure PopupMenuButton state is properly tracked
-    final itemKey = ValueKey(preset.id ?? preset.name);
+    final itemKey = ValueKey(preset.id);
 
     return ReorderableDragStartListener(
       index: dragIndex,
@@ -172,18 +172,7 @@ class PresetManagerScreen extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              final presetId = preset.id;
-              if (presetId == null) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Cannot delete: preset has no ID. Please recreate this preset.'),
-                    ),
-                  );
-                }
-                return;
-              }
-              final success = await frameProvider.deleteCustomPreset(presetId);
+              final success = await frameProvider.deleteCustomPreset(preset.id);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(

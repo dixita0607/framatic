@@ -10,7 +10,7 @@ import 'package:framatic/utils/constants.dart';
 /// Service for photo capture processing and gallery export
 class PhotoService {
   static const String albumName = 'Artist Frames';
-  static const int borderWidth = AppConstants.frameBorderWidthInt;
+  static int get borderWidth => AppConstants.frameBorderWidth.toInt();
 
   /// Process captured photo: crop to aspect ratio and add polaroid border
   /// Returns the processed image bytes

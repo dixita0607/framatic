@@ -1,47 +1,26 @@
 import 'package:framatic/models/frame_preset.dart';
+import 'package:uuid/uuid.dart';
 
 /// Predefined aspect ratios for framing
 class AspectRatios {
-  static const double ratio4x3 = 4 / 3;
-  static const double ratio16x9 = 16 / 9;
-  static const double ratio1x1 = 1 / 1;
-  static const double ratio3x2 = 3 / 2;
-  static const double ratio2x3 = 2 / 3;
-  static const double ratio5x7 = 5 / 7;
-  static const double goldenRatio = 1.618;
-
   /// List of predefined frame presets (minimal defaults)
   /// Additional ratios can be added by users as custom presets
   static List<FramePreset> get predefinedFrames => [
-        FramePreset(
-          name: '16:9',
-          aspectRatio: ratio16x9,
-          isCustom: false,
-        ),
-        FramePreset(
-          name: '4:3',
-          aspectRatio: ratio4x3,
-          isCustom: false,
-        ),
-        FramePreset(
-          name: '1:1',
-          aspectRatio: ratio1x1,
-          isCustom: false,
-        ),
-      ];
+    FramePreset(name: '16:9', width: 16, height: 9, id: const Uuid().v4(), isCustom: false),
+    FramePreset(name: '4:3', width: 4, height: 3, id: const Uuid().v4(), isCustom: false),
+    FramePreset(name: '1:1', width: 1, height: 1, id: const Uuid().v4(), isCustom: false),
+  ];
 }
 
 /// App-wide constants
 class AppConstants {
   static const String appName = 'Framatic';
-  static const String galleryAlbumName = 'Artist Frames';
+  static const String galleryAlbumName = 'Framatic';
 
   // Frame overlay settings
-  static const double defaultFrameOpacity = 0.9;
   static const double minFramePadding = 0.05; // 5% of screen
   static const double maxFramePadding = 0.95; // 95% of screen
 
   // Polaroid border width (used in both preview and saved photos)
   static const double frameBorderWidth = 16.0;
-  static const int frameBorderWidthInt = 16; // For image processing
 }
