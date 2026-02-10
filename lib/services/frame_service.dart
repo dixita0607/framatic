@@ -1,5 +1,5 @@
-import 'package:framatic/db/db.dart';
 import 'package:framatic/models/frame.dart';
+import 'package:framatic/utils/db.dart';
 
 class FrameService {
   final db = FramaticDB.instance.db;

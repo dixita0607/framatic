@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:framatic/db/constants.dart';
 import 'package:framatic/models/frame.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -39,7 +38,7 @@ class FramaticDB {
 
   FutureOr<void> _createDatabase(Database db, int version) async {
     await db.execute('''
-          CREATE TABLE ${DBSchemaValues.framesTable} (
+          CREATE TABLE ${FramesTable.name} (
             ${FramesTable.id} ${DBTypes.integer} primary key autoincrement,
             ${FramesTable.title} ${DBTypes.text} not null,
             ${FramesTable.width} ${DBTypes.integer} not null,
@@ -49,18 +48,31 @@ class FramaticDB {
         ''');
 
     await db.insert(
-      DBSchemaValues.framesTable,
+      FramesTable.name,
       Frame(title: '16:9', width: 16, height: 9, isCustom: false).toJson(),
     );
     await db.insert(
-      DBSchemaValues.framesTable,
+      FramesTable.name,
       Frame(title: '4:3', width: 4, height: 3, isCustom: false).toJson(),
     );
     await db.insert(
-      DBSchemaValues.framesTable,
+      FramesTable.name,
       Frame(title: '1:1', width: 1, height: 1, isCustom: false).toJson(),
     );
   }
 
   Future<void> close() async => await _db.close();
+}
+
+abstract class DBTypes {
+  static const String integer = 'INTEGER';
+  static const String real = 'REAL';
+  static const String text = 'TEXT';
+  static const String blob = 'BLOB';
+}
+
+abstract class DBSchemaValues {
+  static const String fileName = 'framatic.db';
+  static const String dbName = 'Framatic';
+  static const int dbVersion = 1;
 }
