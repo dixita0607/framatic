@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:framatic/models/frame.dart';
+import 'package:framatic/utils/constants.dart';
 import 'package:gal/gal.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
-import 'package:framatic/models/frame_preset.dart';
-import 'package:framatic/utils/constants.dart';
 
 /// Service for photo capture processing and gallery export
 class PhotoService {
@@ -16,7 +17,7 @@ class PhotoService {
   /// Returns the processed image bytes
   Future<Uint8List?> processPhotoWithOverlay({
     required String imagePath,
-    required FramePreset preset,
+    required Frame preset,
   }) async {
     try {
       // Read the captured image
@@ -63,10 +64,7 @@ class PhotoService {
       final finalWidth = cropWidth + (borderWidth * 2);
       final finalHeight = cropHeight + (borderWidth * 2);
 
-      final finalImage = img.Image(
-        width: finalWidth,
-        height: finalHeight,
-      );
+      final finalImage = img.Image(width: finalWidth, height: finalHeight);
 
       // Fill with white (border color)
       final borderColor = img.ColorRgba8(255, 255, 255, 255);

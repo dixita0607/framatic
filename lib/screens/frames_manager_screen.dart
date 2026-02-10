@@ -1,33 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:framatic/models/frame_preset.dart';
+import 'package:framatic/models/frame.dart';
 import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/widgets/custom_frame_dialog.dart';
+import 'package:provider/provider.dart';
 
-class PresetManagerScreen extends StatelessWidget {
-  const PresetManagerScreen({super.key});
+class FramesManagerScreen extends StatelessWidget {
+  const FramesManagerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Frames'),
-      ),
+      appBar: AppBar(title: const Text('Manage Frames')),
       body: Consumer<FrameProvider>(
         builder: (context, frameProvider, child) {
           if (frameProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final allFrames = frameProvider.allPresets;
+          final allFrames = frameProvider.frames;
 
           return ReorderableListView.builder(
             itemCount: allFrames.length,
             onReorder: (oldIndex, newIndex) {
               // Handle reordering - don't await to avoid blocking the animation
               // The provider updates the UI immediately and persists in background
-              final List<FramePreset> items = List.from(allFrames);
-              final FramePreset item = items.removeAt(oldIndex);
+              final List<Frame> items = List.from(allFrames);
+              final Frame item = items.removeAt(oldIndex);
 
               // Adjust newIndex when dragging down: ReorderableListView reports the index
               // AFTER removal, so we need to subtract 1 when moving to a higher index
@@ -39,7 +37,7 @@ class PresetManagerScreen extends StatelessWidget {
               items.insert(adjustedIndex, item);
 
               // Fire and forget - UI updates immediately, persistence happens in background
-              frameProvider.reorderPresets(items);
+              frameProvider.orderFrames(items);
             },
             itemBuilder: (context, index) {
               final preset = allFrames[index];
@@ -71,7 +69,7 @@ class PresetManagerScreen extends StatelessWidget {
 
   Widget _buildPresetTile(
     BuildContext context, {
-    required FramePreset preset,
+    required Frame preset,
     required FrameProvider frameProvider,
     required bool isPredefined,
     required int dragIndex,
@@ -101,7 +99,7 @@ class PresetManagerScreen extends StatelessWidget {
             ),
           ],
         ),
-        title: Text(preset.name),
+        title: Text(preset.title),
         subtitle: Text(preset.formattedRatio),
         trailing: !isPredefined
             ? PopupMenuButton<String>(
@@ -147,7 +145,7 @@ class PresetManagerScreen extends StatelessWidget {
     );
   }
 
-  void _showEditCustomPresetDialog(BuildContext context, FramePreset preset) {
+  void _showEditCustomPresetDialog(BuildContext context, Frame preset) {
     showDialog(
       context: context,
       builder: (context) => CustomFrameDialog(existingPreset: preset),
@@ -156,14 +154,14 @@ class PresetManagerScreen extends StatelessWidget {
 
   void _showDeleteConfirmation(
     BuildContext context,
-    FramePreset preset,
+    Frame preset,
     FrameProvider frameProvider,
   ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Frame'),
-        content: Text('Are you sure you want to delete "${preset.name}"?'),
+        content: Text('Are you sure you want to delete "${preset.title}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -172,17 +170,22 @@ class PresetManagerScreen extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              final success = await frameProvider.deleteCustomPreset(preset.id);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success
-                          ? 'Frame deleted'
-                          : 'Failed to delete frame',
+              try {
+                await frameProvider.deleteFrame(preset.id!);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Frame deleted')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to delete frame: ${e.toString()}'),
+                      backgroundColor: Colors.red,
                     ),
-                  ),
-                );
+                  );
+                }
               }
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),

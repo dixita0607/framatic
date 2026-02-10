@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:framatic/models/frame_preset.dart';
+import 'package:framatic/models/frame.dart';
 import 'package:framatic/providers/frame_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
 class CustomFrameDialog extends StatefulWidget {
-  final FramePreset? existingPreset;
+  final Frame? existingPreset;
 
   const CustomFrameDialog({super.key, this.existingPreset});
 
@@ -28,7 +27,7 @@ class _CustomFrameDialogState extends State<CustomFrameDialog> {
     _isEditing = widget.existingPreset != null;
 
     if (_isEditing) {
-      _nameController.text = widget.existingPreset!.name;
+      _nameController.text = widget.existingPreset!.title;
       _widthController.text = widget.existingPreset!.width.toString();
       _heightController.text = widget.existingPreset!.height.toString();
     }
@@ -154,34 +153,47 @@ class _CustomFrameDialogState extends State<CustomFrameDialog> {
 
     final frameProvider = context.read<FrameProvider>();
 
-    final preset = FramePreset(
-      name: name,
-      width: width,
-      height: height,
-      isCustom: true,
-      id: _isEditing ? widget.existingPreset!.id : const Uuid().v4(),
-    );
+    try {
+      if (_isEditing) {
+        // Update existing frame with its ID
+        final updatedFrame = Frame(
+          id: widget.existingPreset!.id,
+          title: name,
+          width: width,
+          height: height,
+          isCustom: true,
+        );
+        await frameProvider.updateFrame(updatedFrame);
+      } else {
+        // Create new frame without ID (database will auto-generate)
+        final newFrame = Frame(
+          title: name,
+          width: width,
+          height: height,
+          isCustom: true,
+        );
+        await frameProvider.createFrame(newFrame);
+      }
 
-    bool success;
-    if (_isEditing) {
-      success = await frameProvider.updateCustomPreset(preset);
-    } else {
-      success = await frameProvider.addCustomPreset(preset);
-    }
-
-    if (mounted) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success
-                ? _isEditing
-                      ? 'Frame updated'
-                      : 'Frame added'
-                : 'Failed to save frame',
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _isEditing ? 'Frame updated' : 'Frame added',
+            ),
           ),
-        ),
-      );
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save frame: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }

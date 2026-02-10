@@ -1,8 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:framatic/providers/frame_provider.dart';
+import 'package:framatic/screens/frames_manager_screen.dart';
 import 'package:framatic/screens/photo_preview_screen.dart';
-import 'package:framatic/screens/preset_manager_screen.dart';
 import 'package:framatic/services/camera_service.dart';
 import 'package:framatic/services/photo_service.dart';
 import 'package:framatic/utils/constants.dart';
@@ -285,7 +285,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const PresetManagerScreen(),
+                      builder: (context) => const FramesManagerScreen(),
                     ),
                   );
                 },

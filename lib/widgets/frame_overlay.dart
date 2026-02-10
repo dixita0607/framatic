@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:framatic/models/frame_preset.dart';
+import 'package:framatic/models/frame.dart';
 import 'package:framatic/utils/constants.dart';
 
 /// Widget that displays a polaroid-style frame border over the camera preview
 class FrameOverlay extends StatelessWidget {
-  final FramePreset preset;
+  final Frame preset;
   final double borderWidth;
   final double? maxHeight;
 
@@ -30,7 +30,7 @@ class FrameOverlay extends StatelessWidget {
 
 /// Custom painter for drawing the polaroid-style frame border
 class FrameOverlayPainter extends CustomPainter {
-  final FramePreset preset;
+  final Frame preset;
   final double borderWidth;
   final double? maxHeight;
 
@@ -107,10 +107,12 @@ class FrameOverlayPainter extends CustomPainter {
   /// Accounts for border width so the border doesn't get clipped
   Size _calculateFrameSize(Size screenSize) {
     // Available space after accounting for border on both sides
-    final availableWidth = screenSize.width * AppConstants.maxFramePadding - (borderWidth * 2);
+    final availableWidth =
+        screenSize.width * AppConstants.maxFramePadding - (borderWidth * 2);
     // Use maxHeight if provided (for camera area with fixed height), otherwise use screen height
     final heightConstraint = maxHeight ?? screenSize.height;
-    final availableHeight = heightConstraint * AppConstants.maxFramePadding - (borderWidth * 2);
+    final availableHeight =
+        heightConstraint * AppConstants.maxFramePadding - (borderWidth * 2);
 
     double frameWidth = availableWidth;
     double frameHeight = frameWidth / preset.aspectRatio;
@@ -127,17 +129,13 @@ class FrameOverlayPainter extends CustomPainter {
   /// Draw aspect ratio label at top of frame
   void _drawLabel(Canvas canvas, Size screenSize, Rect frameRect) {
     final textSpan = TextSpan(
-      text: preset.name,
+      text: preset.title,
       style: const TextStyle(
         color: Colors.white,
         fontSize: 16,
         fontWeight: FontWeight.bold,
         shadows: [
-          Shadow(
-            color: Colors.black,
-            offset: Offset(1, 1),
-            blurRadius: 3,
-          ),
+          Shadow(color: Colors.black, offset: Offset(1, 1), blurRadius: 3),
         ],
       ),
     );
@@ -161,7 +159,7 @@ class FrameOverlayPainter extends CustomPainter {
   @override
   bool shouldRepaint(FrameOverlayPainter oldDelegate) {
     return oldDelegate.preset != preset ||
-           oldDelegate.borderWidth != borderWidth ||
-           oldDelegate.maxHeight != maxHeight;
+        oldDelegate.borderWidth != borderWidth ||
+        oldDelegate.maxHeight != maxHeight;
   }
 }
