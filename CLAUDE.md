@@ -4,7 +4,9 @@ Framatic is a Flutter mobile app that helps artists frame landscapes by providin
 
 ## State Management
 
-Uses **Provider** pattern for state management.
+Uses **Provider** pattern for state management with the widgets.
+Uses **sqflite** package for storing frame data locally.
+Uses **shared_preferences** package for storing the order of the frame according to user's preference.
 
 ## Core Layers
 
@@ -18,17 +20,15 @@ Uses **Provider** pattern for state management.
 
 **Widgets** (`lib/widgets/`)
 
-## Data and State management
-
-`sqflite` package is being used for storing structured data of frames. To save the order of the page, use `shared_preferences`. The logical part which is dart only code, should be part of `lib/services` and any UI related logic should be part of `lib/providers` files.
+**Database** (`lib/db/`)
 
 ## Frame Overlay Rendering
 
-The overlay uses `CustomPainter` to draw a centered rectangle based on aspect ratio. The area outside the frame is filled with semi-transparent white (polaroid-style). Frame dimensions are calculated to fit within 95% of screen bounds while maintaining the aspect ratio.
+The overlay uses `CustomPainter` to draw a centered rectangle based on aspect ratio. The frame surrounding the camera preview and clicked pictures look solid white(polaroid-style). Frame dimensions are calculated to fit within 95% of screen bounds while maintaining the aspect ratio.
 
 ## Predefined Aspect Ratios
 
-Defined in `lib/utils/constants.dart` via `AspectRatios` class: 4:3, 16:9, 1:1.
+When user opens the application for the first time, there are some pre-defined frames available i.e. 4:3, 16:9, 1:1. Added while creating the database for the first time.
 
 ## Photo Capture Flow
 
@@ -42,6 +42,7 @@ Photos are saved to a dedicated "Framatic" album using the `gal` package for gal
 ## Development workflow notes
 
 - Don't commit the files after finishing a chunk of work. Only commit when asked.
+- Try to think critically when asked questions instead of agreeing with it.
 
 ## Git
 
