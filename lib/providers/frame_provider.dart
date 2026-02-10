@@ -11,7 +11,7 @@ class FrameProvider extends ChangeNotifier {
 
   List<Frame> get frames => _frames;
   bool get isLoading => _isLoading;
-  Frame? get activeFrameId {
+  Frame? get activeFrame {
     try {
       return _frames.firstWhere((frame) => frame.id == _activeFrameId);
     } catch (e) {

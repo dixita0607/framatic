@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:framatic/models/frame.dart';
 import 'package:framatic/providers/frame_provider.dart';
-import 'package:framatic/models/frame_preset.dart';
+import 'package:provider/provider.dart';
 
 /// Widget for quick frame switching with horizontal scroll
 class FrameSelector extends StatelessWidget {
@@ -18,7 +18,7 @@ class FrameSelector extends StatelessWidget {
           );
         }
 
-        final presets = frameProvider.allPresets;
+        final presets = frameProvider.frames;
 
         return SizedBox(
           height: 50,
@@ -27,17 +27,16 @@ class FrameSelector extends StatelessWidget {
             itemCount: presets.length,
             itemBuilder: (context, index) {
               final preset = presets[index];
-              final isSelected =
-                  frameProvider.activePreset == preset;
+              final isSelected = frameProvider.activeFrame == preset;
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: ChoiceChip(
-                  label: Text(preset.name),
+                  label: Text(preset.title),
                   selected: isSelected,
                   onSelected: (selected) {
                     if (selected) {
-                      frameProvider.setActivePreset(preset);
+                      frameProvider.setActiveFrame(preset.id!);
                     }
                   },
                   selectedColor: Colors.white,
@@ -45,8 +44,9 @@ class FrameSelector extends StatelessWidget {
                   showCheckmark: false,
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.black : Colors.white,
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
               );
@@ -89,7 +89,7 @@ class FrameSelectorBottomSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              _buildPresetGrid(context, frameProvider.allPresets, frameProvider),
+              _buildPresetGrid(context, frameProvider.frames, frameProvider),
             ],
           ),
         );
@@ -97,18 +97,22 @@ class FrameSelectorBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildPresetGrid(BuildContext context, List<FramePreset> presets, FrameProvider frameProvider) {
+  Widget _buildPresetGrid(
+    BuildContext context,
+    List<Frame> presets,
+    FrameProvider frameProvider,
+  ) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: presets.map((preset) {
-        final isSelected = frameProvider.activePreset == preset;
+        final isSelected = frameProvider.activeFrame == preset;
         return ChoiceChip(
-          label: Text(preset.name),
+          label: Text(preset.title),
           selected: isSelected,
           onSelected: (selected) {
             if (selected) {
-              frameProvider.setActivePreset(preset);
+              frameProvider.setActiveFrame(preset.id!);
               Navigator.of(context).pop();
             }
           },

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:framatic/db/db.dart';
 import 'package:framatic/providers/frame_provider.dart';
+import 'package:framatic/screens/camera_screen.dart';
 import 'package:framatic/utils/constants.dart';
 import 'package:provider/provider.dart';
 
@@ -41,24 +42,9 @@ class MainApp extends StatelessWidget {
       child: MaterialApp(
         title: AppConstants.appName,
         theme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
-        home: const HomePage(),
+        home: const CameraScreen(),
         debugShowCheckedModeBanner: false,
       ),
     );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  @override
-  Widget build(BuildContext context) {
-    final frames = context.read<FrameProvider>().frames;
-    return Column(children: frames.map((f) => Text(f.title)).toList());
   }
 }

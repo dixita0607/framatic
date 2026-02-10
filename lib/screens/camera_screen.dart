@@ -1,17 +1,17 @@
-import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 import 'package:framatic/providers/frame_provider.dart';
-import 'package:framatic/services/camera_service.dart';
-import 'package:framatic/services/photo_service.dart';
 import 'package:framatic/screens/photo_preview_screen.dart';
 import 'package:framatic/screens/preset_manager_screen.dart';
+import 'package:framatic/services/camera_service.dart';
+import 'package:framatic/services/photo_service.dart';
 import 'package:framatic/utils/constants.dart';
 import 'package:framatic/utils/permissions.dart';
+import 'package:framatic/widgets/camera_controls/capture_button.dart';
 import 'package:framatic/widgets/frame_overlay.dart';
 import 'package:framatic/widgets/frame_selector.dart';
 import 'package:framatic/widgets/zoom_slider.dart';
-import 'package:framatic/widgets/camera_controls/capture_button.dart';
+import 'package:provider/provider.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -74,12 +74,20 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-
   Future<void> _capturePhoto() async {
     if (_isCapturing) return;
 
     final frameProvider = context.read<FrameProvider>();
-    final preset = frameProvider.activePreset;
+    final preset = frameProvider.activeFrame;
+
+    if (preset == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('No frame selected')));
+      }
+      return;
+    }
 
     setState(() {
       _isCapturing = true;
@@ -116,17 +124,16 @@ class _CameraScreenState extends State<CameraScreen> {
       if (mounted) {
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => PhotoPreviewScreen(
-              imageBytes: processedBytes,
-            ),
+            builder: (context) =>
+                PhotoPreviewScreen(imageBytes: processedBytes),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -206,7 +213,14 @@ class _CameraScreenState extends State<CameraScreen> {
 
         return Consumer<FrameProvider>(
           builder: (context, frameProvider, child) {
-            final selectedAspectRatio = frameProvider.activePreset.aspectRatio;
+            final activeFrame = frameProvider.activeFrame;
+
+            // Show loading state if no active frame yet
+            if (activeFrame == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final selectedAspectRatio = activeFrame.aspectRatio;
 
             return GestureDetector(
               onScaleStart: _onScaleStart,
@@ -227,11 +241,10 @@ class _CameraScreenState extends State<CameraScreen> {
                   Align(
                     alignment: Alignment.topCenter,
                     child: FrameOverlay(
-                      preset: frameProvider.activePreset,
+                      preset: activeFrame,
                       maxHeight: maxHeight,
                     ),
                   ),
-
                 ],
               ),
             );
@@ -298,10 +311,7 @@ class _CameraScreenState extends State<CameraScreen> {
           const SizedBox(height: 32),
 
           // Frame selector (48px)
-          const SizedBox(
-            height: 48,
-            child: FrameSelector(),
-          ),
+          const SizedBox(height: 48, child: FrameSelector()),
         ],
       ),
     );
@@ -315,13 +325,13 @@ class _CameraScreenState extends State<CameraScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _errorMessage != null
-                ? _buildErrorWidget()
-                : Column(
-                    children: [
-                      Expanded(child: _buildCameraArea()),
-                      _buildSimplifiedBottomControls(),
-                    ],
-                  ),
+            ? _buildErrorWidget()
+            : Column(
+                children: [
+                  Expanded(child: _buildCameraArea()),
+                  _buildSimplifiedBottomControls(),
+                ],
+              ),
       ),
     );
   }
@@ -333,11 +343,7 @@ class _CameraScreenState extends State<CameraScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              color: Colors.red,
-              size: 64,
-            ),
+            const Icon(Icons.error_outline, color: Colors.red, size: 64),
             const SizedBox(height: 16),
             Text(
               _errorMessage ?? 'An error occurred',
@@ -360,7 +366,6 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-
   /// Build camera preview that is clipped to the selected aspect ratio
   /// Uses same frame calculation as FrameOverlay to ensure alignment
   Widget _buildClippedCameraPreview(
@@ -379,9 +384,11 @@ class _CameraScreenState extends State<CameraScreen> {
         // Calculate frame size exactly like FrameOverlay does
         // Account for border width so camera stays within the border
         final availableWidth =
-            constraints.maxWidth * AppConstants.maxFramePadding - (borderWidth * 2);
+            constraints.maxWidth * AppConstants.maxFramePadding -
+            (borderWidth * 2);
         final availableHeight =
-            constraints.maxHeight * AppConstants.maxFramePadding - (borderWidth * 2);
+            constraints.maxHeight * AppConstants.maxFramePadding -
+            (borderWidth * 2);
 
         double frameWidth = availableWidth;
         double frameHeight = frameWidth / targetAspectRatio;
@@ -423,5 +430,4 @@ class _CameraScreenState extends State<CameraScreen> {
       },
     );
   }
-
 }
