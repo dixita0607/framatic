@@ -21,24 +21,8 @@ class FramesManagerScreen extends StatelessWidget {
 
           return ReorderableListView.builder(
             itemCount: allFrames.length,
-            onReorder: (oldIndex, newIndex) {
-              // Handle reordering - don't await to avoid blocking the animation
-              // The provider updates the UI immediately and persists in background
-              final List<Frame> items = List.from(allFrames);
-              final Frame item = items.removeAt(oldIndex);
-
-              // Adjust newIndex when dragging down: ReorderableListView reports the index
-              // AFTER removal, so we need to subtract 1 when moving to a higher index
-              var adjustedIndex = newIndex;
-              if (oldIndex < newIndex) {
-                adjustedIndex -= 1;
-              }
-
-              items.insert(adjustedIndex, item);
-
-              // Fire and forget - UI updates immediately, persistence happens in background
-              frameProvider.orderFrames(items);
-            },
+            onReorder: (oldIndex, newIndex) async =>
+                await frameProvider.orderFrames(oldIndex, newIndex),
             itemBuilder: (context, index) {
               final preset = allFrames[index];
               // Check if custom using preset's own property (not position-based)

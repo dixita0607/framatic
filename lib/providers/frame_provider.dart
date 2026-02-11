@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:framatic/models/frame.dart';
 import 'package:framatic/services/frame_service.dart';
+import 'package:framatic/utils/frame_order_preferences.dart';
 
 class FrameProvider extends ChangeNotifier {
   final FrameService _frameService = FrameService();
@@ -25,6 +26,7 @@ class FrameProvider extends ChangeNotifier {
 
     try {
       _frames = await _frameService.getAllFrames();
+      await _orderFrames();
       if (_frames.isNotEmpty) {
         _activeFrameId = _frames[0].id!;
       }
@@ -42,8 +44,14 @@ class FrameProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final createdFrame = await _frameService.createFrame(newFrame);
-      _frames.add(createdFrame);
+
+      _frames.insert(0, createdFrame);
       notifyListeners();
+
+      await FrameOrderPreferences.setOrder([
+        createdFrame.id.toString(),
+        ...FrameOrderPreferences.order,
+      ]);
       return createdFrame;
     } finally {
       _isLoading = false;
@@ -76,20 +84,22 @@ class FrameProvider extends ChangeNotifier {
     try {
       await _frameService.deleteFrame(frameId);
       _frames.removeWhere((frame) => frame.id == frameId);
-
-      // If deleted frame was selected, switch to first available
       if (_activeFrameId == frameId) {
         _activeFrameId = _frames.isNotEmpty ? _frames[0].id! : 0;
       }
       notifyListeners();
+
+      await FrameOrderPreferences.setOrder(
+        FrameOrderPreferences.order
+            .where((id) => id != frameId.toString())
+            .toList(),
+      );
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  /// Set the currently active/selected frame
-  /// Throws [StateError] if frame with given ID is not found
   void setActiveFrame(int frameId) {
     final frameExists = _frames.any((frame) => frame.id == frameId);
     if (!frameExists) {
@@ -99,11 +109,47 @@ class FrameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Reorder frames and update local state
-  /// TODO: Persist order to shared_preferences
-  void orderFrames(List<Frame> orderedFrames) {
-    _frames = orderedFrames;
-    notifyListeners();
-    // Order persistence to be implemented with shared_preferences
+  Future<void> orderFrames(int oldPos, int newPos) async {
+    if (oldPos < 0 ||
+        oldPos >= _frames.length ||
+        newPos < 0 ||
+        newPos > _frames.length) {
+      throw ArgumentError(
+        'Invalid reorder indices: oldPos=$oldPos, newPos=$newPos, length=${_frames.length}',
+      );
+    }
+
+    try {
+      final frameToMove = _frames.removeAt(oldPos);
+      var adjustedIndex = newPos;
+      if (oldPos < newPos) {
+        adjustedIndex -= 1;
+      }
+      _frames.insert(adjustedIndex, frameToMove);
+      notifyListeners();
+
+      // Persist to shared preferences
+      await FrameOrderPreferences.setOrder(
+        _frames.map((frame) => frame.id.toString()).toList(),
+      );
+    } catch (e) {
+      debugPrint('Error reordering frames: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> _orderFrames() async {
+    var savedOrder = FrameOrderPreferences.order;
+
+    if (savedOrder.isEmpty && _frames.isNotEmpty) {
+      savedOrder = _frames.map((f) => f.id.toString()).toList();
+      await FrameOrderPreferences.setOrder(savedOrder);
+    }
+
+    final frameMap = Map.fromEntries(
+      _frames.map((frame) => MapEntry(frame.id.toString(), frame)),
+    );
+
+    _frames = savedOrder.map((frameIdStr) => frameMap[frameIdStr]!).toList();
   }
 }

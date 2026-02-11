@@ -5,6 +5,7 @@ import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/screens/camera_screen.dart';
 import 'package:framatic/utils/constants.dart';
 import 'package:framatic/utils/db.dart';
+import 'package:framatic/utils/frame_order_preferences.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -21,6 +22,15 @@ void main() async {
   } catch (e) {
     if (kDebugMode) {
       print('Failed to initialize database: $e');
+    }
+    rethrow;
+  }
+
+  try {
+    await FrameOrderPreferences.initialize();
+  } catch (e) {
+    if (kDebugMode) {
+      print('Failed to initialize FrameOrderPreferences: $e');
     }
     rethrow;
   }
