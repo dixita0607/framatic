@@ -45,7 +45,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       // Check and request camera permission
-      final hasPermission = await PermissionService.checkCameraPermission();
+      final hasPermission = await PermissionService.isCameraPermissionGranted;
       if (!hasPermission) {
         final granted = await PermissionService.requestCameraPermission();
         if (!granted) {
