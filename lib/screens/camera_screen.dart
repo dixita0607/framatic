@@ -4,9 +4,9 @@ import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/screens/frames_manager_screen.dart';
 import 'package:framatic/screens/photo_preview_screen.dart';
 import 'package:framatic/services/camera_service.dart';
+import 'package:framatic/services/permission_service.dart';
 import 'package:framatic/services/photo_service.dart';
 import 'package:framatic/utils/constants.dart';
-import 'package:framatic/utils/permissions.dart';
 import 'package:framatic/widgets/camera_controls/capture_button.dart';
 import 'package:framatic/widgets/frame_overlay.dart';
 import 'package:framatic/widgets/frame_selector.dart';
@@ -45,9 +45,9 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       // Check and request camera permission
-      final hasPermission = await PermissionsHelper.checkCameraPermission();
+      final hasPermission = await PermissionService.checkCameraPermission();
       if (!hasPermission) {
-        final granted = await PermissionsHelper.requestCameraPermission();
+        final granted = await PermissionService.requestCameraPermission();
         if (!granted) {
           setState(() {
             _errorMessage = 'Camera permission is required';
@@ -357,7 +357,7 @@ class _CameraScreenState extends State<CameraScreen> {
             ),
             if (_errorMessage?.contains('permission') ?? false)
               TextButton(
-                onPressed: () => PermissionsHelper.openAppSettings(),
+                onPressed: () => PermissionService.openSettings(),
                 child: const Text('Open Settings'),
               ),
           ],
