@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/screens/camera_screen.dart';
+import 'package:framatic/services/frame_order_service.dart';
 import 'package:framatic/utils/constants.dart';
 import 'package:framatic/utils/db.dart';
-import 'package:framatic/utils/frame_order_preferences.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -27,7 +27,7 @@ void main() async {
   }
 
   try {
-    await FrameOrderPreferences.initialize();
+    await FrameOrderService.initialize();
   } catch (e) {
     if (kDebugMode) {
       print('Failed to initialize FrameOrderPreferences: $e');

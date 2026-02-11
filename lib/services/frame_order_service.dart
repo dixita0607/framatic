@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const orderKey = 'frames_order';
 
-class FrameOrderPreferences {
+class FrameOrderService {
   static late final SharedPreferencesWithCache _preferences;
 
   static Future<void> initialize() async {

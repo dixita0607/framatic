@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:framatic/models/frame.dart';
+import 'package:framatic/services/frame_order_service.dart';
 import 'package:framatic/services/frame_service.dart';
-import 'package:framatic/utils/frame_order_preferences.dart';
 
 class FrameProvider extends ChangeNotifier {
   final FrameService _frameService = FrameService();
@@ -48,9 +48,9 @@ class FrameProvider extends ChangeNotifier {
       _frames.insert(0, createdFrame);
       notifyListeners();
 
-      await FrameOrderPreferences.setOrder([
+      await FrameOrderService.setOrder([
         createdFrame.id.toString(),
-        ...FrameOrderPreferences.order,
+        ...FrameOrderService.order,
       ]);
       return createdFrame;
     } finally {
@@ -89,8 +89,8 @@ class FrameProvider extends ChangeNotifier {
       }
       notifyListeners();
 
-      await FrameOrderPreferences.setOrder(
-        FrameOrderPreferences.order
+      await FrameOrderService.setOrder(
+        FrameOrderService.order
             .where((id) => id != frameId.toString())
             .toList(),
       );
@@ -129,7 +129,7 @@ class FrameProvider extends ChangeNotifier {
       notifyListeners();
 
       // Persist to shared preferences
-      await FrameOrderPreferences.setOrder(
+      await FrameOrderService.setOrder(
         _frames.map((frame) => frame.id.toString()).toList(),
       );
     } catch (e) {
@@ -139,11 +139,11 @@ class FrameProvider extends ChangeNotifier {
   }
 
   Future<void> _orderFrames() async {
-    var savedOrder = FrameOrderPreferences.order;
+    var savedOrder = FrameOrderService.order;
 
     if (savedOrder.isEmpty && _frames.isNotEmpty) {
       savedOrder = _frames.map((f) => f.id.toString()).toList();
-      await FrameOrderPreferences.setOrder(savedOrder);
+      await FrameOrderService.setOrder(savedOrder);
     }
 
     final frameMap = Map.fromEntries(
