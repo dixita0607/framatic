@@ -11,7 +11,7 @@ class FrameOverlay extends StatelessWidget {
   const FrameOverlay({
     super.key,
     required this.preset,
-    this.borderWidth = AppConstants.frameBorderWidth,
+    this.borderWidth = AppConstants.frameBorderThickness,
     this.maxHeight,
   });
 

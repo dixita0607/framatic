@@ -8,21 +8,19 @@ import 'package:gal/gal.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 
-/// Service for photo capture processing and gallery export
 class PhotoService {
-  static const String albumName = 'Artist Frames';
-  static int get borderWidth => AppConstants.frameBorderWidth.toInt();
+  static String get albumName => AppConstants.galleryAlbumName;
+  static int get borderThickness => AppConstants.frameBorderThickness.toInt();
 
-  /// Process captured photo: crop to aspect ratio and add polaroid border
-  /// Returns the processed image bytes
-  Future<Uint8List?> processPhotoWithOverlay({
+  /// Process captured photo: crop to aspect ratio and add polaroid border.
+  /// Returns the path to the processed temp file, or null on failure.
+  Future<String?> processPhotoWithOverlay({
     required String imagePath,
     required Frame preset,
   }) async {
     try {
       // Read the captured image
-      final imageFile = File(imagePath);
-      final imageBytes = await imageFile.readAsBytes();
+      final imageBytes = await File(imagePath).readAsBytes();
       final originalImage = img.decodeImage(imageBytes);
 
       if (originalImage == null) {
@@ -61,8 +59,8 @@ class PhotoService {
       );
 
       // Create final image with border
-      final finalWidth = cropWidth + (borderWidth * 2);
-      final finalHeight = cropHeight + (borderWidth * 2);
+      final finalWidth = cropWidth + (borderThickness * 2);
+      final finalHeight = cropHeight + (borderThickness * 2);
 
       final finalImage = img.Image(width: finalWidth, height: finalHeight);
 
@@ -74,54 +72,33 @@ class PhotoService {
       img.compositeImage(
         finalImage,
         croppedImage,
-        dstX: borderWidth,
-        dstY: borderWidth,
+        dstX: borderThickness,
+        dstY: borderThickness,
       );
 
-      // Encode as JPEG
-      final processedBytes = Uint8List.fromList(
-        img.encodeJpg(finalImage, quality: 95),
+      // Write processed image to a temp file
+      final tempDir = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final imageFile = File('${tempDir.path}/frame_$timestamp.jpg');
+      await imageFile.writeAsBytes(
+        Uint8List.fromList(img.encodeJpg(finalImage)),
       );
 
-      return processedBytes;
+      return imageFile.path;
     } catch (e) {
       debugPrint('Error processing photo with overlay: $e');
       return null;
     }
   }
 
-  /// Save processed photo to gallery
-  Future<bool> saveToGallery(Uint8List imageBytes) async {
+  /// Save processed photo to gallery and delete the temp file.
+  Future<bool> saveToGallery(String imagePath) async {
     try {
-      // Save to temporary file first
-      final tempDir = await getTemporaryDirectory();
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final tempFile = File('${tempDir.path}/frame_$timestamp.jpg');
-      await tempFile.writeAsBytes(imageBytes);
-
-      // Save to gallery with album name
-      await Gal.putImage(tempFile.path, album: albumName);
-
-      // Clean up temp file
-      await tempFile.delete();
-
+      await Gal.putImage(imagePath, album: albumName);
+      await File(imagePath).delete();
       return true;
-    } catch (e) {
-      debugPrint('Error saving to gallery: $e');
-      return false;
-    }
-  }
-
-  /// Request storage permission for saving photos
-  Future<bool> requestStoragePermission() async {
-    try {
-      final hasAccess = await Gal.hasAccess();
-      if (!hasAccess) {
-        return await Gal.requestAccess();
-      }
-      return true;
-    } catch (e) {
-      debugPrint('Error requesting storage permission: $e');
+    } on GalException catch (e) {
+      debugPrint('Error saving to gallery: ${e.type.message}');
       return false;
     }
   }

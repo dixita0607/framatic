@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:framatic/providers/camera_provider.dart';
 import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/screens/camera_screen.dart';
 import 'package:framatic/services/frame_order_service.dart';
@@ -47,6 +48,9 @@ class MainApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (context) => FrameProvider()..initialize(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => CameraProvider()..initialize(),
         ),
       ],
       child: MaterialApp(

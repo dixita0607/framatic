@@ -1,14 +1,16 @@
-import 'dart:typed_data';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:framatic/services/permission_service.dart';
 import 'package:framatic/services/photo_service.dart';
+import 'package:framatic/utils/constants.dart';
 
 /// Screen to preview captured photo with Save/Retake options
 class PhotoPreviewScreen extends StatefulWidget {
-  final Uint8List imageBytes;
+  final String imagePath;
 
   const PhotoPreviewScreen({
     super.key,
-    required this.imageBytes,
+    required this.imagePath,
   });
 
   @override
@@ -24,7 +26,7 @@ class _PhotoPreviewScreenState extends State<PhotoPreviewScreen> {
       _isSaving = true;
     });
 
-    final hasPermission = await _photoService.requestStoragePermission();
+    final hasPermission = await PermissionService.requestStoragePermission();
     if (!hasPermission) {
       if (mounted) {
         setState(() {
@@ -39,7 +41,7 @@ class _PhotoPreviewScreenState extends State<PhotoPreviewScreen> {
       return;
     }
 
-    final success = await _photoService.saveToGallery(widget.imageBytes);
+    final success = await _photoService.saveToGallery(widget.imagePath);
 
     if (mounted) {
       setState(() {
@@ -48,8 +50,8 @@ class _PhotoPreviewScreenState extends State<PhotoPreviewScreen> {
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Photo saved to Artist Frames album'),
+          SnackBar(
+            content: Text('Photo saved to ${AppConstants.galleryAlbumName} album'),
             duration: Duration(seconds: 2),
           ),
         );
@@ -65,6 +67,7 @@ class _PhotoPreviewScreenState extends State<PhotoPreviewScreen> {
   }
 
   void _retakePhoto() {
+    File(widget.imagePath).delete().ignore();
     Navigator.of(context).pop(false); // Return false to indicate retake
   }
 
@@ -78,8 +81,8 @@ class _PhotoPreviewScreenState extends State<PhotoPreviewScreen> {
             // Preview image
             Expanded(
               child: Center(
-                child: Image.memory(
-                  widget.imageBytes,
+                child: Image.file(
+                  File(widget.imagePath),
                   fit: BoxFit.contain,
                 ),
               ),

@@ -1,9 +1,9 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:framatic/providers/camera_provider.dart';
 import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/screens/frames_manager_screen.dart';
 import 'package:framatic/screens/photo_preview_screen.dart';
-import 'package:framatic/services/camera_service.dart';
 import 'package:framatic/services/permission_service.dart';
 import 'package:framatic/services/photo_service.dart';
 import 'package:framatic/utils/constants.dart';
@@ -21,62 +21,11 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  final CameraService _cameraService = CameraService();
   final PhotoService _photoService = PhotoService();
-  bool _isLoading = true;
-  bool _isCapturing = false;
-  String? _errorMessage;
-
-  // Zoom state
-  double _currentZoom = 1.0;
   double _baseZoom = 1.0; // For pinch gesture
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeCamera();
-  }
-
-  Future<void> _initializeCamera() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      // Check and request camera permission
-      final hasPermission = await PermissionService.isCameraPermissionGranted;
-      if (!hasPermission) {
-        final granted = await PermissionService.requestCameraPermission();
-        if (!granted) {
-          setState(() {
-            _errorMessage = 'Camera permission is required';
-            _isLoading = false;
-          });
-          return;
-        }
-      }
-
-      // Initialize camera
-      await _cameraService.initializeCameras();
-      await _cameraService.initializeController();
-
-      // Set initial zoom to minimum (widest view)
-      setState(() {
-        _currentZoom = _cameraService.currentZoom;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to initialize camera: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
   Future<void> _capturePhoto() async {
-    if (_isCapturing) return;
-
+    final cameraProvider = context.read<CameraProvider>();
     final frameProvider = context.read<FrameProvider>();
     final preset = frameProvider.activeFrame;
 
@@ -89,13 +38,8 @@ class _CameraScreenState extends State<CameraScreen> {
       return;
     }
 
-    setState(() {
-      _isCapturing = true;
-    });
-
     try {
-      // Take the picture
-      final xFile = await _cameraService.takePicture();
+      final xFile = await cameraProvider.takePicture();
       if (xFile == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -106,12 +50,12 @@ class _CameraScreenState extends State<CameraScreen> {
       }
 
       // Process with overlay
-      final processedBytes = await _photoService.processPhotoWithOverlay(
+      final processedPath = await _photoService.processPhotoWithOverlay(
         imagePath: xFile.path,
         preset: preset,
       );
 
-      if (processedBytes == null) {
+      if (processedPath == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Failed to process photo')),
@@ -124,8 +68,7 @@ class _CameraScreenState extends State<CameraScreen> {
       if (mounted) {
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) =>
-                PhotoPreviewScreen(imageBytes: processedBytes),
+            builder: (context) => PhotoPreviewScreen(imagePath: processedPath),
           ),
         );
       }
@@ -135,74 +78,37 @@ class _CameraScreenState extends State<CameraScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isCapturing = false;
-        });
-      }
     }
   }
 
   /// Handle zoom slider change
   Future<void> _onZoomChanged(double zoom) async {
-    await _cameraService.setZoomLevel(zoom);
-    setState(() {
-      _currentZoom = zoom;
-    });
+    await context.read<CameraProvider>().setZoomLevel(zoom);
   }
 
   /// Handle pinch gesture start
   void _onScaleStart(ScaleStartDetails details) {
-    _baseZoom = _currentZoom;
+    _baseZoom = context.read<CameraProvider>().currentZoom;
   }
 
   /// Handle pinch gesture update
   Future<void> _onScaleUpdate(ScaleUpdateDetails details) async {
+    final cameraProvider = context.read<CameraProvider>();
+
     // Calculate new zoom based on pinch scale
     final newZoom = (_baseZoom * details.scale).clamp(
-      _cameraService.minZoom,
-      _cameraService.maxZoom,
+      cameraProvider.minZoom,
+      cameraProvider.maxZoom,
     );
 
-    if ((newZoom - _currentZoom).abs() > 0.01) {
-      await _cameraService.setZoomLevel(newZoom);
-      setState(() {
-        _currentZoom = newZoom;
-      });
+    if ((newZoom - cameraProvider.currentZoom).abs() > 0.01) {
+      await cameraProvider.setZoomLevel(newZoom);
     }
-  }
-
-  /// Switch between front and back cameras
-  Future<void> _flipCamera() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await _cameraService.switchCamera();
-      // Update zoom state after camera switch (new camera may have different zoom range)
-      setState(() {
-        _currentZoom = _cameraService.currentZoom;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to switch camera: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _cameraService.dispose();
-    super.dispose();
   }
 
   /// Build camera area with max height constraints
-  Widget _buildCameraArea() {
-    final controller = _cameraService.controller;
+  Widget _buildCameraArea(CameraProvider cameraProvider) {
+    final controller = cameraProvider.controller;
     if (controller == null || !controller.value.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -255,7 +161,7 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   /// Build simplified bottom controls (no arrows)
-  Widget _buildSimplifiedBottomControls() {
+  Widget _buildSimplifiedBottomControls(CameraProvider cameraProvider) {
     return Container(
       color: Colors.black,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 64),
@@ -266,9 +172,9 @@ class _CameraScreenState extends State<CameraScreen> {
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: ZoomSlider(
-              minZoom: _cameraService.minZoom,
-              maxZoom: _cameraService.maxZoom,
-              currentZoom: _currentZoom,
+              minZoom: cameraProvider.minZoom,
+              maxZoom: cameraProvider.maxZoom,
+              currentZoom: cameraProvider.currentZoom,
               onZoomChanged: _onZoomChanged,
             ),
           ),
@@ -294,13 +200,13 @@ class _CameraScreenState extends State<CameraScreen> {
 
               // Capture button (center)
               CaptureButton(
-                isCapturing: _isCapturing,
+                isCapturing: cameraProvider.isCapturing,
                 onPressed: _capturePhoto,
               ),
 
               // Flip camera button (right)
               IconButton(
-                onPressed: _flipCamera,
+                onPressed: () => cameraProvider.switchCamera(),
                 icon: const Icon(Icons.flip_camera_ios, size: 28),
                 color: Colors.white,
               ),
@@ -319,24 +225,26 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cameraProvider = context.watch<CameraProvider>();
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: _isLoading
+        child: cameraProvider.isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
-            ? _buildErrorWidget()
+            : cameraProvider.errorMessage != null
+            ? _buildErrorWidget(cameraProvider)
             : Column(
                 children: [
-                  Expanded(child: _buildCameraArea()),
-                  _buildSimplifiedBottomControls(),
+                  Expanded(child: _buildCameraArea(cameraProvider)),
+                  _buildSimplifiedBottomControls(cameraProvider),
                 ],
               ),
       ),
     );
   }
 
-  Widget _buildErrorWidget() {
+  Widget _buildErrorWidget(CameraProvider cameraProvider) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -346,16 +254,16 @@ class _CameraScreenState extends State<CameraScreen> {
             const Icon(Icons.error_outline, color: Colors.red, size: 64),
             const SizedBox(height: 16),
             Text(
-              _errorMessage ?? 'An error occurred',
+              cameraProvider.errorMessage ?? 'An error occurred',
               style: const TextStyle(color: Colors.white, fontSize: 16),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _initializeCamera,
+              onPressed: () => cameraProvider.initialize(),
               child: const Text('Retry'),
             ),
-            if (_errorMessage?.contains('permission') ?? false)
+            if (cameraProvider.errorMessage?.contains('permission') ?? false)
               TextButton(
                 onPressed: () => PermissionService.openSettings(),
                 child: const Text('Open Settings'),
@@ -377,7 +285,7 @@ class _CameraScreenState extends State<CameraScreen> {
     final previewWidth = controller.value.previewSize?.height ?? 1920;
     final previewHeight = controller.value.previewSize?.width ?? 1080;
     final cameraAspectRatio = previewWidth / previewHeight;
-    const borderWidth = AppConstants.frameBorderWidth;
+    const borderWidth = AppConstants.frameBorderThickness;
 
     return LayoutBuilder(
       builder: (context, constraints) {
