@@ -8,6 +8,7 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   CameraProvider() {
     WidgetsBinding.instance.addObserver(this);
+    _initialize();
   }
 
   bool _isLoading = true;
@@ -22,7 +23,9 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   double get maxZoom => _cameraService.maxZoom;
   double get currentZoom => _cameraService.currentZoom;
 
-  Future<void> initialize() async {
+  Future<void> retry() => _initialize();
+
+  Future<void> _initialize() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -92,7 +95,7 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
       _cameraService.disposeController();
       notifyListeners();
     } else if (state == AppLifecycleState.resumed) {
-      initialize();
+      _initialize();
     }
   }
 

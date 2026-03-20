@@ -260,7 +260,7 @@ class _CameraScreenState extends State<CameraScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => cameraProvider.initialize(),
+              onPressed: () => cameraProvider.retry(),
               child: const Text('Retry'),
             ),
             if (cameraProvider.errorMessage?.contains('permission') ?? false)

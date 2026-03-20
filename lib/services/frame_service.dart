@@ -1,17 +1,25 @@
 import 'package:framatic/models/frame.dart';
+import 'package:framatic/services/preferences_service.dart';
 import 'package:framatic/utils/db.dart';
 
-class FrameService {
-  final db = FramaticDB.instance.db;
+const _orderKey = 'frames_order';
 
-  // getAllFrames
+class FrameService {
+  final _db = FramaticDB.instance.db;
+
+  Future<List<String>> getOrder() =>
+      PreferencesService.getStringList(_orderKey);
+
+  Future<void> setOrder(List<String> order) =>
+      PreferencesService.setStringList(_orderKey, order);
+
   Future<List<Frame>> getAllFrames() async {
-    final frames = await db.query(FramesTable.name);
+    final frames = await _db.query(FramesTable.name);
     return frames.map((frame) => Frame.fromJson(frame)).toList();
   }
 
   Future<Frame> getFrameById(int id) async {
-    final frame = await db.query(
+    final frame = await _db.query(
       FramesTable.name,
       where: 'id = ?',
       whereArgs: [id],
@@ -23,7 +31,7 @@ class FrameService {
   }
 
   Future<Frame> createFrame(Frame frame) async {
-    final createdFrameId = await db.insert(FramesTable.name, frame.toJson());
+    final createdFrameId = await _db.insert(FramesTable.name, frame.toJson());
     if (createdFrameId == 0) throw StateError('Failed to create the frame');
     return await getFrameById(createdFrameId);
   }
@@ -32,7 +40,7 @@ class FrameService {
     if (frame.id == null) {
       throw ArgumentError('frame.id cannot be null for update operation');
     }
-    final updatedFrameId = await db.update(
+    final updatedFrameId = await _db.update(
       FramesTable.name,
       frame.toJson(),
       where: 'id = ?',
@@ -45,7 +53,7 @@ class FrameService {
   }
 
   Future<int> deleteFrame(int id) async {
-    final deletedFrame = await db.delete(
+    final deletedFrame = await _db.delete(
       FramesTable.name,
       where: 'id = ?',
       whereArgs: [id],

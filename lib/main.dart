@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:framatic/providers/camera_provider.dart';
 import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/screens/camera_screen.dart';
-import 'package:framatic/services/frame_order_service.dart';
 import 'package:framatic/utils/constants.dart';
 import 'package:framatic/utils/db.dart';
 import 'package:provider/provider.dart';
@@ -27,15 +26,6 @@ void main() async {
     rethrow;
   }
 
-  try {
-    await FrameOrderService.initialize();
-  } catch (e) {
-    if (kDebugMode) {
-      print('Failed to initialize FrameOrderPreferences: $e');
-    }
-    rethrow;
-  }
-
   runApp(const MainApp());
 }
 
@@ -46,12 +36,8 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (context) => FrameProvider()..initialize(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => CameraProvider()..initialize(),
-        ),
+        ChangeNotifierProvider(create: (_) => FrameProvider()),
+        ChangeNotifierProvider(create: (_) => CameraProvider()),
       ],
       child: MaterialApp(
         title: AppConstants.appName,

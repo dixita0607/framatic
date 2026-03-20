@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:framatic/models/frame.dart';
-import 'package:framatic/services/frame_order_service.dart';
 import 'package:framatic/services/frame_service.dart';
 
 class FrameProvider extends ChangeNotifier {
@@ -8,31 +7,31 @@ class FrameProvider extends ChangeNotifier {
 
   List<Frame> _frames = [];
   bool _isLoading = false;
-  late int _activeFrameId;
+  int? _activeFrameId;
+
+  FrameProvider() {
+    _initialize();
+  }
 
   List<Frame> get frames => _frames;
   bool get isLoading => _isLoading;
-  Frame? get activeFrame {
-    try {
-      return _frames.firstWhere((frame) => frame.id == _activeFrameId);
-    } catch (e) {
-      return null;
-    }
-  }
+  Frame? get activeFrame => _activeFrameId == null
+      ? null
+      : _frames.where((frame) => frame.id == _activeFrameId).firstOrNull;
 
-  Future<void> initialize() async {
+  Future<void> _initialize() async {
     _isLoading = true;
     notifyListeners();
 
     try {
       _frames = await _frameService.getAllFrames();
-      await _orderFrames();
+      await _initializeFrameOrder();
       if (_frames.isNotEmpty) {
         _activeFrameId = _frames[0].id!;
       }
     } catch (e) {
-      debugPrint('Error initializing FrameProvider: $e');
-      rethrow;
+      debugPrint('Error initializing frames: $e');
+      throw StateError('Failed to load frames. Please restart the app.');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -48,11 +47,13 @@ class FrameProvider extends ChangeNotifier {
       _frames.insert(0, createdFrame);
       notifyListeners();
 
-      await FrameOrderService.setOrder([
-        createdFrame.id.toString(),
-        ...FrameOrderService.order,
-      ]);
+      await _frameService.setOrder(
+        _frames.map((f) => f.id.toString()).toList(),
+      );
       return createdFrame;
+    } catch (e) {
+      debugPrint('Error creating frame: $e');
+      throw StateError('Failed to create frame. Please try again.');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -72,6 +73,9 @@ class FrameProvider extends ChangeNotifier {
       }
 
       return updatedFrame;
+    } catch (e) {
+      debugPrint('Error updating frame: $e');
+      throw StateError('Failed to update frame. Please try again.');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -84,16 +88,17 @@ class FrameProvider extends ChangeNotifier {
     try {
       await _frameService.deleteFrame(frameId);
       _frames.removeWhere((frame) => frame.id == frameId);
-      if (_activeFrameId == frameId) {
-        _activeFrameId = _frames.isNotEmpty ? _frames[0].id! : 0;
+      if (_activeFrameId != null && _activeFrameId == frameId) {
+        _activeFrameId = _frames.isNotEmpty ? _frames[0].id : null;
       }
       notifyListeners();
 
-      await FrameOrderService.setOrder(
-        FrameOrderService.order
-            .where((id) => id != frameId.toString())
-            .toList(),
+      await _frameService.setOrder(
+        _frames.map((f) => f.id.toString()).toList(),
       );
+    } catch (e) {
+      debugPrint('Error deleting frame: $e');
+      throw StateError('Failed to delete frame. Please try again.');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -128,28 +133,32 @@ class FrameProvider extends ChangeNotifier {
       _frames.insert(adjustedIndex, frameToMove);
       notifyListeners();
 
-      // Persist to shared preferences
-      await FrameOrderService.setOrder(
+      await _frameService.setOrder(
         _frames.map((frame) => frame.id.toString()).toList(),
       );
     } catch (e) {
       debugPrint('Error reordering frames: $e');
-      rethrow;
+      throw StateError('Failed to reorder frames. Please try again.');
     }
   }
 
-  Future<void> _orderFrames() async {
-    var savedOrder = FrameOrderService.order;
+  Future<void> _initializeFrameOrder() async {
+    if (_frames.isEmpty) return;
 
-    if (savedOrder.isEmpty && _frames.isNotEmpty) {
-      savedOrder = _frames.map((f) => f.id.toString()).toList();
-      await FrameOrderService.setOrder(savedOrder);
+    final orderedIds = await _frameService.getOrder();
+    final frameIds = _frames.map((f) => f.id.toString()).toSet();
+
+    // Keep only IDs that exist in DB, then append any new DB IDs not yet in order.
+    final validOrder = orderedIds.where(frameIds.contains).toList();
+    final newDbIds = frameIds.difference(orderedIds.toSet()).toList();
+    final finalOrder = [...validOrder, ...newDbIds];
+
+    // Only persist if stale IDs were removed or new DB IDs were added.
+    if (validOrder.length != orderedIds.length || newDbIds.isNotEmpty) {
+      await _frameService.setOrder(finalOrder);
     }
 
-    final frameMap = Map.fromEntries(
-      _frames.map((frame) => MapEntry(frame.id.toString(), frame)),
-    );
-
-    _frames = savedOrder.map((frameIdStr) => frameMap[frameIdStr]!).toList();
+    final frameMap = {for (final f in _frames) f.id.toString(): f};
+    _frames = finalOrder.map((id) => frameMap[id]!).toList();
   }
 }
