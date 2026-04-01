@@ -1,4 +1,4 @@
-/// Model representing a frame preset with aspect ratio information
+/// Model representing a frame with aspect ratio information
 class Frame {
   final int? id;
   final String title;
@@ -42,7 +42,7 @@ class Frame {
     FramesTable.isCustom: isCustom ? 1 : 0,
   };
 
-  /// Create a copy of this preset with modified properties
+  /// Create a copy of this frame with modified properties
   Frame copyWith({
     int? id,
     String? title,
@@ -71,11 +71,11 @@ class Frame {
           isCustom == other.isCustom;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(id, title, width, height, isCustom);
 
   @override
   String toString() {
-    return 'FramePreset(id: $id, title: $title, width: $width, height: $height, isCustom: $isCustom)';
+    return 'Frame(id: $id, title: $title, width: $width, height: $height, isCustom: $isCustom)';
   }
 }
 

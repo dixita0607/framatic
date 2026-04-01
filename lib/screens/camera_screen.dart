@@ -2,7 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:framatic/providers/camera_provider.dart';
 import 'package:framatic/providers/frame_provider.dart';
-import 'package:framatic/screens/frames_manager_screen.dart';
+import 'package:framatic/screens/frames_manager/frames_manager_screen.dart';
 import 'package:framatic/screens/photo_preview_screen.dart';
 import 'package:framatic/services/permission_service.dart';
 import 'package:framatic/services/photo_service.dart';

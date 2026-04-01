@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:framatic/providers/camera_provider.dart';
 import 'package:framatic/providers/frame_provider.dart';
 import 'package:framatic/screens/camera_screen.dart';
+import 'package:framatic/services/frame_service.dart';
 import 'package:framatic/utils/constants.dart';
 import 'package:framatic/utils/db.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,6 @@ void main() async {
     }
     rethrow;
   }
-
   runApp(const MainApp());
 }
 
@@ -36,12 +36,12 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => FrameProvider()),
+        ChangeNotifierProvider(create: (_) => FrameProvider(FrameService())),
         ChangeNotifierProvider(create: (_) => CameraProvider()),
       ],
       child: MaterialApp(
         title: AppConstants.appName,
-        theme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
+        theme: ThemeData(brightness: Brightness.dark),
         home: const CameraScreen(),
         debugShowCheckedModeBanner: false,
       ),

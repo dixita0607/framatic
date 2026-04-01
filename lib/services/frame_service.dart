@@ -1,18 +1,22 @@
 import 'package:framatic/models/frame.dart';
+import 'package:framatic/services/frame_repository.dart';
 import 'package:framatic/services/preferences_service.dart';
 import 'package:framatic/utils/db.dart';
 
 const _orderKey = 'frames_order';
 
-class FrameService {
+class FrameService implements FrameRepository {
   final _db = FramaticDB.instance.db;
 
+  @override
   Future<List<String>> getOrder() =>
       PreferencesService.getStringList(_orderKey);
 
+  @override
   Future<void> setOrder(List<String> order) =>
       PreferencesService.setStringList(_orderKey, order);
 
+  @override
   Future<List<Frame>> getAllFrames() async {
     final frames = await _db.query(FramesTable.name);
     return frames.map((frame) => Frame.fromJson(frame)).toList();
@@ -30,12 +34,14 @@ class FrameService {
     return Frame.fromJson(frame[0]);
   }
 
+  @override
   Future<Frame> createFrame(Frame frame) async {
     final createdFrameId = await _db.insert(FramesTable.name, frame.toJson());
     if (createdFrameId == 0) throw StateError('Failed to create the frame');
     return await getFrameById(createdFrameId);
   }
 
+  @override
   Future<Frame> updateFrame(Frame frame) async {
     if (frame.id == null) {
       throw ArgumentError('frame.id cannot be null for update operation');
@@ -52,6 +58,7 @@ class FrameService {
     return await getFrameById(frame.id!);
   }
 
+  @override
   Future<int> deleteFrame(int id) async {
     final deletedFrame = await _db.delete(
       FramesTable.name,
