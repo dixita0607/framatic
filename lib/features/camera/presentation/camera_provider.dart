@@ -1,7 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:framatic/services/camera_service.dart';
-import 'package:framatic/services/permission_service.dart';
+import 'package:framatic/core/services/permission_service.dart';
+import 'package:framatic/features/camera/data/camera_service.dart';
 
 class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   final CameraService _cameraService = CameraService();

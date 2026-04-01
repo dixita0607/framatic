@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:framatic/models/frame.dart';
-import 'package:framatic/providers/frame_provider.dart';
+import 'package:framatic/core/models/frame.dart';
+import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
 import 'package:provider/provider.dart';
 
 class ManageFrameDialog extends StatefulWidget {

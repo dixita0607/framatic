@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:framatic/providers/frame_provider.dart';
-import 'package:framatic/screens/frames_manager/frame_list_item.dart';
-import 'package:framatic/screens/frames_manager/manage_frame_dialog.dart';
+import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
+import 'package:framatic/features/frames_manager/presentation/widgets/frame_list_item.dart';
+import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
 import 'package:provider/provider.dart';
 
 class FramesManagerScreen extends StatelessWidget {

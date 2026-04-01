@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:framatic/models/frame.dart';
-import 'package:framatic/utils/constants.dart';
+import 'package:framatic/core/models/frame.dart';
+import 'package:framatic/core/utils/constants.dart';
 
 /// Widget that displays a polaroid-style frame border over the camera preview
 class FrameOverlay extends StatelessWidget {

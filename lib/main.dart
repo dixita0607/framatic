@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:framatic/providers/camera_provider.dart';
-import 'package:framatic/providers/frame_provider.dart';
-import 'package:framatic/screens/camera_screen.dart';
-import 'package:framatic/services/frame_service.dart';
-import 'package:framatic/utils/constants.dart';
-import 'package:framatic/utils/db.dart';
+import 'package:framatic/core/utils/constants.dart';
+import 'package:framatic/core/utils/db.dart';
+import 'package:framatic/features/camera/presentation/camera_provider.dart';
+import 'package:framatic/features/camera/presentation/camera_screen.dart';
+import 'package:framatic/features/frames_manager/data/frame_service.dart';
+import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {

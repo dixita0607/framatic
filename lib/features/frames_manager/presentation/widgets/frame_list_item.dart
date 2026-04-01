@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:framatic/models/frame.dart';
-import 'package:framatic/screens/frames_manager/delete_frame_dialog.dart';
-import 'package:framatic/screens/frames_manager/manage_frame_dialog.dart';
+import 'package:framatic/core/models/frame.dart';
+import 'package:framatic/features/frames_manager/presentation/widgets/delete_frame_dialog.dart';
+import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
 
 class FrameListItem extends StatelessWidget {
   final Frame frame;

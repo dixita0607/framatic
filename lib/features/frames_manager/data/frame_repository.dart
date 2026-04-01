@@ -1,4 +1,4 @@
-import 'package:framatic/models/frame.dart';
+import 'package:framatic/core/models/frame.dart';
 
 abstract interface class FrameRepository {
   Future<List<String>> getOrder();

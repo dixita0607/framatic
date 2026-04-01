@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:framatic/models/frame.dart';
-import 'package:framatic/providers/frame_provider.dart';
+import 'package:framatic/core/models/frame.dart';
+import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
 import 'package:provider/provider.dart';
 
 /// Widget for quick frame switching with horizontal scroll

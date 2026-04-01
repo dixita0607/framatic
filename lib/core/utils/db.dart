@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:framatic/models/frame.dart';
+import 'package:framatic/core/models/frame.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 

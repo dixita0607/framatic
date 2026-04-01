@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:framatic/models/frame.dart';
-import 'package:framatic/services/frame_repository.dart';
+import 'package:framatic/core/models/frame.dart';
+import 'package:framatic/features/frames_manager/data/frame_repository.dart';
 
 class FrameProvider extends ChangeNotifier {
   final FrameRepository _frameRepository;
@@ -9,7 +9,8 @@ class FrameProvider extends ChangeNotifier {
   bool _isLoading = false;
   int? _activeFrameId;
 
-  FrameProvider(FrameRepository frameRepository) : _frameRepository = frameRepository {
+  FrameProvider(FrameRepository frameRepository)
+    : _frameRepository = frameRepository {
     _initialize();
   }
 

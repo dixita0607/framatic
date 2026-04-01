@@ -1,16 +1,16 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:framatic/providers/camera_provider.dart';
-import 'package:framatic/providers/frame_provider.dart';
-import 'package:framatic/screens/frames_manager/frames_manager_screen.dart';
-import 'package:framatic/screens/photo_preview_screen.dart';
-import 'package:framatic/services/permission_service.dart';
-import 'package:framatic/services/photo_service.dart';
-import 'package:framatic/utils/constants.dart';
-import 'package:framatic/widgets/camera_controls/capture_button.dart';
-import 'package:framatic/widgets/frame_overlay.dart';
-import 'package:framatic/widgets/frame_selector.dart';
-import 'package:framatic/widgets/zoom_slider.dart';
+import 'package:framatic/core/services/permission_service.dart';
+import 'package:framatic/core/utils/constants.dart';
+import 'package:framatic/features/camera/presentation/camera_provider.dart';
+import 'package:framatic/features/camera/presentation/widgets/capture_button.dart';
+import 'package:framatic/features/camera/presentation/widgets/frame_overlay.dart';
+import 'package:framatic/features/camera/presentation/widgets/frame_selector.dart';
+import 'package:framatic/features/camera/presentation/widgets/zoom_slider.dart';
+import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
+import 'package:framatic/features/frames_manager/presentation/frames_manager_screen.dart';
+import 'package:framatic/features/photo_preview/data/photo_service.dart';
+import 'package:framatic/features/photo_preview/presentation/photo_preview_screen.dart';
 import 'package:provider/provider.dart';
 
 class CameraScreen extends StatefulWidget {

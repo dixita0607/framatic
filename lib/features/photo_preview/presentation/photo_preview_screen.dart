@@ -1,8 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:framatic/services/permission_service.dart';
-import 'package:framatic/services/photo_service.dart';
-import 'package:framatic/utils/constants.dart';
+import 'package:framatic/core/services/permission_service.dart';
+import 'package:framatic/core/utils/constants.dart';
+import 'package:framatic/features/photo_preview/data/photo_service.dart';
 
 /// Screen to preview captured photo with Save/Retake options
 class PhotoPreviewScreen extends StatefulWidget {

@@ -1,7 +1,7 @@
-import 'package:framatic/models/frame.dart';
-import 'package:framatic/services/frame_repository.dart';
-import 'package:framatic/services/preferences_service.dart';
-import 'package:framatic/utils/db.dart';
+import 'package:framatic/core/models/frame.dart';
+import 'package:framatic/core/services/preferences_service.dart';
+import 'package:framatic/core/utils/db.dart';
+import 'package:framatic/features/frames_manager/data/frame_repository.dart';
 
 const _orderKey = 'frames_order';
 
