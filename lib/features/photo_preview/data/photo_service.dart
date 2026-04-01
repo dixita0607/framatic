@@ -5,19 +5,16 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/utils/constants.dart';
+import 'package:framatic/features/photo_preview/data/photo_repository.dart';
 import 'package:gal/gal.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 
-class PhotoService {
-  static String get albumName => AppConstants.galleryAlbumName;
-  static int get borderThickness => AppConstants.frameBorderThickness.toInt();
-
-  /// Process captured photo: crop to aspect ratio and add polaroid border.
-  /// Returns the path to the processed temp file, or null on failure.
-  Future<String?> processPhotoWithOverlay({
+class PhotoService implements PhotoRepository {
+  @override
+  Future<String> processPhotoWithFrame({
     required String imagePath,
-    required Frame preset,
+    required Frame frame,
   }) async {
     try {
       // Read bytes on the main isolate (async I/O, non-blocking)
@@ -26,13 +23,12 @@ class PhotoService {
       // All CPU-bound work runs in a background isolate so the UI stays free.
       // The closure captures only sendable values (Uint8List, double, int).
       final resultBytes = await Isolate.run(
-        () => _processImage(imageBytes, preset.aspectRatio, borderThickness),
+        () => _processImage(
+          imageBytes,
+          frame.aspectRatio,
+          AppConstants.frameBorderPercentage,
+        ),
       );
-
-      if (resultBytes == null) {
-        debugPrint('Failed to process image in isolate');
-        return null;
-      }
 
       // Write result back to a temp file on the main isolate (async I/O)
       final tempDir = await getTemporaryDirectory();
@@ -42,15 +38,15 @@ class PhotoService {
 
       return imageFile.path;
     } catch (e) {
-      debugPrint('Error processing photo with overlay: $e');
-      return null;
+      throw StateError('Error processing photo with overlay: $e');
     }
   }
 
   /// Save processed photo to gallery and delete the temp file.
+  @override
   Future<bool> saveToGallery(String imagePath) async {
     try {
-      await Gal.putImage(imagePath, album: albumName);
+      await Gal.putImage(imagePath, album: AppConstants.galleryAlbumName);
       await File(imagePath).delete();
       return true;
     } on GalException catch (e) {
@@ -61,13 +57,15 @@ class PhotoService {
 
   /// Runs entirely inside the background isolate.
   /// Must be a static method — instance methods cannot be sent across isolates.
-  static Uint8List? _processImage(
+  static Uint8List _processImage(
     Uint8List imageBytes,
     double aspectRatio,
-    int border,
+    double borderPercentage,
   ) {
     final originalImage = img.decodeImage(imageBytes);
-    if (originalImage == null) return null;
+    if (originalImage == null) {
+      throw StateError('Failed to decode image');
+    }
 
     final imageWidth = originalImage.width;
     final imageHeight = originalImage.height;
@@ -96,6 +94,10 @@ class PhotoService {
       width: cropWidth,
       height: cropHeight,
     );
+
+    // Calculate border thickness as a percentage of the cropped frame width
+    // This ensures the border scales proportionally on any device/image
+    final border = (cropWidth * borderPercentage).round();
 
     // Create final image with border
     final finalWidth = cropWidth + (border * 2);

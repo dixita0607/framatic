@@ -7,6 +7,8 @@ import 'package:framatic/features/camera/presentation/camera_provider.dart';
 import 'package:framatic/features/camera/presentation/camera_screen.dart';
 import 'package:framatic/features/frames_manager/data/frame_service.dart';
 import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
+import 'package:framatic/features/photo_preview/data/photo_service.dart';
+import 'package:framatic/features/photo_preview/presentation/photo_preview_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -38,6 +40,7 @@ class MainApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => FrameProvider(FrameService())),
         ChangeNotifierProvider(create: (_) => CameraProvider()),
+        ChangeNotifierProvider(create: (_) => PhotoPreviewProvider(PhotoService())),
       ],
       child: MaterialApp(
         title: AppConstants.appName,

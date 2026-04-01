@@ -50,19 +50,10 @@ class _CameraScreenState extends State<CameraScreen> {
       }
 
       // Process with overlay
-      final processedPath = await _photoService.processPhotoWithOverlay(
+      final processedPath = await _photoService.processPhotoWithFrame(
         imagePath: xFile.path,
-        preset: preset,
+        frame: preset,
       );
-
-      if (processedPath == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to process photo')),
-          );
-        }
-        return;
-      }
 
       // Navigate to preview screen
       if (mounted) {
@@ -285,7 +276,7 @@ class _CameraScreenState extends State<CameraScreen> {
     final previewWidth = controller.value.previewSize?.height ?? 1920;
     final previewHeight = controller.value.previewSize?.width ?? 1080;
     final cameraAspectRatio = previewWidth / previewHeight;
-    const borderWidth = AppConstants.frameBorderThickness;
+    const borderWidth = 16; // Overlay border in screen pixels
 
     return LayoutBuilder(
       builder: (context, constraints) {

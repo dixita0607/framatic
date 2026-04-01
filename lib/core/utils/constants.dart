@@ -6,6 +6,6 @@ class AppConstants {
   // Frame overlay settings
   static const double maxFramePadding = 0.95; // 95% of screen
 
-  // Polaroid border width (used in both preview and saved photos)
-  static const double frameBorderThickness = 16.0;
+  // Polaroid border as percentage of frame width (auto-scales to any device/resolution)
+  static const double frameBorderPercentage = 0.04; // 4% of frame width
 }

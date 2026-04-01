@@ -5,13 +5,13 @@ import 'package:framatic/core/utils/constants.dart';
 /// Widget that displays a polaroid-style frame border over the camera preview
 class FrameOverlay extends StatelessWidget {
   final Frame preset;
-  final double borderWidth;
+  final int borderWidth;
   final double? maxHeight;
 
   const FrameOverlay({
     super.key,
     required this.preset,
-    this.borderWidth = AppConstants.frameBorderThickness,
+    this.borderWidth = 16, // Overlay border in screen pixels
     this.maxHeight,
   });
 
@@ -31,7 +31,7 @@ class FrameOverlay extends StatelessWidget {
 /// Custom painter for drawing the polaroid-style frame border
 class FrameOverlayPainter extends CustomPainter {
   final Frame preset;
-  final double borderWidth;
+  final int borderWidth;
   final double? maxHeight;
 
   FrameOverlayPainter({
@@ -107,8 +107,7 @@ class FrameOverlayPainter extends CustomPainter {
   /// Accounts for border width so the border doesn't get clipped
   Size _calculateFrameSize(Size screenSize) {
     // Available space after accounting for border on both sides
-    final availableWidth =
-        screenSize.width * AppConstants.maxFramePadding - (borderWidth * 2);
+    final availableWidth = screenSize.width * AppConstants.maxFramePadding - (borderWidth * 2);
     // Use maxHeight if provided (for camera area with fixed height), otherwise use screen height
     final heightConstraint = maxHeight ?? screenSize.height;
     final availableHeight =
