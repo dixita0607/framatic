@@ -1,33 +1,39 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:framatic/core/services/permission_service.dart';
-import 'package:framatic/features/camera/data/camera_service.dart';
+import 'package:framatic/features/camera/data/camera_repository.dart';
+import 'package:framatic/features/camera/domain/camera_error.dart';
 
 class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
-  final CameraService _cameraService = CameraService();
+  final CameraRepository _cameraRepository;
 
-  CameraProvider() {
+  CameraProvider(CameraRepository cameraRepository)
+      : _cameraRepository = cameraRepository {
     WidgetsBinding.instance.addObserver(this);
     _initialize();
   }
 
   bool _isLoading = true;
   bool _isCapturing = false;
-  String? _errorMessage;
+  CameraError? _error;
+
+  double _minZoom = 1.0;
+  double _maxZoom = 1.0;
+  double _currentZoom = 1.0;
 
   bool get isLoading => _isLoading;
   bool get isCapturing => _isCapturing;
-  String? get errorMessage => _errorMessage;
-  CameraController? get controller => _cameraService.controller;
-  double get minZoom => _cameraService.minZoom;
-  double get maxZoom => _cameraService.maxZoom;
-  double get currentZoom => _cameraService.currentZoom;
+  CameraError? get error => _error;
+  CameraController? get controller => _cameraRepository.controller;
+  double get minZoom => _minZoom;
+  double get maxZoom => _maxZoom;
+  double get currentZoom => _currentZoom;
 
   Future<void> retry() => _initialize();
 
   Future<void> _initialize() async {
     _isLoading = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
@@ -35,16 +41,22 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
       if (!hasPermission) {
         final granted = await PermissionService.requestCameraPermission();
         if (!granted) {
-          _errorMessage = 'Camera permission is required';
+          _error = PermissionError('Camera permission is required');
           _isLoading = false;
           notifyListeners();
           return;
         }
       }
 
-      await _cameraService.initialize();
+      await _cameraRepository.initialize();
+      final (minZoom, maxZoom) = await _cameraRepository.getZoomLimits();
+      _minZoom = minZoom;
+      _maxZoom = maxZoom;
+      _currentZoom = minZoom;
+    } on CameraError catch (e) {
+      _error = e;
     } catch (e) {
-      _errorMessage = 'Failed to initialize camera: $e';
+      _error = InitializationError('Failed to initialize camera: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -52,7 +64,9 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> setZoomLevel(double zoom) async {
-    await _cameraService.setZoomLevel(zoom);
+    final clampedZoom = zoom.clamp(_minZoom, _maxZoom);
+    await _cameraRepository.setZoomLevel(clampedZoom);
+    _currentZoom = clampedZoom;
     notifyListeners();
   }
 
@@ -61,9 +75,13 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
 
     try {
-      await _cameraService.toggleCameraDirection();
+      await _cameraRepository.toggleCameraDirection();
+      final (minZoom, maxZoom) = await _cameraRepository.getZoomLimits();
+      _minZoom = minZoom;
+      _maxZoom = maxZoom;
+      _currentZoom = minZoom;
     } catch (e) {
-      _errorMessage = 'Failed to switch camera: $e';
+      _error = SwitchCameraError('Failed to switch camera: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -77,7 +95,7 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
 
     try {
-      return await _cameraService.takePicture();
+      return await _cameraRepository.takePicture();
     } finally {
       _isCapturing = false;
       notifyListeners();
@@ -86,23 +104,40 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_cameraService.controller == null ||
-        !_cameraService.controller!.value.isInitialized) {
-      return;
-    }
-
     if (state == AppLifecycleState.inactive) {
-      _cameraService.disposeController();
+      _cameraRepository.disposeController();
       notifyListeners();
     } else if (state == AppLifecycleState.resumed) {
-      _initialize();
+      // Re-initialize the camera controller after app resumes
+      _reinitialize();
+    }
+  }
+
+  Future<void> _reinitialize() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await _cameraRepository.reinitialize();
+      final (minZoom, maxZoom) = await _cameraRepository.getZoomLimits();
+      _minZoom = minZoom;
+      _maxZoom = maxZoom;
+      _currentZoom = minZoom;
+    } on CameraError catch (e) {
+      _error = e;
+    } catch (e) {
+      _error = ReinitializationError('Failed to reinitialize camera: $e');
+      debugPrint('Error reinitializing camera: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _cameraService.disposeController();
+    _cameraRepository.disposeController();
     super.dispose();
   }
 }

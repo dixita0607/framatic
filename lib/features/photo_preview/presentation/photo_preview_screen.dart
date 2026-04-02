@@ -1,15 +1,22 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/widgets/circular_action_button.dart';
+import 'package:framatic/features/camera/presentation/widgets/frame_overlay.dart';
 import 'package:framatic/features/photo_preview/presentation/photo_preview_provider.dart';
 import 'package:provider/provider.dart';
 
 /// Screen to preview captured photo with Save/Retake options
 class PhotoPreviewScreen extends StatelessWidget {
   final String imagePath;
+  final Frame frame;
 
-  const PhotoPreviewScreen({super.key, required this.imagePath});
+  const PhotoPreviewScreen({
+    super.key,
+    required this.imagePath,
+    required this.frame,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +24,22 @@ class PhotoPreviewScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Preview image
+            // Preview image with frame overlay
             Expanded(
-              child: Center(
-                child: Image.file(File(imagePath), fit: BoxFit.contain),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Image
+                      Center(
+                        child: Image.file(File(imagePath), fit: BoxFit.contain),
+                      ),
+                      // Frame overlay - shows the same frame as in camera
+                      FrameOverlay(frame: frame, maxHeight: constraints.maxHeight),
+                    ],
+                  );
+                },
               ),
             ),
 

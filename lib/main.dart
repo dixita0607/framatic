@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:framatic/core/utils/constants.dart';
 import 'package:framatic/core/utils/db.dart';
+import 'package:framatic/features/camera/data/camera_service.dart';
 import 'package:framatic/features/camera/presentation/camera_provider.dart';
 import 'package:framatic/features/camera/presentation/camera_screen.dart';
 import 'package:framatic/features/frames_manager/data/frame_service.dart';
@@ -28,6 +29,7 @@ void main() async {
     }
     rethrow;
   }
+
   runApp(const MainApp());
 }
 
@@ -39,7 +41,7 @@ class MainApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => FrameProvider(FrameService())),
-        ChangeNotifierProvider(create: (_) => CameraProvider()),
+        ChangeNotifierProvider(create: (_) => CameraProvider(CameraService())),
         ChangeNotifierProvider(create: (_) => PhotoPreviewProvider(PhotoService())),
       ],
       child: MaterialApp(
