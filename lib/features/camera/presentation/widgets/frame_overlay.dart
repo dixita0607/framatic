@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/utils/constants.dart';
+import 'package:framatic/core/utils/frame_calculator.dart';
 
 /// Widget that displays a polaroid-style frame border over the camera preview
 class FrameOverlay extends StatelessWidget {
@@ -17,9 +18,10 @@ class FrameOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final frameSize = _calculateFrameSize(
-          constraints.maxWidth,
-          maxHeight ?? constraints.maxHeight,
+        final frameSize = calculateFrameSize(
+          maxWidth: constraints.maxWidth,
+          maxHeight: maxHeight ?? constraints.maxHeight,
+          aspectRatio: frame.aspectRatio,
         );
         final borderWidth = (frameSize.width * AppConstants.frameBorderPercentage).round();
         final totalWidth = frameSize.width + (borderWidth * 2).toDouble();
@@ -75,22 +77,4 @@ class FrameOverlay extends StatelessWidget {
     );
   }
 
-  /// Calculate frame size that fits within the screen while maintaining aspect ratio
-  /// Accounts for border width (percentage-based) so the border doesn't get clipped
-  Size _calculateFrameSize(double maxWidth, double maxHeight) {
-    final borderFactor = 1 + (2 * AppConstants.frameBorderPercentage);
-    final availableWidth = maxWidth * AppConstants.maxFramePadding / borderFactor;
-    final availableHeight = maxHeight * AppConstants.maxFramePadding / borderFactor;
-
-    double frameWidth = availableWidth;
-    double frameHeight = frameWidth / frame.aspectRatio;
-
-    // If height exceeds available bounds, scale based on height instead
-    if (frameHeight > availableHeight) {
-      frameHeight = availableHeight;
-      frameWidth = frameHeight * frame.aspectRatio;
-    }
-
-    return Size(frameWidth, frameHeight);
-  }
 }

@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:framatic/core/utils/constants.dart';
+import 'package:framatic/core/utils/frame_calculator.dart';
 
 /// Build camera preview that is clipped to the selected aspect ratio
 /// Uses same frame calculation as FrameOverlay to ensure alignment
@@ -25,21 +25,13 @@ class ClippedCameraPreview extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calculate frame size exactly like FrameOverlay does
-        // Border is percentage-based to match photo service rendering
-        final borderFactor = 1 + (2 * AppConstants.frameBorderPercentage);
-        final availableWidth =
-            constraints.maxWidth * AppConstants.maxFramePadding / borderFactor;
-        final availableHeight =
-            constraints.maxHeight * AppConstants.maxFramePadding / borderFactor;
-
-        double frameWidth = availableWidth;
-        double frameHeight = frameWidth / targetAspectRatio;
-
-        if (frameHeight > availableHeight) {
-          frameHeight = availableHeight;
-          frameWidth = frameHeight * targetAspectRatio;
-        }
+        final frameSize = calculateFrameSize(
+          maxWidth: constraints.maxWidth,
+          maxHeight: constraints.maxHeight,
+          aspectRatio: targetAspectRatio,
+        );
+        final frameWidth = frameSize.width;
+        final frameHeight = frameSize.height;
 
         // Calculate camera preview size to minimize cropping
         // We want the camera to just cover the frame, not be overly zoomed

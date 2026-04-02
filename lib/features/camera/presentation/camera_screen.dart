@@ -59,7 +59,6 @@ class _CameraScreenState extends State<CameraScreen> {
           MaterialPageRoute(
             builder: (context) => PhotoPreviewScreen(
               imagePath: processedPath,
-              frame: activeFrame,
             ),
           ),
         );

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/utils/constants.dart';
+import 'package:framatic/core/utils/frame_calculator.dart';
 import 'package:framatic/features/photo_preview/data/photo_repository.dart';
 import 'package:gal/gal.dart';
 import 'package:image/image.dart' as img;
@@ -67,24 +68,16 @@ class PhotoService implements PhotoRepository {
       throw StateError('Failed to decode image');
     }
 
-    final imageWidth = originalImage.width;
-    final imageHeight = originalImage.height;
-    final imageAspectRatio = imageWidth / imageHeight;
+    final crop = fitToAspectRatio(
+      maxWidth: originalImage.width.toDouble(),
+      maxHeight: originalImage.height.toDouble(),
+      aspectRatio: aspectRatio,
+    );
+    final cropWidth = crop.width.round();
+    final cropHeight = crop.height.round();
 
-    int cropWidth, cropHeight;
-
-    if (aspectRatio > imageAspectRatio) {
-      // Frame is wider than image - fit to width, crop height
-      cropWidth = imageWidth;
-      cropHeight = (imageWidth / aspectRatio).round();
-    } else {
-      // Frame is taller than image - fit to height, crop width
-      cropHeight = imageHeight;
-      cropWidth = (imageHeight * aspectRatio).round();
-    }
-
-    final cropLeft = ((imageWidth - cropWidth) / 2).round();
-    final cropTop = ((imageHeight - cropHeight) / 2).round();
+    final cropLeft = ((originalImage.width - cropWidth) / 2).round();
+    final cropTop = ((originalImage.height - cropHeight) / 2).round();
 
     // Crop the image to the frame aspect ratio
     final croppedImage = img.copyCrop(
