@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:framatic/core/models/frame.dart';
-import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
-import 'package:provider/provider.dart';
 
 class ManageFrameDialog extends StatefulWidget {
   final Frame? frame;
+  final Function(Frame) onSave;
 
-  const ManageFrameDialog({super.key, this.frame});
+  const ManageFrameDialog({
+    super.key,
+    this.frame,
+    required this.onSave,
+  });
 
   @override
   State<ManageFrameDialog> createState() => _ManageFrameDialogState();
@@ -135,29 +138,16 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
     final width = int.parse(_widthController.text);
     final height = int.parse(_heightController.text);
 
-    final frameProvider = context.read<FrameProvider>();
-
     try {
-      if (_isEditing) {
-        // Update existing frame with its ID
-        final updatedFrame = Frame(
-          id: widget.frame!.id,
-          title: name,
-          width: width,
-          height: height,
-          isCustom: true,
-        );
-        await frameProvider.updateFrame(updatedFrame);
-      } else {
-        // Create new frame without ID (database will auto-generate)
-        final newFrame = Frame(
-          title: name,
-          width: width,
-          height: height,
-          isCustom: true,
-        );
-        await frameProvider.createFrame(newFrame);
-      }
+      final frame = Frame(
+        id: _isEditing ? widget.frame!.id : null,
+        title: name,
+        width: width,
+        height: height,
+        isCustom: true,
+      );
+
+      await widget.onSave(frame);
 
       if (mounted) {
         Navigator.of(context).pop();

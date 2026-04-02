@@ -6,8 +6,16 @@ import 'package:framatic/features/frames_manager/presentation/widgets/manage_fra
 class FrameListItem extends StatelessWidget {
   final Frame frame;
   final int order;
+  final Function(Frame) onEdit;
+  final Function(int frameId) onDelete;
 
-  const FrameListItem({super.key, required this.frame, required this.order});
+  const FrameListItem({
+    super.key,
+    required this.frame,
+    required this.order,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +56,10 @@ class FrameListItem extends StatelessWidget {
                     leadingIcon: const Icon(Icons.edit),
                     onPressed: () => showDialog(
                       context: context,
-                      builder: (_) => ManageFrameDialog(frame: frame),
+                      builder: (_) => ManageFrameDialog(
+                        frame: frame,
+                        onSave: onEdit,
+                      ),
                     ),
                     child: const Text('edit'),
                   ),
@@ -56,7 +67,10 @@ class FrameListItem extends StatelessWidget {
                     leadingIcon: const Icon(Icons.delete),
                     onPressed: () => showDialog(
                       context: context,
-                      builder: (_) => DeleteFrameDialog(frame: frame),
+                      builder: (_) => DeleteFrameDialog(
+                        frame: frame,
+                        onDelete: onDelete,
+                      ),
                     ),
                     child: const Text('delete'),
                   ),

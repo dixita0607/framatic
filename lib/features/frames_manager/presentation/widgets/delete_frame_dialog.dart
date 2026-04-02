@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:framatic/core/models/frame.dart';
-import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
-import 'package:provider/provider.dart';
 
 class DeleteFrameDialog extends StatelessWidget {
   final Frame frame;
+  final Function(int frameId) onDelete;
 
-  const DeleteFrameDialog({super.key, required this.frame});
+  const DeleteFrameDialog({
+    super.key,
+    required this.frame,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +25,7 @@ class DeleteFrameDialog extends StatelessWidget {
           onPressed: () async {
             Navigator.of(context).pop();
             try {
-              await context.read<FrameProvider>().deleteFrame(frame.id!);
+              await onDelete(frame.id!);
               if (context.mounted) {
                 ScaffoldMessenger.of(
                   context,

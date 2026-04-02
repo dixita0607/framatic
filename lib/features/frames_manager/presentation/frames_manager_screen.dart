@@ -7,6 +7,17 @@ import 'package:provider/provider.dart';
 class FramesManagerScreen extends StatelessWidget {
   const FramesManagerScreen({super.key});
 
+  void _showAddFrameDialog(BuildContext context, FrameProvider frameProvider) {
+    showDialog(
+      context: context,
+      builder: (context) => ManageFrameDialog(
+        onSave: (newFrame) async {
+          await frameProvider.createFrame(newFrame);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,28 +30,33 @@ class FramesManagerScreen extends StatelessWidget {
 
           final allFrames = frameProvider.frames;
 
-          return ReorderableListView.builder(
-            itemCount: allFrames.length,
-            onReorder: (oldIndex, newIndex) async =>
-                await frameProvider.orderFrames(oldIndex, newIndex),
-            itemBuilder: (context, index) {
-              final frame = allFrames[index];
-              return FrameListItem(
-                key: ValueKey(frame.id),
-                frame: frame,
-                order: index,
-              );
-            },
+          return Scaffold(
+            body: ReorderableListView.builder(
+              itemCount: allFrames.length,
+              onReorder: (oldIndex, newIndex) async =>
+                  await frameProvider.orderFrames(oldIndex, newIndex),
+              itemBuilder: (context, index) {
+                final frame = allFrames[index];
+                return FrameListItem(
+                  key: ValueKey(frame.id),
+                  frame: frame,
+                  order: index,
+                  onEdit: (updatedFrame) async {
+                    await frameProvider.updateFrame(updatedFrame);
+                  },
+                  onDelete: (frameId) async {
+                    await frameProvider.deleteFrame(frameId);
+                  },
+                );
+              },
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => _showAddFrameDialog(context, frameProvider),
+              tooltip: 'Add Custom Frame',
+              child: const Icon(Icons.add),
+            ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => showDialog(
-          context: context,
-          builder: (context) => const ManageFrameDialog(),
-        ),
-        tooltip: 'Add Custom Frame',
-        child: const Icon(Icons.add),
       ),
     );
   }
