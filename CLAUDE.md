@@ -8,31 +8,34 @@ Uses **Provider** pattern for state management with the widgets.
 Uses **sqflite** package for storing frame data locally.
 Uses **shared_preferences** package for storing the order of the frame according to user's preference.
 
-## Core Layers
+## Architecture
 
-**Models** (`lib/models/`)
+Feature-based MVVM structure under `lib/`:
 
-**Services** (`lib/services/`)
+**Core** (`lib/core/`) — shared code across features
 
-**Providers** (`lib/providers/`)
+- `models/` — data models (e.g., Frame)
+- `services/` — permission, preferences
+- `utils/` — constants, DB helper, frame calculator
+- `widgets/` — reusable widgets (e.g., CircularActionButton)
 
-**Screens** (`lib/screens/`)
+**Features** (`lib/features/`) — each feature follows data/domain/presentation layers
 
-**Widgets** (`lib/widgets/`)
+- `camera/` — camera viewfinder, capture, zoom, frame overlay
+- `frames_manager/` — CRUD for custom frames
+- `photo_preview/` — preview and save captured photos
 
-**Database** (`lib/db/`)
+## Frame Overlay & Camera Clipping
 
-## Frame Overlay Rendering
+The frame border is a `Container` with `Border.all` positioned via `Stack`/`Positioned`. The camera feed is clipped to the selected aspect ratio using `ClipRect` + `OverflowBox` (not masked). Both widgets share `calculateFrameSize()` from `frame_calculator.dart` to stay aligned.
 
-The overlay uses `CustomPainter` to draw a centered rectangle based on aspect ratio. The frame surrounding the camera preview and clicked pictures look solid white(polaroid-style). Frame dimensions are calculated to fit within 95% of screen bounds while maintaining the aspect ratio.
+## Photo Processing
+
+Captured images are processed in a background `Isolate`. The image is center-cropped to the frame's aspect ratio using the `image` package (`img.copyCrop`), then composited onto a white-filled canvas to create the polaroid-style border. The result is written to a temp file and shown in preview. Photos are saved to a dedicated "Framatic" album using `Gal.putImage`.
 
 ## Predefined Aspect Ratios
 
 When user opens the application for the first time, there are some pre-defined frames available i.e. 4:3, 16:9, 1:1. Added while creating the database for the first time.
-
-## Photo Capture Flow
-
-Photos are saved to a dedicated "Framatic" album using the `gal` package for gallery access. The frame overlay is rendered onto the captured image before saving.
 
 ## Design Approach
 
