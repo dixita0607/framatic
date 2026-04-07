@@ -8,11 +8,7 @@ class ManageFrameDialog extends StatefulWidget {
   final Frame? frame;
   final Function(Frame) onSave;
 
-  const ManageFrameDialog({
-    super.key,
-    this.frame,
-    required this.onSave,
-  });
+  const ManageFrameDialog({super.key, this.frame, required this.onSave});
 
   @override
   State<ManageFrameDialog> createState() => _ManageFrameDialogState();
@@ -76,7 +72,7 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
                 Expanded(
                   child: TextFormField(
                     controller: _widthController,
-                    keyboardType: TextInputType.number,
+                    keyboardType: .number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
                       labelText: 'Width',
@@ -98,7 +94,7 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
                 Expanded(
                   child: TextFormField(
                     controller: _heightController,
-                    keyboardType: TextInputType.number,
+                    keyboardType: .number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
                       labelText: 'Height',

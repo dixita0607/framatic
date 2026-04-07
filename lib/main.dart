@@ -42,11 +42,13 @@ class MainApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => FrameProvider(FrameService())),
         ChangeNotifierProvider(create: (_) => CameraProvider(CameraService())),
-        ChangeNotifierProvider(create: (_) => PhotoPreviewProvider(PhotoService())),
+        ChangeNotifierProvider(
+          create: (_) => PhotoPreviewProvider(PhotoService()),
+        ),
       ],
       child: MaterialApp(
         title: AppConstants.appName,
-        theme: ThemeData(brightness: Brightness.dark),
+        theme: ThemeData(brightness: .dark),
         home: const CameraScreen(),
         debugShowCheckedModeBanner: false,
       ),

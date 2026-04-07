@@ -28,14 +28,14 @@ class FrameSelector extends StatelessWidget {
     return SizedBox(
       height: 50,
       child: ListView.builder(
-        scrollDirection: Axis.horizontal,
+        scrollDirection: .horizontal,
         itemCount: frames.length,
         itemBuilder: (context, index) {
           final frame = frames[index];
           final isSelected = activeFrame == frame;
 
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const .symmetric(horizontal: 4),
             child: ChoiceChip(
               label: Text(frame.title),
               selected: isSelected,

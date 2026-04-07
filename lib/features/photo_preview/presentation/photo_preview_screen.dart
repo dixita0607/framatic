@@ -11,10 +11,7 @@ import 'package:provider/provider.dart';
 class PhotoPreviewScreen extends StatelessWidget {
   final String imagePath;
 
-  const PhotoPreviewScreen({
-    super.key,
-    required this.imagePath,
-  });
+  const PhotoPreviewScreen({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
@@ -24,18 +21,16 @@ class PhotoPreviewScreen extends StatelessWidget {
           children: [
             // Preview the processed image (frame border is already baked in)
             Expanded(
-              child: Center(
-                child: Image.file(File(imagePath), fit: BoxFit.contain),
-              ),
+              child: Center(child: Image.file(File(imagePath), fit: .contain)),
             ),
 
             // Action buttons
             Consumer<PhotoPreviewProvider>(
               builder: (context, provider, _) {
                 return Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const .all(24),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: .spaceEvenly,
                     children: [
                       // Retake button
                       CircularActionButton(
@@ -60,14 +55,10 @@ class PhotoPreviewScreen extends StatelessWidget {
                                   await provider.savePhoto(imagePath);
 
                                   if (context.mounted) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(
-                                          provider.successMessage,
-                                        ),
-                                        duration:
-                                            const Duration(seconds: 2),
+                                        content: Text(provider.successMessage),
+                                        duration: const Duration(seconds: 2),
                                       ),
                                     );
                                     Navigator.of(context).pop(true);

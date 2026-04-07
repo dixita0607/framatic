@@ -59,9 +59,7 @@ class _CameraScreenState extends State<CameraScreen> {
       if (mounted) {
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => PhotoPreviewScreen(
-              imagePath: processedPath,
-            ),
+            builder: (context) => PhotoPreviewScreen(imagePath: processedPath),
           ),
         );
       }
@@ -139,13 +137,13 @@ class _CameraScreenState extends State<CameraScreen> {
                 ),
                 Container(
                   color: Colors.black,
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 64),
+                  padding: const .fromLTRB(16, 0, 16, 64),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: .start,
                     children: [
                       // Zoom slider
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
+                        padding: const .only(bottom: 16),
                         child: ZoomSlider(
                           minZoom: cameraProvider.minZoom,
                           maxZoom: cameraProvider.maxZoom,
@@ -156,8 +154,8 @@ class _CameraScreenState extends State<CameraScreen> {
 
                       // Control buttons row (settings, capture, flip camera)
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: .spaceEvenly,
+                        crossAxisAlignment: .center,
                         children: [
                           IconButton(
                             icon: const Icon(Icons.settings, size: 28),

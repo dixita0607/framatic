@@ -92,26 +92,26 @@ class _ZoomSliderState extends State<ZoomSlider> {
     final sliderValue = _zoomToSliderValue(widget.currentZoom);
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      padding: const .symmetric(vertical: 6, horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: .circular(20),
       ),
       child: Row(
         children: [
           // Zoom level indicator (left side)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const .symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: .circular(8),
             ),
             child: Text(
               '${widget.currentZoom.toStringAsFixed(1)}x',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
-                fontWeight: FontWeight.bold,
+                fontWeight: .bold,
               ),
             ),
           ),
@@ -168,7 +168,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
     }
 
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       children: [
         for (int i = 0; i < buttons.length; i++) ...[
           buttons[i],
@@ -195,18 +195,13 @@ class _ZoomSliderState extends State<ZoomSlider> {
         widget.onZoomChanged(zoom);
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 2),
+        margin: const .symmetric(vertical: 2),
         width: 28,
         height: 28,
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: isActive
-              ? Colors.white
-              : Colors.white.withValues(alpha: 0.2),
-          border: Border.all(
-            color: Colors.white,
-            width: 1,
-          ),
+          shape: .circle,
+          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.2),
+          border: .all(color: Colors.white, width: 1),
         ),
         child: Center(
           child: Text(
@@ -214,7 +209,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
             style: TextStyle(
               color: isActive ? Colors.black : Colors.white,
               fontSize: 10,
-              fontWeight: FontWeight.bold,
+              fontWeight: .bold,
             ),
           ),
         ),

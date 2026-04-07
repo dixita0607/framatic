@@ -24,7 +24,7 @@ class FrameListItem extends StatelessWidget {
       index: order,
       child: ListTile(
         leading: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             const Icon(Icons.drag_handle),
             const SizedBox(width: 8),
@@ -32,7 +32,7 @@ class FrameListItem extends StatelessWidget {
               width: 48,
               height: 48,
               child: FittedBox(
-                fit: BoxFit.contain,
+                fit: .contain,
                 child: ColoredBox(
                   color: Colors.grey.withValues(alpha: 0.3),
                   child: SizedBox(width: frame.aspectRatio * 100, height: 100),
@@ -56,10 +56,8 @@ class FrameListItem extends StatelessWidget {
                     leadingIcon: const Icon(Icons.edit),
                     onPressed: () => showDialog(
                       context: context,
-                      builder: (_) => ManageFrameDialog(
-                        frame: frame,
-                        onSave: onEdit,
-                      ),
+                      builder: (_) =>
+                          ManageFrameDialog(frame: frame, onSave: onEdit),
                     ),
                     child: const Text('edit'),
                   ),
@@ -67,10 +65,8 @@ class FrameListItem extends StatelessWidget {
                     leadingIcon: const Icon(Icons.delete),
                     onPressed: () => showDialog(
                       context: context,
-                      builder: (_) => DeleteFrameDialog(
-                        frame: frame,
-                        onDelete: onDelete,
-                      ),
+                      builder: (_) =>
+                          DeleteFrameDialog(frame: frame, onDelete: onDelete),
                     ),
                     child: const Text('delete'),
                   ),

@@ -8,11 +8,7 @@ class FrameOverlay extends StatelessWidget {
   final Frame frame;
   final double? maxHeight;
 
-  const FrameOverlay({
-    super.key,
-    required this.frame,
-    this.maxHeight,
-  });
+  const FrameOverlay({super.key, required this.frame, this.maxHeight});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +19,8 @@ class FrameOverlay extends StatelessWidget {
           maxHeight: maxHeight ?? constraints.maxHeight,
           aspectRatio: frame.aspectRatio,
         );
-        final borderWidth = (frameSize.width * AppConstants.frameBorderPercentage).round();
+        final borderWidth =
+            (frameSize.width * AppConstants.frameBorderPercentage).round();
         final totalWidth = frameSize.width + (borderWidth * 2).toDouble();
         final totalHeight = frameSize.height + (borderWidth * 2).toDouble();
 
@@ -41,7 +38,7 @@ class FrameOverlay extends StatelessWidget {
               height: totalHeight,
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
+                  border: .all(
                     color: Colors.white,
                     width: borderWidth.toDouble(),
                   ),
@@ -59,7 +56,7 @@ class FrameOverlay extends StatelessWidget {
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: .bold,
                     shadows: [
                       Shadow(
                         color: Colors.black,
@@ -76,5 +73,4 @@ class FrameOverlay extends StatelessWidget {
       },
     );
   }
-
 }

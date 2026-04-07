@@ -5,7 +5,7 @@ abstract interface class CameraRepository {
   CameraController? get controller;
 
   Future<void> initialize({
-    CameraLensDirection direction = CameraLensDirection.back,
+    CameraLensDirection direction = .back,
   });
 
   Future<(double minZoom, double maxZoom)> getZoomLimits();

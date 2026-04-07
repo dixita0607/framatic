@@ -15,7 +15,7 @@ class CameraService implements CameraRepository {
 
   @override
   Future<void> initialize({
-    CameraLensDirection direction = CameraLensDirection.back,
+    CameraLensDirection direction = .back,
   }) async {
     if (_cameras.isEmpty) {
       _cameras = await availableCameras();
@@ -48,7 +48,7 @@ class CameraService implements CameraRepository {
         userMessage: 'Failed to reinitialize camera.',
       );
     }
-    final currentDirection = _controller?.description.lensDirection ?? CameraLensDirection.back;
+    final currentDirection = _controller?.description.lensDirection ?? .back;
     final camera = _findCamera(currentDirection);
     await _initializeController(camera);
     await _adjustZoomLevels();
@@ -59,7 +59,7 @@ class CameraService implements CameraRepository {
     if (_cameras.length < 2 || _controller == null) return;
 
     final currentDirection = _controller!.description.lensDirection;
-    final targetDirection = currentDirection == CameraLensDirection.back
+    final targetDirection = currentDirection == .back
         ? CameraLensDirection.front
         : CameraLensDirection.back;
 
@@ -103,7 +103,7 @@ class CameraService implements CameraRepository {
 
     _controller = CameraController(
       camera,
-      ResolutionPreset.max,
+      .max,
       enableAudio: false,
     );
 

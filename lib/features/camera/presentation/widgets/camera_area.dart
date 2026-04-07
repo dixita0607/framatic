@@ -29,7 +29,7 @@ class CameraArea extends StatelessWidget {
           onScaleStart: onScaleStart,
           onScaleUpdate: onScaleUpdate,
           child: Stack(
-            alignment: Alignment.center,
+            alignment: .center,
             children: [
               // Camera preview - clipped to selected aspect ratio
               Center(
@@ -42,7 +42,7 @@ class CameraArea extends StatelessWidget {
 
               // Frame overlay (aligned to top)
               Align(
-                alignment: Alignment.topCenter,
+                alignment: .topCenter,
                 child: FrameOverlay(frame: activeFrame, maxHeight: maxHeight),
               ),
             ],

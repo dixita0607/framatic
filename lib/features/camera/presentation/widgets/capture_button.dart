@@ -52,9 +52,9 @@ class _CaptureButtonState extends State<CaptureButton>
           width: 88,
           height: 88,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
+            shape: .circle,
             color: Colors.white.withValues(alpha: 0.3),
-            border: Border.all(
+            border: .all(
               color: Colors.white,
               width: 3,
             ),

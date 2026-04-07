@@ -19,15 +19,15 @@ class CircularActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       children: [
         Container(
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
+            shape: .circle,
             color: Colors.transparent,
-            border: Border.all(color: Colors.white, width: 2),
+            border: .all(color: Colors.white, width: 2),
           ),
           child: IconButton(
             onPressed: onPressed,
@@ -40,11 +40,7 @@ class CircularActionButton extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                : Icon(icon, color: Colors.white, size: 28),
           ),
         ),
         const SizedBox(height: 8),
