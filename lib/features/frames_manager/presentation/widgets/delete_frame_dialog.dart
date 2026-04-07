@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:framatic/core/errors/app_error.dart';
+import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/models/frame.dart';
 
 class DeleteFrameDialog extends StatelessWidget {
@@ -31,13 +33,9 @@ class DeleteFrameDialog extends StatelessWidget {
                   context,
                 ).showSnackBar(const SnackBar(content: Text('Frame deleted')));
               }
-            } catch (e) {
+            } on AppError catch (e) {
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Failed to delete frame: ${e.toString()}'),
-                  ),
-                );
+                context.showErrorSnackBar(e);
               }
             }
           },

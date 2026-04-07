@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:framatic/core/errors/app_error.dart';
+import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/features/camera/presentation/camera_provider.dart';
 import 'package:framatic/features/camera/presentation/widgets/camera_area.dart';
 import 'package:framatic/features/camera/presentation/widgets/camera_error_widget.dart';
@@ -63,11 +65,15 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
         );
       }
+    } on AppError catch (e) {
+      if (mounted) {
+        context.showErrorSnackBar(e);
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        context.showErrorSnackBar(
+          UnexpectedError('Unexpected error during capture: $e', cause: e),
+        );
       }
     }
   }

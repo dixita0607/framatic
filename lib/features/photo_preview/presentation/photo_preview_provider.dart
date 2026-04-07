@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/services/permission_service.dart';
 import 'package:framatic/core/utils/constants.dart';
@@ -34,10 +35,15 @@ class PhotoPreviewProvider extends ChangeNotifier {
     try {
       final hasPermission = await PermissionService.requestStoragePermission();
       if (!hasPermission) {
-        throw StateError('Storage permission required to save photos');
+        throw PermissionError(
+          'Storage permission denied',
+          userMessage: 'Storage permission is required to save photos.',
+        );
       }
 
       await _photoRepository.saveToGallery(imagePath);
+    } on AppError {
+      rethrow;
     } catch (e) {
       debugPrint('Error saving photo: $e');
       rethrow;

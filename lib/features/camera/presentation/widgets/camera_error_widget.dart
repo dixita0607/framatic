@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/services/permission_service.dart';
-import 'package:framatic/features/camera/domain/camera_error.dart';
 
 class CameraErrorWidget extends StatelessWidget {
-  final CameraError? error;
+  final AppError? error;
   final VoidCallback onRetry;
 
   const CameraErrorWidget({
@@ -16,16 +16,16 @@ class CameraErrorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const .all(24.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.error_outline, size: 64),
             const SizedBox(height: 16),
             Text(
-              error?.message ?? 'An error occurred',
+              error?.userMessage ?? 'An error occurred',
               style: const TextStyle(fontSize: 16),
-              textAlign: .center,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(onPressed: onRetry, child: const Text('Retry')),

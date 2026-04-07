@@ -6,5 +6,5 @@ abstract interface class PhotoRepository {
     required Frame frame,
   });
 
-  Future<bool> saveToGallery(String imagePath);
+  Future<void> saveToGallery(String imagePath);
 }

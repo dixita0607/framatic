@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -15,8 +16,9 @@ class FramaticDB {
   static FramaticDB get instance => _instance;
   Database get db {
     if (_isInitialized == false) {
-      throw StateError(
+      throw DatabaseError(
         'Database connection is not open. Call open() method first to access the db instance',
+        userMessage: 'Database is not available.',
       );
     }
     return _db;

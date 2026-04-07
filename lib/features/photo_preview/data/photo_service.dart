@@ -2,11 +2,11 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/utils/constants.dart';
 import 'package:framatic/core/utils/frame_calculator.dart';
 import 'package:framatic/features/photo_preview/data/photo_repository.dart';
+import 'package:framatic/features/photo_preview/domain/photo_error.dart';
 import 'package:gal/gal.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
@@ -39,20 +39,26 @@ class PhotoService implements PhotoRepository {
 
       return imageFile.path;
     } catch (e) {
-      throw StateError('Error processing photo with overlay: $e');
+      throw ProcessPhotoError(
+        'Error processing photo with overlay: $e',
+        userMessage: 'Failed to process photo.',
+        cause: e,
+      );
     }
   }
 
   /// Save processed photo to gallery and delete the temp file.
   @override
-  Future<bool> saveToGallery(String imagePath) async {
+  Future<void> saveToGallery(String imagePath) async {
     try {
       await Gal.putImage(imagePath, album: AppConstants.galleryAlbumName);
       await File(imagePath).delete();
-      return true;
     } on GalException catch (e) {
-      debugPrint('Error saving to gallery: ${e.type.message}');
-      return false;
+      throw SavePhotoError(
+        'Error saving to gallery: ${e.type.message}',
+        userMessage: 'Failed to save photo to gallery.',
+        cause: e,
+      );
     }
   }
 
@@ -65,7 +71,10 @@ class PhotoService implements PhotoRepository {
   ) {
     final originalImage = img.decodeImage(imageBytes);
     if (originalImage == null) {
-      throw StateError('Failed to decode image');
+      throw DecodePhotoError(
+        'Failed to decode image',
+        userMessage: 'Failed to process photo.',
+      );
     }
 
     final crop = fitToAspectRatio(

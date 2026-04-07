@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/features/frames_manager/data/frame_repository.dart';
+import 'package:framatic/features/frames_manager/domain/frame_error.dart';
 
 class FrameProvider extends ChangeNotifier {
   final FrameRepository _frameRepository;
@@ -50,7 +51,7 @@ class FrameProvider extends ChangeNotifier {
       return createdFrame;
     } catch (e) {
       debugPrint('Error creating frame: $e');
-      throw StateError('Failed to create frame. Please try again.');
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -69,7 +70,7 @@ class FrameProvider extends ChangeNotifier {
       return updatedFrame;
     } catch (e) {
       debugPrint('Error updating frame: $e');
-      throw StateError('Failed to update frame. Please try again.');
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -90,7 +91,7 @@ class FrameProvider extends ChangeNotifier {
       );
     } catch (e) {
       debugPrint('Error deleting frame: $e');
-      throw StateError('Failed to delete frame. Please try again.');
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -100,7 +101,10 @@ class FrameProvider extends ChangeNotifier {
   void setActiveFrame(int frameId) {
     final frameExists = _frames.any((frame) => frame.id == frameId);
     if (!frameExists) {
-      throw StateError('Frame with id $frameId not found');
+      throw FindFrameError(
+        'Frame with id $frameId not found',
+        userMessage: 'Frame not found.',
+      );
     }
     _activeFrameId = frameId;
     notifyListeners();
@@ -114,8 +118,9 @@ class FrameProvider extends ChangeNotifier {
         oldPos >= _frames.length ||
         newPos < 0 ||
         newPos > _frames.length) {
-      throw ArgumentError(
+      throw ReorderFrameError(
         'Invalid reorder indices: oldPos=$oldPos, newPos=$newPos, length=${_frames.length}',
+        userMessage: 'Failed to reorder frames.',
       );
     }
 
@@ -133,7 +138,11 @@ class FrameProvider extends ChangeNotifier {
       );
     } catch (e) {
       debugPrint('Error reordering frames: $e');
-      throw StateError('Failed to reorder frames. Please try again.');
+      throw ReorderFrameError(
+        'Error reordering frames: $e',
+        userMessage: 'Failed to reorder frames. Please try again.',
+        cause: e,
+      );
     }
   }
 

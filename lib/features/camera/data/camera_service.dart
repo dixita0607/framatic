@@ -22,7 +22,10 @@ class CameraService implements CameraRepository {
     }
 
     if (_cameras.isEmpty) {
-      throw NoCameraAvailableError('No cameras available on this device');
+      throw NoCameraAvailableError(
+        'No cameras available on this device',
+        userMessage: 'No cameras found on this device.',
+      );
     }
 
     final camera = _findCamera(direction);
@@ -40,7 +43,10 @@ class CameraService implements CameraRepository {
   @override
   Future<void> reinitialize() async {
     if (_cameras.isEmpty) {
-      throw StateError('Cameras not yet discovered. Call create() first.');
+      throw ReinitializeCameraError(
+        'Cameras not yet discovered. Call create() first.',
+        userMessage: 'Failed to reinitialize camera.',
+      );
     }
     final currentDirection = _controller?.description.lensDirection ?? CameraLensDirection.back;
     final camera = _findCamera(currentDirection);
@@ -72,12 +78,8 @@ class CameraService implements CameraRepository {
   Future<void> setZoomLevel(double zoom) async {
     if (_controller == null || !_controller!.value.isInitialized) return;
 
-    try {
-      final clampedZoom = zoom.clamp(_minZoom, _maxZoom);
-      await _controller!.setZoomLevel(clampedZoom);
-    } catch (e) {
-      debugPrint('Error setting zoom level: $e');
-    }
+    final clampedZoom = zoom.clamp(_minZoom, _maxZoom);
+    await _controller!.setZoomLevel(clampedZoom);
   }
 
   @override
@@ -88,8 +90,11 @@ class CameraService implements CameraRepository {
     try {
       return await _controller!.takePicture();
     } catch (e) {
-      debugPrint('Error taking picture: $e');
-      return null;
+      throw CaptureCameraError(
+        'Failed to take picture: $e',
+        userMessage: 'Failed to capture photo. Please try again.',
+        cause: e,
+      );
     }
   }
 
@@ -105,8 +110,11 @@ class CameraService implements CameraRepository {
     try {
       await _controller!.initialize();
     } catch (e) {
-      debugPrint('Error initializing camera controller: $e');
-      rethrow;
+      throw InitializeCameraError(
+        'Failed to initialize camera controller: $e',
+        userMessage: 'Failed to initialize camera. Please try again.',
+        cause: e,
+      );
     }
   }
 

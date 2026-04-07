@@ -2,6 +2,7 @@ import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/services/preferences_service.dart';
 import 'package:framatic/core/utils/db.dart';
 import 'package:framatic/features/frames_manager/data/frame_repository.dart';
+import 'package:framatic/features/frames_manager/domain/frame_error.dart';
 
 const _orderKey = 'frames_order';
 
@@ -29,7 +30,10 @@ class FrameService implements FrameRepository {
       whereArgs: [id],
     );
     if (frame.isEmpty) {
-      throw StateError('Frame not found with given id: $id');
+      throw FindFrameError(
+        'Frame not found with given id: $id',
+        userMessage: 'Frame not found.',
+      );
     }
     return Frame.fromJson(frame[0]);
   }
@@ -37,14 +41,22 @@ class FrameService implements FrameRepository {
   @override
   Future<Frame> createFrame(Frame frame) async {
     final createdFrameId = await _db.insert(FramesTable.name, frame.toJson());
-    if (createdFrameId == 0) throw StateError('Failed to create the frame');
+    if (createdFrameId == 0) {
+      throw CreateFrameError(
+        'Failed to create the frame',
+        userMessage: 'Failed to create frame. Please try again.',
+      );
+    }
     return await getFrameById(createdFrameId);
   }
 
   @override
   Future<Frame> updateFrame(Frame frame) async {
     if (frame.id == null) {
-      throw ArgumentError('frame.id cannot be null for update operation');
+      throw UpdateFrameError(
+        'frame.id cannot be null for update operation',
+        userMessage: 'Failed to update frame. Please try again.',
+      );
     }
     final updatedFrameId = await _db.update(
       FramesTable.name,
@@ -53,7 +65,10 @@ class FrameService implements FrameRepository {
       whereArgs: [frame.id],
     );
     if (updatedFrameId == 0) {
-      throw StateError('Failed to update the frame with id: ${frame.id}');
+      throw UpdateFrameError(
+        'Failed to update the frame with id: ${frame.id}',
+        userMessage: 'Failed to update frame. Please try again.',
+      );
     }
     return await getFrameById(frame.id!);
   }
@@ -66,6 +81,9 @@ class FrameService implements FrameRepository {
       whereArgs: [id],
     );
     if (deletedFrame == 1) return id;
-    throw StateError('Failed to delete the frame with given id: $id');
+    throw DeleteFrameError(
+      'Failed to delete the frame with given id: $id',
+      userMessage: 'Failed to delete frame. Please try again.',
+    );
   }
 }

@@ -1,34 +1,45 @@
-/// TODO: Implement similar error type hierarchies for other features
-/// (photo_preview, frames_manager, etc.) to maintain consistent, type-safe
-/// error handling across the app instead of using generic string-based errors.
-sealed class CameraError implements Exception {
-  final String message;
-  const CameraError(this.message);
+import 'package:framatic/core/errors/app_error.dart';
 
-  @override
-  String toString() => message;
-}
-
-class PermissionError extends CameraError {
-  const PermissionError(super.message);
-}
-
-class InitializationError extends CameraError {
-  const InitializationError(super.message);
+sealed class CameraError extends AppError {
+  const CameraError(super.message, {required super.userMessage, super.cause});
 }
 
 class NoCameraAvailableError extends CameraError {
-  const NoCameraAvailableError(super.message);
+  const NoCameraAvailableError(
+    super.message, {
+    required super.userMessage,
+    super.cause,
+  });
+}
+
+class InitializeCameraError extends CameraError {
+  const InitializeCameraError(
+    super.message, {
+    required super.userMessage,
+    super.cause,
+  });
 }
 
 class SwitchCameraError extends CameraError {
-  const SwitchCameraError(super.message);
+  const SwitchCameraError(
+    super.message, {
+    required super.userMessage,
+    super.cause,
+  });
 }
 
-class CaptureError extends CameraError {
-  const CaptureError(super.message);
+class CaptureCameraError extends CameraError {
+  const CaptureCameraError(
+    super.message, {
+    required super.userMessage,
+    super.cause,
+  });
 }
 
-class ReinitializationError extends CameraError {
-  const ReinitializationError(super.message);
+class ReinitializeCameraError extends CameraError {
+  const ReinitializeCameraError(
+    super.message, {
+    required super.userMessage,
+    super.cause,
+  });
 }

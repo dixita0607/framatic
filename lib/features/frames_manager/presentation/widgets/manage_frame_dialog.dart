@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:framatic/core/errors/app_error.dart';
+import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/models/frame.dart';
 
 class ManageFrameDialog extends StatefulWidget {
@@ -155,11 +157,9 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
           SnackBar(content: Text(_isEditing ? 'Frame updated' : 'Frame added')),
         );
       }
-    } catch (e) {
+    } on AppError catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save frame: ${e.toString()}')),
-        );
+        context.showErrorSnackBar(e);
       }
     }
   }

@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:framatic/core/errors/app_error.dart';
+import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/widgets/circular_action_button.dart';
 import 'package:framatic/features/photo_preview/presentation/photo_preview_provider.dart';
 import 'package:provider/provider.dart';
@@ -70,14 +72,9 @@ class PhotoPreviewScreen extends StatelessWidget {
                                     );
                                     Navigator.of(context).pop(true);
                                   }
-                                } catch (e) {
+                                } on AppError catch (e) {
                                   if (context.mounted) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                      SnackBar(
-                                        content: Text(e.toString()),
-                                      ),
-                                    );
+                                    context.showErrorSnackBar(e);
                                   }
                                 }
                               },

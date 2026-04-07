@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:framatic/core/services/permission_service.dart';
 import 'package:framatic/features/camera/data/camera_repository.dart';
+import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/features/camera/domain/camera_error.dart';
 
 class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
@@ -15,7 +16,7 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   bool _isLoading = true;
   bool _isCapturing = false;
-  CameraError? _error;
+  AppError? _error;
 
   double _minZoom = 1.0;
   double _maxZoom = 1.0;
@@ -23,7 +24,7 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   bool get isLoading => _isLoading;
   bool get isCapturing => _isCapturing;
-  CameraError? get error => _error;
+  AppError? get error => _error;
   CameraController? get controller => _cameraRepository.controller;
   double get minZoom => _minZoom;
   double get maxZoom => _maxZoom;
@@ -41,7 +42,10 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
       if (!hasPermission) {
         final granted = await PermissionService.requestCameraPermission();
         if (!granted) {
-          _error = PermissionError('Camera permission is required');
+          _error = PermissionError(
+            'Camera permission denied',
+            userMessage: 'Camera permission is required.',
+          );
           _isLoading = false;
           notifyListeners();
           return;
@@ -56,7 +60,11 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
     } on CameraError catch (e) {
       _error = e;
     } catch (e) {
-      _error = InitializationError('Failed to initialize camera: $e');
+      _error = InitializeCameraError(
+        'Failed to initialize camera: $e',
+        userMessage: 'Failed to initialize camera.',
+        cause: e,
+      );
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -81,7 +89,11 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
       _maxZoom = maxZoom;
       _currentZoom = minZoom;
     } catch (e) {
-      _error = SwitchCameraError('Failed to switch camera: $e');
+      _error = SwitchCameraError(
+        'Failed to switch camera: $e',
+        userMessage: 'Failed to switch camera.',
+        cause: e,
+      );
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -126,7 +138,11 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
     } on CameraError catch (e) {
       _error = e;
     } catch (e) {
-      _error = ReinitializationError('Failed to reinitialize camera: $e');
+      _error = ReinitializeCameraError(
+        'Failed to reinitialize camera: $e',
+        userMessage: 'Failed to reinitialize camera.',
+        cause: e,
+      );
       debugPrint('Error reinitializing camera: $e');
     } finally {
       _isLoading = false;
