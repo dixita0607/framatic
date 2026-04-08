@@ -62,6 +62,14 @@ class PhotoService implements PhotoRepository {
     }
   }
 
+  static Future<void> cleanupTempFiles() async {
+    final tempDir = await getTemporaryDirectory();
+    tempDir.listSync()
+        .whereType<File>()
+        .where((f) => f.uri.pathSegments.last.startsWith('frame_'))
+        .forEach((f) => f.delete().ignore());
+  }
+
   /// Runs entirely inside the background isolate.
   /// Must be a static method — instance methods cannot be sent across isolates.
   static Uint8List _processImage(

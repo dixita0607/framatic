@@ -30,6 +30,8 @@ void main() async {
     rethrow;
   }
 
+  PhotoService.cleanupTempFiles().ignore();
+
   runApp(const MainApp());
 }
 
