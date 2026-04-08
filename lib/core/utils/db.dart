@@ -8,14 +8,15 @@ import 'package:sqflite/sqflite.dart';
 class FramaticDB {
   static final FramaticDB _instance = FramaticDB._();
   late Database _db;
-  var _isInitialized = false;
+  Completer<void>? _initCompleter;
 
   FramaticDB._();
   factory FramaticDB() => _instance;
 
   static FramaticDB get instance => _instance;
+  bool get _isInitialized => _initCompleter?.isCompleted ?? false;
   Database get db {
-    if (_isInitialized == false) {
+    if (!_isInitialized) {
       throw DatabaseError(
         'Database connection is not open. Call open() method first to access the db instance',
         userMessage: 'Database is not available.',
@@ -28,14 +29,20 @@ class FramaticDB {
       join(await getDatabasesPath(), DBSchemaValues.fileName);
 
   Future<void> open() async {
-    if (_isInitialized == true) return;
-    final dbPath = await _getDbPath();
-    _db = await openDatabase(
-      dbPath,
-      version: DBSchemaValues.dbVersion,
-      onCreate: _createDatabase,
-    );
-    _isInitialized = true;
+    if (_initCompleter != null) return _initCompleter!.future;
+    _initCompleter = Completer<void>();
+    try {
+      final dbPath = await _getDbPath();
+      _db = await openDatabase(
+        dbPath,
+        version: DBSchemaValues.dbVersion,
+        onCreate: _createDatabase,
+      );
+      _initCompleter!.complete();
+    } catch (e) {
+      _initCompleter = null; // allow retry on next open() call
+      rethrow;
+    }
   }
 
   FutureOr<void> _createDatabase(Database db, int version) async {
