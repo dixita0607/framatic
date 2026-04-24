@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:framatic/core/models/frame.dart';
 
 void main() {
-  group('serialization', () {
+  group('Frame model serialization', () {
     test('toJson maps isCustom bool to int', () {
       final json = Frame(
         id: 1,
@@ -14,11 +14,7 @@ void main() {
 
       expect(json[FramesTable.isCustom], 1);
 
-      final json2 = Frame(
-        title: 'Test',
-        width: 16,
-        height: 9,
-      ).toJson();
+      final json2 = Frame(title: 'Test', width: 16, height: 9).toJson();
 
       expect(json2[FramesTable.isCustom], 0);
     });
@@ -37,11 +33,7 @@ void main() {
     });
 
     test('fromJson roundtrip with null id', () {
-      final original = Frame(
-        title: 'Square',
-        width: 1,
-        height: 1,
-      );
+      final original = Frame(title: 'Square', width: 1, height: 1);
       final restored = Frame.fromJson(original.toJson());
 
       expect(restored.id, isNull);

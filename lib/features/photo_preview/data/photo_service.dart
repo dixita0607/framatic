@@ -24,11 +24,7 @@ class PhotoService implements PhotoRepository {
       // All CPU-bound work runs in a background isolate so the UI stays free.
       // The closure captures only sendable values (Uint8List, double, int).
       final resultBytes = await Isolate.run(
-        () => _processImage(
-          imageBytes,
-          frame.aspectRatio,
-          AppConstants.frameBorderPercentage,
-        ),
+        () => _processImage(imageBytes, frame.aspectRatio),
       );
 
       // Write result back to a temp file on the main isolate (async I/O)
@@ -51,7 +47,7 @@ class PhotoService implements PhotoRepository {
   @override
   Future<void> saveToGallery(String imagePath) async {
     try {
-      await Gal.putImage(imagePath, album: AppConstants.galleryAlbumName);
+      await Gal.putImage(imagePath, album: AppConstants.appName);
       await File(imagePath).delete();
     } on GalException catch (e) {
       throw SavePhotoError(
@@ -64,7 +60,8 @@ class PhotoService implements PhotoRepository {
 
   static Future<void> cleanupTempFiles() async {
     final tempDir = await getTemporaryDirectory();
-    tempDir.listSync()
+    tempDir
+        .listSync()
         .whereType<File>()
         .where((f) => f.uri.pathSegments.last.startsWith('frame_'))
         .forEach((f) => f.delete().ignore());
@@ -72,11 +69,7 @@ class PhotoService implements PhotoRepository {
 
   /// Runs entirely inside the background isolate.
   /// Must be a static method — instance methods cannot be sent across isolates.
-  static Uint8List _processImage(
-    Uint8List imageBytes,
-    double aspectRatio,
-    double borderPercentage,
-  ) {
+  static Uint8List _processImage(Uint8List imageBytes, double aspectRatio) {
     final originalImage = img.decodeImage(imageBytes);
     if (originalImage == null) {
       throw DecodePhotoError(
@@ -85,18 +78,16 @@ class PhotoService implements PhotoRepository {
       );
     }
 
-    final crop = fitToAspectRatio(
+    final innerImageSize = fitToAspectRatio(
       maxWidth: originalImage.width.toDouble(),
       maxHeight: originalImage.height.toDouble(),
       aspectRatio: aspectRatio,
     );
-    final cropWidth = crop.width.round();
-    final cropHeight = crop.height.round();
-
+    final cropWidth = innerImageSize.width.round();
+    final cropHeight = innerImageSize.height.round();
     final cropLeft = ((originalImage.width - cropWidth) / 2).round();
     final cropTop = ((originalImage.height - cropHeight) / 2).round();
 
-    // Crop the image to the frame aspect ratio
     final croppedImage = img.copyCrop(
       originalImage,
       x: cropLeft,
@@ -105,18 +96,18 @@ class PhotoService implements PhotoRepository {
       height: cropHeight,
     );
 
-    // Calculate border thickness as a percentage of the cropped frame width
-    // This ensures the border scales proportionally on any device/image
-    final border = (cropWidth * borderPercentage).round();
+    // This 4 as a multiplier works as an illusion here. It looks like the border is as thick as in camera preview screen.
+    // TODO: Revisit the calculations of border thickness if device specific issues are observed in future.
 
-    // Create final image with border
-    final finalWidth = cropWidth + (border * 2);
-    final finalHeight = cropHeight + (border * 2);
+    final imageWithBorder = img.Image(
+      width: croppedImage.width + (4 * AppConstants.frameBorder),
+      height: croppedImage.height + (4 * AppConstants.frameBorder),
+    );
 
-    final finalImage = img.Image(width: finalWidth, height: finalHeight);
-    img.fill(finalImage, color: img.ColorRgba8(255, 255, 255, 255));
-    img.compositeImage(finalImage, croppedImage, dstX: border, dstY: border);
+    img.fill(imageWithBorder, color: img.ColorRgba8(255, 255, 255, 255));
 
-    return Uint8List.fromList(img.encodeJpg(finalImage));
+    img.compositeImage(imageWithBorder, croppedImage, center: true);
+
+    return Uint8List.fromList(img.encodeJpg(imageWithBorder));
   }
 }

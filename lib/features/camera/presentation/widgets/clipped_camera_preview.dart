@@ -3,48 +3,45 @@ import 'package:flutter/material.dart';
 import 'package:framatic/core/utils/frame_calculator.dart';
 
 /// Build camera preview that is clipped to the selected aspect ratio
-/// Uses same frame calculation as FrameOverlay to ensure alignment
 class ClippedCameraPreview extends StatelessWidget {
   final CameraController controller;
   final double targetAspectRatio;
-  final double maxHeight;
 
   const ClippedCameraPreview({
     super.key,
     required this.controller,
     required this.targetAspectRatio,
-    required this.maxHeight,
   });
 
   @override
   Widget build(BuildContext context) {
     // Camera preview size (note: width/height are swapped for portrait)
-    final previewWidth = controller.value.previewSize?.height ?? 1920;
-    final previewHeight = controller.value.previewSize?.width ?? 1080;
-    final cameraAspectRatio = previewWidth / previewHeight;
+    final cameraWidth = controller.value.previewSize?.height ?? 1920;
+    final cameraHeight = controller.value.previewSize?.width ?? 1080;
+    final cameraAspectRatio = cameraWidth / cameraHeight;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final frameSize = calculateFrameSize(
+        final previewSize = fitToAspectRatio(
           maxWidth: constraints.maxWidth,
           maxHeight: constraints.maxHeight,
           aspectRatio: targetAspectRatio,
         );
-        final frameWidth = frameSize.width;
-        final frameHeight = frameSize.height;
+        final frameWidth = previewSize.width;
+        final frameHeight = previewSize.height;
 
         // Calculate camera preview size to minimize cropping
         // We want the camera to just cover the frame, not be overly zoomed
-        double cameraWidth, cameraHeight;
+        double finalWidth, finalHeight;
 
         if (targetAspectRatio > cameraAspectRatio) {
           // Target is wider than camera - match width, crop height
-          cameraWidth = frameWidth;
-          cameraHeight = cameraWidth / cameraAspectRatio;
+          finalWidth = frameWidth;
+          finalHeight = finalWidth / cameraAspectRatio;
         } else {
           // Target is taller than camera - match height, crop width
-          cameraHeight = frameHeight;
-          cameraWidth = cameraHeight * cameraAspectRatio;
+          finalHeight = frameHeight;
+          finalWidth = finalHeight * cameraAspectRatio;
         }
 
         return ClipRect(
@@ -52,11 +49,11 @@ class ClippedCameraPreview extends StatelessWidget {
             width: frameWidth,
             height: frameHeight,
             child: OverflowBox(
-              maxWidth: cameraWidth,
-              maxHeight: cameraHeight,
+              maxWidth: finalWidth,
+              maxHeight: finalHeight,
               child: SizedBox(
-                width: cameraWidth,
-                height: cameraHeight,
+                width: finalWidth,
+                height: finalHeight,
                 child: CameraPreview(controller),
               ),
             ),

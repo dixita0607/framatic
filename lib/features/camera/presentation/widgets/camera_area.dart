@@ -2,7 +2,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/features/camera/presentation/widgets/clipped_camera_preview.dart';
-import 'package:framatic/features/camera/presentation/widgets/frame_overlay.dart';
 
 class CameraArea extends StatelessWidget {
   final CameraController controller;
@@ -22,7 +21,6 @@ class CameraArea extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxHeight = constraints.maxHeight;
         final selectedAspectRatio = activeFrame.aspectRatio;
 
         return GestureDetector(
@@ -33,17 +31,15 @@ class CameraArea extends StatelessWidget {
             children: [
               // Camera preview - clipped to selected aspect ratio
               Center(
-                child: ClippedCameraPreview(
-                  controller: controller,
-                  targetAspectRatio: selectedAspectRatio,
-                  maxHeight: maxHeight,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 16, color: Colors.white),
+                  ),
+                  child: ClippedCameraPreview(
+                    controller: controller,
+                    targetAspectRatio: selectedAspectRatio,
+                  ),
                 ),
-              ),
-
-              // Frame overlay (aligned to top)
-              Align(
-                alignment: .topCenter,
-                child: FrameOverlay(frame: activeFrame, maxHeight: maxHeight),
               ),
             ],
           ),

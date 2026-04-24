@@ -57,6 +57,5 @@ class PhotoPreviewProvider extends ChangeNotifier {
     File(imagePath).delete().ignore();
   }
 
-  String get successMessage =>
-      'Photo saved to ${AppConstants.galleryAlbumName} album';
+  String get successMessage => 'Photo saved to ${AppConstants.appName} album';
 }
