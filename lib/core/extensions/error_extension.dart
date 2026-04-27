@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:framatic/core/errors/app_error.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 extension ErrorSnackBar on BuildContext {
   void showErrorSnackBar(AppError error) {
-    ScaffoldMessenger.of(this).showSnackBar(
-      SnackBar(content: Text(error.userMessage)),
-    );
+    SketchySnackBar.show(this, message: error.userMessage);
   }
 }

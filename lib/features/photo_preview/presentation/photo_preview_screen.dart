@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
-import 'package:framatic/core/widgets/circular_action_button.dart';
 import 'package:framatic/features/photo_preview/presentation/photo_preview_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 /// Screen to preview captured photo with Save/Retake options
 class PhotoPreviewScreen extends StatelessWidget {
@@ -15,7 +15,7 @@ class PhotoPreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SketchyScaffold(
       body: SafeArea(
         child: Column(
           children: [
@@ -33,9 +33,8 @@ class PhotoPreviewScreen extends StatelessWidget {
                     mainAxisAlignment: .spaceEvenly,
                     children: [
                       // Retake button
-                      CircularActionButton(
-                        icon: Icons.close,
-                        label: 'Retake',
+                      SketchyIconButton(
+                        icon: SketchySymbol(symbol: .x),
                         onPressed: provider.isSaving
                             ? null
                             : () {
@@ -45,9 +44,8 @@ class PhotoPreviewScreen extends StatelessWidget {
                       ),
 
                       // Save button
-                      CircularActionButton(
-                        icon: Icons.check,
-                        label: 'Save',
+                      SketchyIconButton(
+                        icon: SketchySymbol(symbol: .check),
                         onPressed: provider.isSaving
                             ? null
                             : () async {
@@ -55,11 +53,9 @@ class PhotoPreviewScreen extends StatelessWidget {
                                   await provider.savePhoto(imagePath);
 
                                   if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(provider.successMessage),
-                                        duration: const Duration(seconds: 2),
-                                      ),
+                                    SketchySnackBar.show(
+                                      context,
+                                      message: provider.successMessage,
                                     );
                                     Navigator.of(context).pop(true);
                                   }
@@ -69,7 +65,6 @@ class PhotoPreviewScreen extends StatelessWidget {
                                   }
                                 }
                               },
-                        isLoading: provider.isSaving,
                       ),
                     ],
                   ),

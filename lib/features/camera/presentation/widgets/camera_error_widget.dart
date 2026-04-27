@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/services/permission_service.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class CameraErrorWidget extends StatelessWidget {
   final AppError? error;
@@ -20,19 +21,22 @@ class CameraErrorWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: .center,
           children: [
-            const Icon(Icons.error_outline, size: 64),
+            const SketchySymbol(symbol: .hash),
             const SizedBox(height: 16),
-            Text(
+            SketchyText(
               error?.userMessage ?? 'An error occurred',
               style: const TextStyle(fontSize: 16),
               textAlign: .center,
             ),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+            SketchyButton(
+              onPressed: onRetry,
+              child: const SketchyText('Retry'),
+            ),
             if (error is PermissionError)
-              TextButton(
+              SketchyButton(
                 onPressed: () => PermissionService.openSettings(),
-                child: const Text('Open Settings'),
+                child: const SketchyText('Open Settings'),
               ),
           ],
         ),

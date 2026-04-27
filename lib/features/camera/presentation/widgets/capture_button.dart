@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class CaptureButton extends StatefulWidget {
   final VoidCallback? onPressed;
@@ -46,35 +47,23 @@ class _CaptureButtonState extends State<CaptureButton>
         widget.onPressed?.call();
       },
       onTapCancel: () => _scaleController.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
-          width: 88,
-          height: 88,
-          decoration: BoxDecoration(
-            shape: .circle,
-            color: Colors.white.withValues(alpha: 0.3),
-            border: .all(
-              color: Colors.white,
-              width: 3,
-            ),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: widget.isCapturing
-                ? const Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation(Colors.white),
-                      ),
-                    ),
-                  )
-                : null,
-          ),
-        ),
+      child: SketchyFrame(
+        width: 88,
+        height: 88,
+        fillColor: SketchyTheme.of(context).secondaryColor,
+        fill: .solid,
+        strokeColor: SketchyTheme.of(context).primaryColor,
+        strokeWidth: 4,
+        shape: .circle,
+        child: widget.isCapturing
+            ? const Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: SketchyCircularProgressIndicator(strokeWidth: 2.5),
+                ),
+              )
+            : Center(),
       ),
     );
   }

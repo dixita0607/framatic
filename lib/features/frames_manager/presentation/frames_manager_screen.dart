@@ -1,59 +1,75 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
 import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/frame_list_item.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class FramesManagerScreen extends StatelessWidget {
   const FramesManagerScreen({super.key});
 
-  void _showAddFrameDialog(BuildContext context, FrameProvider frameProvider) {
-    showDialog(
-      context: context,
-      builder: (context) => ManageFrameDialog(
-        onSave: (newFrame) async {
-          await frameProvider.createFrame(newFrame);
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Manage Frames')),
+    return SketchyScaffold(
+      appBar: SketchyAppBar(
+        title: const SketchyText('Manage Frames'),
+        leading: RotatedBox(
+          quarterTurns: 2,
+          child: GestureDetector(
+            child: SketchySymbol(symbol: .chevronRight),
+            onTap: () => Navigator.pop(context),
+          ),
+        ),
+      ),
       body: Consumer<FrameProvider>(
         builder: (context, frameProvider, child) {
           if (frameProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: SketchyCircularProgressIndicator());
           }
 
           final allFrames = frameProvider.frames;
 
-          return Scaffold(
-            body: ReorderableListView.builder(
-              itemCount: allFrames.length,
-              onReorder: (oldIndex, newIndex) async =>
-                  await frameProvider.orderFrames(oldIndex, newIndex),
-              itemBuilder: (context, index) {
-                final frame = allFrames[index];
-                return FrameListItem(
-                  key: ValueKey(frame.id),
-                  frame: frame,
-                  order: index,
-                  onEdit: (updatedFrame) async {
-                    await frameProvider.updateFrame(updatedFrame);
-                  },
-                  onDelete: (frameId) async {
-                    await frameProvider.deleteFrame(frameId);
-                  },
-                );
-              },
+          return SketchyScaffold(
+            body: Padding(
+              padding: .all(16),
+              child: ListView.builder(
+                itemCount: allFrames.length,
+                // onReorder: (oldIndex, newIndex) async =>
+                //     await frameProvider.orderFrames(oldIndex, newIndex),
+                itemBuilder: (context, index) {
+                  final frame = allFrames[index];
+                  return DraggableFrameListItem(
+                    key: ValueKey(frame.id),
+                    frame: frame,
+                    order: index,
+                    onEdit: (updatedFrame) async {
+                      await frameProvider.updateFrame(updatedFrame);
+                    },
+                    onDelete: (frameId) async {
+                      await frameProvider.deleteFrame(frameId);
+                    },
+                  );
+                },
+              ),
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () => _showAddFrameDialog(context, frameProvider),
+            floatingActionButton: SketchyButton(
+              onPressed: () => unawaited(
+                showGeneralDialog(
+                  context: context,
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      SketchyDialog(
+                        child: ManageFrameDialog(
+                          onSave: (newFrame) async {
+                            await frameProvider.createFrame(newFrame);
+                          },
+                        ),
+                      ),
+                ),
+              ),
               tooltip: 'Add Custom Frame',
-              child: const Icon(Icons.add),
+              child: const SketchySymbol(symbol: .plus),
             ),
           );
         },

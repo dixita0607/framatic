@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:framatic/core/models/frame.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 /// Widget for quick frame switching with horizontal scroll
 class FrameSelector extends StatelessWidget {
@@ -21,7 +22,7 @@ class FrameSelector extends StatelessWidget {
     if (isLoading) {
       return const SizedBox(
         height: 40,
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: SketchyCircularProgressIndicator()),
       );
     }
 
@@ -33,17 +34,22 @@ class FrameSelector extends StatelessWidget {
         itemBuilder: (context, index) {
           final frame = frames[index];
           final isSelected = activeFrame == frame;
-
           return Padding(
             padding: const .symmetric(horizontal: 4),
-            child: ChoiceChip(
-              label: Text(frame.title),
-              selected: isSelected,
-              onSelected: (selected) {
-                if (selected) {
-                  onFrameSelected(frame.id!);
-                }
-              },
+            child: GestureDetector(
+              child: SketchyFrame(
+                padding: EdgeInsetsGeometry.all(8),
+                fillColor: isSelected
+                    ? SketchyTheme.of(context).secondaryColor
+                    : SketchyColors.transparent,
+                fill: .hachure,
+                strokeColor: isSelected
+                    ? SketchyTheme.of(context).primaryColor
+                    : SketchyTheme.of(context).inkColor,
+                cornerRadius: 20,
+                child: SketchyText(frame.title),
+              ),
+              onTap: () => onFrameSelected(frame.id!),
             ),
           );
         },

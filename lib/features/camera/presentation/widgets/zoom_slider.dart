@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 /// A horizontal zoom slider widget with non-linear mapping for better visualization
 ///
@@ -94,7 +95,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
     return Container(
       padding: const .symmetric(vertical: 6, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.4),
+        color: SketchyColors.black.withValues(alpha: 0.4),
         borderRadius: .circular(20),
       ),
       child: Row(
@@ -103,13 +104,13 @@ class _ZoomSliderState extends State<ZoomSlider> {
           Container(
             padding: const .symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.6),
+              color: SketchyColors.black.withValues(alpha: 0.6),
               borderRadius: .circular(8),
             ),
-            child: Text(
+            child: SketchyText(
               '${widget.currentZoom.toStringAsFixed(1)}x',
               style: const TextStyle(
-                color: Colors.white,
+                color: SketchyColors.white,
                 fontSize: 12,
                 fontWeight: .bold,
               ),
@@ -118,29 +119,18 @@ class _ZoomSliderState extends State<ZoomSlider> {
           const SizedBox(width: 8),
           // Horizontal slider (takes remaining space)
           Expanded(
-            child: SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                trackHeight: 4,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-                activeTrackColor: Colors.white,
-                inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
-                thumbColor: Colors.white,
-                overlayColor: Colors.white.withValues(alpha: 0.2),
-              ),
-              child: Slider(
-                value: sliderValue,
-                min: 0.0,
-                max: 1.0,
-                onChanged: (newSliderValue) {
-                  final newZoom = _sliderValueToZoom(newSliderValue);
-                  if (_shouldTriggerHaptic(newZoom)) {
-                    HapticFeedback.mediumImpact();
-                    _lastHapticZoom = newZoom;
-                  }
-                  widget.onZoomChanged(newZoom);
-                },
-              ),
+            child: SketchySlider(
+              value: sliderValue,
+              min: 0.0,
+              max: 1.0,
+              onChanged: (newSliderValue) {
+                final newZoom = _sliderValueToZoom(newSliderValue);
+                if (_shouldTriggerHaptic(newZoom)) {
+                  HapticFeedback.mediumImpact();
+                  _lastHapticZoom = newZoom;
+                }
+                widget.onZoomChanged(newZoom);
+              },
             ),
           ),
           const SizedBox(width: 8),
@@ -200,14 +190,16 @@ class _ZoomSliderState extends State<ZoomSlider> {
         height: 28,
         decoration: BoxDecoration(
           shape: .circle,
-          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.2),
-          border: .all(color: Colors.white, width: 1),
+          color: isActive
+              ? SketchyColors.white
+              : SketchyColors.white.withValues(alpha: 0.2),
+          border: .all(color: SketchyColors.white, width: 1),
         ),
         child: Center(
-          child: Text(
+          child: SketchyText(
             label,
             style: TextStyle(
-              color: isActive ? Colors.black : Colors.white,
+              color: isActive ? SketchyColors.black : SketchyColors.white,
               fontSize: 10,
               fontWeight: .bold,
             ),

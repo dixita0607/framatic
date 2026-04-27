@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/utils/constants.dart';
 import 'package:framatic/core/utils/db.dart';
 import 'package:framatic/features/camera/data/camera_service.dart';
@@ -11,6 +11,7 @@ import 'package:framatic/features/frames_manager/presentation/frame_provider.dar
 import 'package:framatic/features/photo_preview/data/photo_service.dart';
 import 'package:framatic/features/photo_preview/presentation/photo_preview_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,9 +49,10 @@ class MainApp extends StatelessWidget {
           create: (_) => PhotoPreviewProvider(PhotoService()),
         ),
       ],
-      child: MaterialApp(
+      child: SketchyApp(
         title: AppConstants.appName,
-        theme: ThemeData(brightness: .dark),
+        theme: SketchyThemeData.fromTheme(SketchyThemes.blue),
+        themeMode: SketchyThemeMode.light,
         home: const CameraScreen(),
         debugShowCheckedModeBanner: false,
       ),

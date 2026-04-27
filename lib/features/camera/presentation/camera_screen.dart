@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/features/camera/presentation/camera_provider.dart';
@@ -12,6 +12,7 @@ import 'package:framatic/features/frames_manager/presentation/frames_manager_scr
 import 'package:framatic/features/photo_preview/presentation/photo_preview_provider.dart';
 import 'package:framatic/features/photo_preview/presentation/photo_preview_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -31,9 +32,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     if (activeFrame == null) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('No frame selected')));
+        SketchySnackBar.show(context, message: 'No frame selected');
       }
       return;
     }
@@ -42,9 +41,7 @@ class _CameraScreenState extends State<CameraScreen> {
       final xFile = await cameraProvider.takePicture();
       if (xFile == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to capture photo')),
-          );
+          SketchySnackBar.show(context, message: 'Failed to capture photo');
         }
         return;
       }
@@ -58,7 +55,7 @@ class _CameraScreenState extends State<CameraScreen> {
       // Navigate to preview screen
       if (mounted) {
         await Navigator.of(context).push(
-          MaterialPageRoute(
+          SketchyPageRoute(
             builder: (context) => PhotoPreviewScreen(imagePath: processedPath),
           ),
         );
@@ -103,17 +100,17 @@ class _CameraScreenState extends State<CameraScreen> {
 
   void _onManageFrames() => Navigator.of(
     context,
-  ).push(MaterialPageRoute(builder: (context) => const FramesManagerScreen()));
+  ).push(SketchyPageRoute(builder: (context) => const FramesManagerScreen()));
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SketchyScaffold(
       body: SafeArea(
         child: Consumer2<CameraProvider, FrameProvider>(
           builder: (context, cameraProvider, frameProvider, child) {
             // Show loading when initializing or controller is null
             if (cameraProvider.isLoading || cameraProvider.controller == null) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: SketchyCircularProgressIndicator());
             }
 
             // Show error if present
@@ -136,7 +133,6 @@ class _CameraScreenState extends State<CameraScreen> {
                   ),
                 ),
                 Container(
-                  color: Colors.black,
                   padding: const .fromLTRB(16, 0, 16, 64),
                   child: Column(
                     mainAxisAlignment: .start,
@@ -152,27 +148,22 @@ class _CameraScreenState extends State<CameraScreen> {
                         ),
                       ),
 
-                      // Control buttons row (settings, capture, flip camera)
                       Row(
                         mainAxisAlignment: .spaceEvenly,
                         crossAxisAlignment: .center,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.settings, size: 28),
-                            color: Colors.white,
+                          SketchyIconButton(
+                            icon: const SketchySymbol(symbol: .gear),
                             onPressed: _onManageFrames,
-                            tooltip: 'Manage Frames',
                           ),
-
                           CaptureButton(
                             isCapturing: cameraProvider.isCapturing,
                             onPressed: _capturePhoto,
                           ),
-
-                          IconButton(
+                          // TODO: Replace camera symbol here
+                          SketchyIconButton(
                             onPressed: () => cameraProvider.switchCamera(),
-                            icon: const Icon(Icons.flip_camera_ios, size: 28),
-                            color: Colors.white,
+                            icon: const SketchySymbol(symbol: .rectangle),
                           ),
                         ],
                       ),
