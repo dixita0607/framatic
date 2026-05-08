@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:framatic/core/utils/app_themes.dart';
 import 'package:framatic/core/utils/constants.dart';
 import 'package:framatic/core/utils/db.dart';
 import 'package:framatic/features/camera/data/camera_service.dart';
@@ -50,22 +51,8 @@ class MainApp extends StatelessWidget {
       ],
       child: SketchyApp(
         title: AppConstants.appName,
-        theme: SketchyThemeData(
-          inkColor: const Color(0xFF1A1A14),
-          paperColor: const Color(0xFFC8D0B8),
-          primaryColor: const Color(0xFF2E7D68),
-          secondaryColor: const Color(0xFFB0BCA0),
-          roughness: 0.45,
-          typography: SketchyTypographyData.comicShanns(),
-        ),
-        darkTheme: SketchyThemeData(
-          inkColor: const Color(0xFFE4ECD8),
-          paperColor: const Color(0xFF151912),
-          primaryColor: const Color(0xFF3EA88A),
-          secondaryColor: const Color(0xFF1E2418),
-          roughness: 0.45,
-          typography: SketchyTypographyData.comicShanns(),
-        ),
+        theme: resolveTheme(activeScheme).light,
+        darkTheme: resolveTheme(activeScheme).dark,
         themeMode: SketchyThemeMode.system,
         home: const CameraScreen(),
       ),
