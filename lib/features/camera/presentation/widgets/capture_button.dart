@@ -55,14 +55,14 @@ class _CaptureButtonState extends State<CaptureButton>
           width: 88,
           height: 88,
           fill: SketchyFill.solid,
-          fillColor: primary.withValues(alpha: 0.85),
+          fillColor: primary.withValues(alpha: 0.35),
           strokeColor: primary,
           child: widget.isCapturing
               ? const Center(
                   child: SketchyCircularProgressIndicator(
                     size: 24,
                     strokeWidth: 2.5,
-                    color: Color(0xFFFFFFFF),
+                    color: Color(0xFF000000),
                   ),
                 )
               : const SizedBox.shrink(),

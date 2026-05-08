@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
+import 'package:framatic/core/widgets/app_icons.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/features/camera/presentation/camera_provider.dart';
@@ -153,7 +153,7 @@ class _CameraScreenState extends State<CameraScreen> {
                               onPressed: _capturePhoto,
                             ),
                             SketchyIconButton(
-                              icon: Icon(Icons.flip_camera_ios, color: ink),
+                              icon: RotateCameraIcon(color: ink),
                               onPressed: () => cameraProvider.switchCamera(),
                               iconSize: 40,
                             ),

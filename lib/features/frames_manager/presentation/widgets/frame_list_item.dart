@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/utils/dialog_utils.dart';
+import 'package:framatic/core/widgets/app_icons.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/delete_frame_dialog.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
@@ -53,7 +53,7 @@ class FrameListItem extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SketchyIconButton(
-                    icon: Icon(Icons.edit, color: ink),
+                    icon: PencilIcon(color: ink),
                     iconSize: 40,
                     onPressed: () => showSketchyDialog(
                       context: context,

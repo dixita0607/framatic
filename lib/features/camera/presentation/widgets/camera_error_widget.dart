@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
+import 'package:framatic/core/widgets/app_icons.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/services/permission_service.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
@@ -23,7 +23,7 @@ class CameraErrorWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: ink),
+            ErrorOutlineIcon(color: ink, size: 64),
             const SizedBox(height: 16),
             Text(
               error?.userMessage ?? 'An error occurred',
