@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:framatic/core/utils/color_utils.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 /// A sketch-style button with a solid colored fill.
@@ -26,7 +27,7 @@ class FilledSketchyButton extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: DefaultTextStyle.merge(
-            style: const TextStyle(color: Color(0xFF000000)),
+            style: TextStyle(color: onColor(fillColor)),
             child: child,
           ),
         ),

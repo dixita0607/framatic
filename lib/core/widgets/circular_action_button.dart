@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:framatic/core/utils/color_utils.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class CircularActionButton extends StatelessWidget {
@@ -22,7 +23,7 @@ class CircularActionButton extends StatelessWidget {
     final ink = SketchyTheme.of(context).inkColor;
     final primary = SketchyTheme.of(context).primaryColor;
     final isDisabled = onPressed == null;
-    final iconColor = isPrimary ? const Color(0xFF000000) : ink;
+    final iconColor = isPrimary ? onColor(primary) : ink;
 
     return GestureDetector(
       onTap: onPressed,

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/widgets/circular_action_button.dart';
+import 'package:framatic/core/widgets/dotted_background.dart';
 import 'package:framatic/features/photo_preview/presentation/photo_preview_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
@@ -15,7 +16,7 @@ class PhotoPreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SketchyScaffold(
+    return DottedScaffold(
       body: SafeArea(
         child: Column(
           children: [

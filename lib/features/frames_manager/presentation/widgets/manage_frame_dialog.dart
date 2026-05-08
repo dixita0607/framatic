@@ -4,6 +4,7 @@ import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/widgets/filled_sketchy_button.dart';
+import 'package:framatic/core/widgets/sketchy_underline.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class ManageFrameDialog extends StatefulWidget {
@@ -47,33 +48,27 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final typography = SketchyTheme.of(context).typography;
-    final inputStyle = typography.body;
     final primary = SketchyTheme.of(context).primaryColor;
+    final secondary = SketchyTheme.of(context).secondaryColor;
+    final ink = SketchyTheme.of(context).inkColor;
 
     return SketchyDialog(
-      child: DefaultTextStyle(
-        style: inputStyle.copyWith(color: const Color(0xFF1A1A1A)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: SingleChildScrollView(
+      child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 _isEditing ? 'Edit Frame' : 'Add Frame',
-                style: typography.body.copyWith(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A1A)),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
+              SketchyUnderline(color: ink),
+              const SizedBox(height: 20),
               SketchyTextField(
                 controller: _nameController,
-                style: inputStyle,
                 decoration: InputDecoration(
                   labelText: 'Frame Name',
-                  labelStyle: inputStyle,
-                  hintText: 'e.x. Ultra Wide',
-                  hintStyle: inputStyle,
                   errorText: _nameError,
                 ),
               ),
@@ -85,11 +80,8 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
                       controller: _widthController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      style: inputStyle,
                       decoration: InputDecoration(
                         labelText: 'Width',
-                        labelStyle: inputStyle,
-                        hintStyle: inputStyle,
                         errorText: _widthError,
                       ),
                     ),
@@ -100,22 +92,20 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
                       controller: _heightController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      style: inputStyle,
                       decoration: InputDecoration(
                         labelText: 'Height',
-                        labelStyle: inputStyle,
-                        hintStyle: inputStyle,
                         errorText: _heightError,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  SketchyButton(
+                  FilledSketchyButton(
+                    fillColor: secondary,
                     onPressed: () => Navigator.of(context).pop(),
                     child: const Text('Cancel'),
                   ),
@@ -129,10 +119,8 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
               ),
             ],
           ),
-        ),
       ),
-    ),
-  );
+    );
   }
 
   void _saveFrame() async {

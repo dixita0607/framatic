@@ -22,6 +22,8 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
   try {
     await FramaticDB.instance.open();
   } catch (e) {

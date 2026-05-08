@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:framatic/core/widgets/app_icons.dart';
+import 'package:framatic/core/widgets/dotted_background.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/features/camera/presentation/camera_provider.dart';
@@ -95,10 +96,9 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final paper = SketchyTheme.of(context).paperColor;
     final ink = SketchyTheme.of(context).inkColor;
 
-    return SketchyScaffold(
+    return DottedScaffold(
       body: SafeArea(
         child: Consumer2<CameraProvider, FrameProvider>(
           builder: (context, cameraProvider, frameProvider, child) {
@@ -123,9 +123,7 @@ class _CameraScreenState extends State<CameraScreen> {
                     onScaleUpdate: _onScaleUpdate,
                   ),
                 ),
-                ColoredBox(
-                  color: paper,
-                  child: Padding(
+                Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 64),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -172,7 +170,6 @@ class _CameraScreenState extends State<CameraScreen> {
                       ],
                     ),
                   ),
-                ),
               ],
             );
           },

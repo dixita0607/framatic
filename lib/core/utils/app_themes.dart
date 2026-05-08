@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 // ── Change this to switch the active color scheme ──────────────────────────
-const activeScheme = AppTheme.citrusAndOcean;
+const activeScheme = AppTheme.graphite;
 // ───────────────────────────────────────────────────────────────────────────
 
 enum AppTheme {
@@ -15,6 +15,7 @@ enum AppTheme {
   citrusAndOcean,
   mintAndCoral,
   lavenderAndAmber,
+  graphite,
 }
 
 ({SketchyThemeData light, SketchyThemeData dark}) resolveTheme(AppTheme scheme) {
@@ -28,6 +29,7 @@ enum AppTheme {
     AppTheme.citrusAndOcean  => _citrusAndOcean,
     AppTheme.mintAndCoral    => _mintAndCoral,
     AppTheme.lavenderAndAmber => _lavenderAndAmber,
+    AppTheme.graphite          => _graphite,
   };
 }
 
@@ -40,7 +42,7 @@ final _midnightStudy = (
     paperColor:     const Color(0xFFD4D8E8),
     primaryColor:   const Color(0xFF5040A0),
     secondaryColor: const Color(0xFF9890C0),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
   dark: SketchyThemeData(
@@ -48,7 +50,7 @@ final _midnightStudy = (
     paperColor:     const Color(0xFF141220),
     primaryColor:   const Color(0xFF8878D8),
     secondaryColor: const Color(0xFF302848),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
 );
@@ -60,7 +62,7 @@ final _midnightBlue = (
     paperColor:     const Color(0xFFD0D8EC),
     primaryColor:   const Color(0xFF1E5FA0),
     secondaryColor: const Color(0xFF7090C0),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
   dark: SketchyThemeData(
@@ -68,7 +70,7 @@ final _midnightBlue = (
     paperColor:     const Color(0xFF0C1220),
     primaryColor:   const Color(0xFF5090D8),
     secondaryColor: const Color(0xFF1A2C48),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
 );
@@ -80,7 +82,7 @@ final _midnightGreen = (
     paperColor:     const Color(0xFFC8D8CC),
     primaryColor:   const Color(0xFF1A6B40),
     secondaryColor: const Color(0xFF70A880),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
   dark: SketchyThemeData(
@@ -88,7 +90,7 @@ final _midnightGreen = (
     paperColor:     const Color(0xFF0C1810),
     primaryColor:   const Color(0xFF4AB878),
     secondaryColor: const Color(0xFF143020),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
 );
@@ -102,7 +104,7 @@ final _warmParchment = (
     paperColor:     const Color(0xFFEDE0C8),
     primaryColor:   const Color(0xFF8B5E3C),
     secondaryColor: const Color(0xFFC8AD88),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
   dark: SketchyThemeData(
@@ -110,7 +112,7 @@ final _warmParchment = (
     paperColor:     const Color(0xFF201808),
     primaryColor:   const Color(0xFFD08050),
     secondaryColor: const Color(0xFF3C2810),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
 );
@@ -122,7 +124,7 @@ final _goldenHour = (
     paperColor:     const Color(0xFFF0E4B0),
     primaryColor:   const Color(0xFFB87800),
     secondaryColor: const Color(0xFFD4C060),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
   dark: SketchyThemeData(
@@ -130,7 +132,7 @@ final _goldenHour = (
     paperColor:     const Color(0xFF1C1400),
     primaryColor:   const Color(0xFFE8A020),
     secondaryColor: const Color(0xFF3C2C00),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
 );
@@ -142,7 +144,7 @@ final _dustyRose = (
     paperColor:     const Color(0xFFE8D8D8),
     primaryColor:   const Color(0xFFA04060),
     secondaryColor: const Color(0xFFC0A0A8),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
   dark: SketchyThemeData(
@@ -150,7 +152,7 @@ final _dustyRose = (
     paperColor:     const Color(0xFF1C0C10),
     primaryColor:   const Color(0xFFD86088),
     secondaryColor: const Color(0xFF3C1828),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
 );
@@ -164,7 +166,7 @@ final _citrusAndOcean = (
     paperColor:     const Color(0xFFF0D8C0),
     primaryColor:   const Color(0xFF1E5888),
     secondaryColor: const Color(0xFFD0A878),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
   dark: SketchyThemeData(
@@ -172,7 +174,7 @@ final _citrusAndOcean = (
     paperColor:     const Color(0xFF200E04),
     primaryColor:   const Color(0xFF4A90C8),
     secondaryColor: const Color(0xFF3C2010),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
 );
@@ -184,7 +186,7 @@ final _mintAndCoral = (
     paperColor:     const Color(0xFFC8E8E0),
     primaryColor:   const Color(0xFFC04840),
     secondaryColor: const Color(0xFF90C8C0),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
   dark: SketchyThemeData(
@@ -192,7 +194,7 @@ final _mintAndCoral = (
     paperColor:     const Color(0xFF081614),
     primaryColor:   const Color(0xFFE87060),
     secondaryColor: const Color(0xFF102820),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
 );
@@ -204,7 +206,7 @@ final _lavenderAndAmber = (
     paperColor:     const Color(0xFFE0D4F0),
     primaryColor:   const Color(0xFFC07810),
     secondaryColor: const Color(0xFFB8A8D8),
-    roughness: 0.45,
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
   dark: SketchyThemeData(
@@ -212,7 +214,30 @@ final _lavenderAndAmber = (
     paperColor:     const Color(0xFF120820),
     primaryColor:   const Color(0xFFE8A040),
     secondaryColor: const Color(0xFF281840),
-    roughness: 0.45,
+    roughness: 0.35,
+    typography: SketchyTypographyData.comicShanns(),
+  ),
+);
+
+// ── Monochrome ─────────────────────────────────────────────────────────────
+
+// Copic cool grey palette — pure dark paper, near-white ink.
+// Dark is the intended default; light is the inverse for system light mode.
+final _graphite = (
+  light: SketchyThemeData(
+    inkColor:       const Color(0xFF141414), // C-10 near-black
+    paperColor:     const Color(0xFFF0F0F0), // C-0 near-white
+    primaryColor:   const Color(0xFF393939), // C-9 dark grey
+    secondaryColor: const Color(0xFFB0B0B0), // C-4 mid grey
+    roughness: 0.35,
+    typography: SketchyTypographyData.comicShanns(),
+  ),
+  dark: SketchyThemeData(
+    inkColor:       const Color(0xFFF0F0F0), // C-0 near-white
+    paperColor:     const Color(0xFF141414), // C-10 near-black
+    primaryColor:   const Color(0xFFD8D8D8), // C-2 light grey
+    secondaryColor: const Color(0xFF424242), // C-8/9 dark grey
+    roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
 );

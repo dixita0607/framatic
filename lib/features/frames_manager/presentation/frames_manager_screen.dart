@@ -1,7 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/widgets.dart';
+import 'package:framatic/core/utils/color_utils.dart';
 import 'package:framatic/core/utils/dialog_utils.dart';
+import 'package:framatic/core/widgets/dotted_background.dart';
 import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/frame_list_item.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
@@ -24,22 +24,8 @@ class FramesManagerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = SketchyTheme.of(context).inkColor;
     final primary = SketchyTheme.of(context).primaryColor;
-    return SketchyScaffold(
-      appBar: SketchyAppBar(
-        leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Transform.rotate(
-                angle: pi,
-                child: SketchySymbol(symbol: SketchySymbols.chevronRight, color: ink),
-              ),
-          ),
-        ),
-        title: const Text('Manage Frames'),
-      ),
+    return DottedScaffold(
       body: Consumer<FrameProvider>(
         builder: (context, frameProvider, child) {
           if (frameProvider.isLoading) {
@@ -49,6 +35,7 @@ class FramesManagerScreen extends StatelessWidget {
           final allFrames = frameProvider.frames;
 
           return ReorderableList(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             itemCount: allFrames.length,
             onReorder: (oldIndex, newIndex) async =>
                 await frameProvider.orderFrames(oldIndex, newIndex),
@@ -78,8 +65,8 @@ class FramesManagerScreen extends StatelessWidget {
           fill: SketchyFill.solid,
           fillColor: primary,
           strokeColor: primary,
-          child: const Center(
-            child: SketchySymbol(symbol: SketchySymbols.plus, color: Color(0xFF000000)),
+          child: Center(
+            child: SketchySymbol(symbol: SketchySymbols.plus, color: onColor(primary)),
           ),
         ),
       ),
@@ -87,3 +74,4 @@ class FramesManagerScreen extends StatelessWidget {
     );
   }
 }
+

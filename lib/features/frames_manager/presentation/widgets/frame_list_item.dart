@@ -27,9 +27,9 @@ class FrameListItem extends StatelessWidget {
     return ReorderableDragStartListener(
       key: ValueKey(frame.id),
       index: order,
-      child: SketchyListTile(
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Row(
           children: [
             SketchySymbol(symbol: SketchySymbols.menu, color: ink),
             const SizedBox(width: 8),
@@ -44,12 +44,28 @@ class FrameListItem extends StatelessWidget {
                 ),
               ),
             ),
-          ],
-        ),
-        title: Text(frame.title),
-        subtitle: Text(frame.formattedRatio),
-        trailing: frame.isCustom
-            ? Row(
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    frame.title,
+                    style: TextStyle(
+                      color: ink,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    frame.formattedRatio,
+                    style: TextStyle(color: ink, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            if (frame.isCustom)
+              Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SketchyIconButton(
@@ -71,8 +87,9 @@ class FrameListItem extends StatelessWidget {
                     ),
                   ),
                 ],
-              )
-            : null,
+              ),
+          ],
+        ),
       ),
     );
   }

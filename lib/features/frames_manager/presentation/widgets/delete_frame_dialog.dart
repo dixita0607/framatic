@@ -3,6 +3,7 @@ import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/widgets/filled_sketchy_button.dart';
+import 'package:framatic/core/widgets/sketchy_underline.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class DeleteFrameDialog extends StatelessWidget {
@@ -17,27 +18,27 @@ class DeleteFrameDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final typography = SketchyTheme.of(context).typography;
+    final secondary = SketchyTheme.of(context).secondaryColor;
+    final ink = SketchyTheme.of(context).inkColor;
     return SketchyDialog(
-      child: DefaultTextStyle(
-        style: typography.body.copyWith(color: const Color(0xFF1A1A1A)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
+      child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Delete Frame',
-              style: typography.body.copyWith(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A1A)),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 12),
-            Text('Are you sure you want to delete "${frame.title}"?', style: typography.body.copyWith(color: const Color(0xFF1A1A1A))),
-            const SizedBox(height: 20),
+            const SizedBox(height: 4),
+            SketchyUnderline(color: ink),
+            const SizedBox(height: 16),
+            Text('Are you sure you want to delete "${frame.title}"?'),
+            const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                SketchyButton(
+                FilledSketchyButton(
+                  fillColor: secondary,
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),
                 ),
@@ -60,9 +61,7 @@ class DeleteFrameDialog extends StatelessWidget {
               ],
             ),
           ],
-        ),
       ),
-    ),
-  );
+    );
   }
 }

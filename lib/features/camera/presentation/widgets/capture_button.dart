@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:framatic/core/utils/color_utils.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class CaptureButton extends StatefulWidget {
@@ -58,11 +59,11 @@ class _CaptureButtonState extends State<CaptureButton>
           fillColor: primary.withValues(alpha: 0.35),
           strokeColor: primary,
           child: widget.isCapturing
-              ? const Center(
+              ? Center(
                   child: SketchyCircularProgressIndicator(
                     size: 24,
                     strokeWidth: 2.5,
-                    color: Color(0xFF000000),
+                    color: onColor(primary),
                   ),
                 )
               : const SizedBox.shrink(),
