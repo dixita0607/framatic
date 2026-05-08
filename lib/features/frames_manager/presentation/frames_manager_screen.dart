@@ -3,6 +3,7 @@ import 'package:framatic/features/frames_manager/presentation/frame_provider.dar
 import 'package:framatic/features/frames_manager/presentation/widgets/frame_list_item.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class FramesManagerScreen extends StatelessWidget {
   const FramesManagerScreen({super.key});
@@ -20,18 +21,30 @@ class FramesManagerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Manage Frames')),
+    final ink = SketchyTheme.of(context).inkColor;
+    final primary = SketchyTheme.of(context).primaryColor;
+    return SketchyScaffold(
+      appBar: SketchyAppBar(
+        leading: GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Icon(Icons.arrow_back, color: ink),
+          ),
+        ),
+        title: const Text('Manage Frames'),
+      ),
       body: Consumer<FrameProvider>(
         builder: (context, frameProvider, child) {
           if (frameProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: SketchyCircularProgressIndicator());
           }
 
           final allFrames = frameProvider.frames;
 
-          return Scaffold(
-            body: ReorderableListView.builder(
+          return Material(
+            type: MaterialType.transparency,
+            child: ReorderableListView.builder(
               itemCount: allFrames.length,
               onReorder: (oldIndex, newIndex) async =>
                   await frameProvider.orderFrames(oldIndex, newIndex),
@@ -50,14 +63,24 @@ class FramesManagerScreen extends StatelessWidget {
                 );
               },
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () => _showAddFrameDialog(context, frameProvider),
-              tooltip: 'Add Custom Frame',
-              child: const Icon(Icons.add),
-            ),
           );
         },
       ),
+      floatingActionButton: GestureDetector(
+        onTap: () => _showAddFrameDialog(context, context.read<FrameProvider>()),
+        child: SketchyFrame(
+          shape: SketchyFrameShape.circle,
+          width: 56,
+          height: 56,
+          fill: SketchyFill.solid,
+          fillColor: primary,
+          strokeColor: primary,
+          child: const Center(
+            child: Icon(Icons.add, color: Color(0xFF000000)),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: SketchyFabLocation.endFloat,
     );
   }
 }

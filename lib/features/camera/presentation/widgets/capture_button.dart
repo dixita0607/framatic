@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class CaptureButton extends StatefulWidget {
   final VoidCallback? onPressed;
@@ -39,6 +40,7 @@ class _CaptureButtonState extends State<CaptureButton>
 
   @override
   Widget build(BuildContext context) {
+    final primary = SketchyTheme.of(context).primaryColor;
     return GestureDetector(
       onTapDown: (_) => _scaleController.forward(),
       onTapUp: (_) {
@@ -48,32 +50,22 @@ class _CaptureButtonState extends State<CaptureButton>
       onTapCancel: () => _scaleController.reverse(),
       child: ScaleTransition(
         scale: _scaleAnimation,
-        child: Container(
+        child: SketchyFrame(
+          shape: SketchyFrameShape.circle,
           width: 88,
           height: 88,
-          decoration: BoxDecoration(
-            shape: .circle,
-            color: Colors.white.withValues(alpha: 0.3),
-            border: .all(
-              color: Colors.white,
-              width: 3,
-            ),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: widget.isCapturing
-                ? const Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation(Colors.white),
-                      ),
-                    ),
-                  )
-                : null,
-          ),
+          fill: SketchyFill.solid,
+          fillColor: primary.withValues(alpha: 0.85),
+          strokeColor: primary,
+          child: widget.isCapturing
+              ? const Center(
+                  child: SketchyCircularProgressIndicator(
+                    size: 24,
+                    strokeWidth: 2.5,
+                    color: Color(0xFFFFFFFF),
+                  ),
+                )
+              : const SizedBox.shrink(),
         ),
       ),
     );

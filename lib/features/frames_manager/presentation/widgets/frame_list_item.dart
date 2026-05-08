@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/delete_frame_dialog.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class FrameListItem extends StatelessWidget {
   final Frame frame;
@@ -19,22 +20,24 @@ class FrameListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ink = SketchyTheme.of(context).inkColor;
+    final primary = SketchyTheme.of(context).primaryColor;
     return ReorderableDragStartListener(
       key: ValueKey(frame.id),
       index: order,
-      child: ListTile(
+      child: SketchyListTile(
         leading: Row(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.drag_handle),
+            Icon(Icons.drag_handle, color: ink),
             const SizedBox(width: 8),
             SizedBox(
               width: 48,
               height: 48,
               child: FittedBox(
-                fit: .contain,
+                fit: BoxFit.contain,
                 child: ColoredBox(
-                  color: Colors.grey.withValues(alpha: 0.3),
+                  color: primary.withValues(alpha: 0.35),
                   child: SizedBox(width: frame.aspectRatio * 100, height: 100),
                 ),
               ),
@@ -44,31 +47,26 @@ class FrameListItem extends StatelessWidget {
         title: Text(frame.title),
         subtitle: Text(frame.formattedRatio),
         trailing: frame.isCustom
-            ? MenuAnchor(
-                builder: (context, controller, child) => IconButton(
-                  icon: const Icon(Icons.more_vert),
-                  onPressed: () => controller.isOpen
-                      ? controller.close()
-                      : controller.open(),
-                ),
-                menuChildren: <Widget>[
-                  MenuItemButton(
-                    leadingIcon: const Icon(Icons.edit),
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SketchyIconButton(
+                    icon: Icon(Icons.edit, color: ink),
+                    iconSize: 40,
                     onPressed: () => showDialog(
                       context: context,
                       builder: (_) =>
                           ManageFrameDialog(frame: frame, onSave: onEdit),
                     ),
-                    child: const Text('edit'),
                   ),
-                  MenuItemButton(
-                    leadingIcon: const Icon(Icons.delete),
+                  SketchyIconButton(
+                    icon: Icon(Icons.delete, color: ink),
+                    iconSize: 40,
                     onPressed: () => showDialog(
                       context: context,
                       builder: (_) =>
                           DeleteFrameDialog(frame: frame, onDelete: onDelete),
                     ),
-                    child: const Text('delete'),
                   ),
                 ],
               )

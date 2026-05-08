@@ -6,8 +6,8 @@ import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/widgets/circular_action_button.dart';
 import 'package:framatic/features/photo_preview/presentation/photo_preview_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
-/// Screen to preview captured photo with Save/Retake options
 class PhotoPreviewScreen extends StatelessWidget {
   final String imagePath;
 
@@ -15,24 +15,20 @@ class PhotoPreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SketchyScaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // Preview the processed image (frame border is already baked in)
             Expanded(
-              child: Center(child: Image.file(File(imagePath), fit: .contain)),
+              child: Center(child: Image.file(File(imagePath), fit: BoxFit.contain)),
             ),
-
-            // Action buttons
             Consumer<PhotoPreviewProvider>(
               builder: (context, provider, _) {
-                return Container(
-                  padding: const .all(24),
+                return Padding(
+                  padding: const EdgeInsets.all(24),
                   child: Row(
-                    mainAxisAlignment: .spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // Retake button
                       CircularActionButton(
                         icon: Icons.close,
                         label: 'Retake',
@@ -43,23 +39,19 @@ class PhotoPreviewScreen extends StatelessWidget {
                                 Navigator.of(context).pop(false);
                               },
                       ),
-
-                      // Save button
                       CircularActionButton(
                         icon: Icons.check,
                         label: 'Save',
+                        isPrimary: true,
                         onPressed: provider.isSaving
                             ? null
                             : () async {
                                 try {
                                   await provider.savePhoto(imagePath);
-
                                   if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(provider.successMessage),
-                                        duration: const Duration(seconds: 2),
-                                      ),
+                                    SketchySnackBar.show(
+                                      context,
+                                      message: provider.successMessage,
                                     );
                                     Navigator.of(context).pop(true);
                                   }

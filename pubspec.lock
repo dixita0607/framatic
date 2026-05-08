@@ -440,6 +440,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  rough_flutter:
+    dependency: transitive
+    description:
+      name: rough_flutter
+      sha256: "0828b3c81e475aee2308154d05ed87e671661dfc237aac04dc972b0f9b22016b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -496,6 +504,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.1"
+  sketchy_design_lang:
+    dependency: "direct main"
+    description:
+      name: sketchy_design_lang
+      sha256: "1b2bacd3389c9c720741ca036285f0acf69a6fa956e19b2db5de3cbf57fce2a6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
   sky_engine:
     dependency: transitive
     description: flutter

@@ -12,6 +12,7 @@ import 'package:framatic/features/frames_manager/presentation/frames_manager_scr
 import 'package:framatic/features/photo_preview/presentation/photo_preview_provider.dart';
 import 'package:framatic/features/photo_preview/presentation/photo_preview_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -21,7 +22,7 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  double _baseZoom = 1.0; // For pinch gesture
+  double _baseZoom = 1.0;
 
   Future<void> _capturePhoto() async {
     final cameraProvider = context.read<CameraProvider>();
@@ -31,9 +32,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     if (activeFrame == null) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('No frame selected')));
+        SketchySnackBar.show(context, message: 'No frame selected');
       }
       return;
     }
@@ -42,31 +41,25 @@ class _CameraScreenState extends State<CameraScreen> {
       final xFile = await cameraProvider.takePicture();
       if (xFile == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to capture photo')),
-          );
+          SketchySnackBar.show(context, message: 'Failed to capture photo');
         }
         return;
       }
 
-      // Process with overlay
       final processedPath = await photoProvider.processPhotoWithFrame(
         imagePath: xFile.path,
         frame: activeFrame,
       );
 
-      // Navigate to preview screen
       if (mounted) {
         await Navigator.of(context).push(
-          MaterialPageRoute(
+          SketchyPageRoute(
             builder: (context) => PhotoPreviewScreen(imagePath: processedPath),
           ),
         );
       }
     } on AppError catch (e) {
-      if (mounted) {
-        context.showErrorSnackBar(e);
-      }
+      if (mounted) context.showErrorSnackBar(e);
     } catch (e) {
       if (mounted) {
         context.showErrorSnackBar(
@@ -76,47 +69,42 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  /// Handle zoom slider change
   Future<void> _onZoomChanged(double zoom) async {
     await context.read<CameraProvider>().setZoomLevel(zoom);
   }
 
-  /// Handle pinch gesture start
   void _onScaleStart(ScaleStartDetails details) {
     _baseZoom = context.read<CameraProvider>().currentZoom;
   }
 
-  /// Handle pinch gesture update
   Future<void> _onScaleUpdate(ScaleUpdateDetails details) async {
     final cameraProvider = context.read<CameraProvider>();
-
-    // Calculate new zoom based on pinch scale
     final newZoom = (_baseZoom * details.scale).clamp(
       cameraProvider.minZoom,
       cameraProvider.maxZoom,
     );
-
     if ((newZoom - cameraProvider.currentZoom).abs() > 0.01) {
       await cameraProvider.setZoomLevel(newZoom);
     }
   }
 
-  void _onManageFrames() => Navigator.of(
-    context,
-  ).push(MaterialPageRoute(builder: (context) => const FramesManagerScreen()));
+  void _onManageFrames() => Navigator.of(context).push(
+        SketchyPageRoute(builder: (context) => const FramesManagerScreen()),
+      );
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final paper = SketchyTheme.of(context).paperColor;
+    final ink = SketchyTheme.of(context).inkColor;
+
+    return SketchyScaffold(
       body: SafeArea(
         child: Consumer2<CameraProvider, FrameProvider>(
           builder: (context, cameraProvider, frameProvider, child) {
-            // Show loading when initializing or controller is null
             if (cameraProvider.isLoading || cameraProvider.controller == null) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: SketchyCircularProgressIndicator());
             }
 
-            // Show error if present
             if (cameraProvider.error != null) {
               return CameraErrorWidget(
                 error: cameraProvider.error,
@@ -124,7 +112,6 @@ class _CameraScreenState extends State<CameraScreen> {
               );
             }
 
-            // Show camera view
             return Column(
               children: [
                 Expanded(
@@ -135,58 +122,54 @@ class _CameraScreenState extends State<CameraScreen> {
                     onScaleUpdate: _onScaleUpdate,
                   ),
                 ),
-                Container(
-                  color: Colors.black,
-                  padding: const .fromLTRB(16, 0, 16, 64),
-                  child: Column(
-                    mainAxisAlignment: .start,
-                    children: [
-                      // Zoom slider
-                      Padding(
-                        padding: const .only(bottom: 16),
-                        child: ZoomSlider(
-                          minZoom: cameraProvider.minZoom,
-                          maxZoom: cameraProvider.maxZoom,
-                          currentZoom: cameraProvider.currentZoom,
-                          onZoomChanged: _onZoomChanged,
+                ColoredBox(
+                  color: paper,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 64),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: ZoomSlider(
+                            minZoom: cameraProvider.minZoom,
+                            maxZoom: cameraProvider.maxZoom,
+                            currentZoom: cameraProvider.currentZoom,
+                            onZoomChanged: _onZoomChanged,
+                          ),
                         ),
-                      ),
-
-                      // Control buttons row (settings, capture, flip camera)
-                      Row(
-                        mainAxisAlignment: .spaceEvenly,
-                        crossAxisAlignment: .center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.settings, size: 28),
-                            color: Colors.white,
-                            onPressed: _onManageFrames,
-                            tooltip: 'Manage Frames',
-                          ),
-
-                          CaptureButton(
-                            isCapturing: cameraProvider.isCapturing,
-                            onPressed: _capturePhoto,
-                          ),
-
-                          IconButton(
-                            onPressed: () => cameraProvider.switchCamera(),
-                            icon: const Icon(Icons.flip_camera_ios, size: 28),
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        height: 48,
-                        child: FrameSelector(
-                          frames: frameProvider.frames,
-                          activeFrame: frameProvider.activeFrame!,
-                          isLoading: frameProvider.isLoading,
-                          onFrameSelected: frameProvider.setActiveFrame,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SketchyIconButton(
+                              icon: Icon(Icons.settings, color: ink),
+                              onPressed: _onManageFrames,
+                              iconSize: 40,
+                            ),
+                            CaptureButton(
+                              isCapturing: cameraProvider.isCapturing,
+                              onPressed: _capturePhoto,
+                            ),
+                            SketchyIconButton(
+                              icon: Icon(Icons.flip_camera_ios, color: ink),
+                              onPressed: () => cameraProvider.switchCamera(),
+                              iconSize: 40,
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          height: 48,
+                          child: FrameSelector(
+                            frames: frameProvider.frames,
+                            activeFrame: frameProvider.activeFrame!,
+                            isLoading: frameProvider.isLoading,
+                            onFrameSelected: frameProvider.setActiveFrame,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
