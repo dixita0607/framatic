@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class CaptureButton extends StatefulWidget {

@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';
+import 'dart:math';
+
+import 'package:flutter/widgets.dart';
+import 'package:framatic/core/utils/dialog_utils.dart';
 import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/frame_list_item.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
@@ -9,7 +12,7 @@ class FramesManagerScreen extends StatelessWidget {
   const FramesManagerScreen({super.key});
 
   void _showAddFrameDialog(BuildContext context, FrameProvider frameProvider) {
-    showDialog(
+    showSketchyDialog(
       context: context,
       builder: (context) => ManageFrameDialog(
         onSave: (newFrame) async {
@@ -29,7 +32,10 @@ class FramesManagerScreen extends StatelessWidget {
           onTap: () => Navigator.of(context).pop(),
           child: Padding(
             padding: const EdgeInsets.all(8),
-            child: Icon(Icons.arrow_back, color: ink),
+            child: Transform.rotate(
+                angle: pi,
+                child: SketchySymbol(symbol: SketchySymbols.chevronRight, color: ink),
+              ),
           ),
         ),
         title: const Text('Manage Frames'),
@@ -42,27 +48,24 @@ class FramesManagerScreen extends StatelessWidget {
 
           final allFrames = frameProvider.frames;
 
-          return Material(
-            type: MaterialType.transparency,
-            child: ReorderableListView.builder(
-              itemCount: allFrames.length,
-              onReorder: (oldIndex, newIndex) async =>
-                  await frameProvider.orderFrames(oldIndex, newIndex),
-              itemBuilder: (context, index) {
-                final frame = allFrames[index];
-                return FrameListItem(
-                  key: ValueKey(frame.id),
-                  frame: frame,
-                  order: index,
-                  onEdit: (updatedFrame) async {
-                    await frameProvider.updateFrame(updatedFrame);
-                  },
-                  onDelete: (frameId) async {
-                    await frameProvider.deleteFrame(frameId);
-                  },
-                );
-              },
-            ),
+          return ReorderableList(
+            itemCount: allFrames.length,
+            onReorder: (oldIndex, newIndex) async =>
+                await frameProvider.orderFrames(oldIndex, newIndex),
+            itemBuilder: (context, index) {
+              final frame = allFrames[index];
+              return FrameListItem(
+                key: ValueKey(frame.id),
+                frame: frame,
+                order: index,
+                onEdit: (updatedFrame) async {
+                  await frameProvider.updateFrame(updatedFrame);
+                },
+                onDelete: (frameId) async {
+                  await frameProvider.deleteFrame(frameId);
+                },
+              );
+            },
           );
         },
       ),
@@ -76,7 +79,7 @@ class FramesManagerScreen extends StatelessWidget {
           fillColor: primary,
           strokeColor: primary,
           child: const Center(
-            child: Icon(Icons.add, color: Color(0xFF000000)),
+            child: SketchySymbol(symbol: SketchySymbols.plus, color: Color(0xFF000000)),
           ),
         ),
       ),

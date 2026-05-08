@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/features/camera/presentation/camera_provider.dart';
@@ -143,7 +144,7 @@ class _CameraScreenState extends State<CameraScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             SketchyIconButton(
-                              icon: Icon(Icons.settings, color: ink),
+                              icon: SketchySymbol(symbol: SketchySymbols.gear, color: ink),
                               onPressed: _onManageFrames,
                               iconSize: 40,
                             ),

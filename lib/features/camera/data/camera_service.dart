@@ -1,5 +1,5 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:framatic/features/camera/data/camera_repository.dart';
 import 'package:framatic/features/camera/domain/camera_error.dart';
 

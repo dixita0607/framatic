@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/models/frame.dart';
+import 'package:framatic/core/utils/dialog_utils.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/delete_frame_dialog.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
@@ -29,7 +31,7 @@ class FrameListItem extends StatelessWidget {
         leading: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.drag_handle, color: ink),
+            SketchySymbol(symbol: SketchySymbols.menu, color: ink),
             const SizedBox(width: 8),
             SizedBox(
               width: 48,
@@ -53,16 +55,16 @@ class FrameListItem extends StatelessWidget {
                   SketchyIconButton(
                     icon: Icon(Icons.edit, color: ink),
                     iconSize: 40,
-                    onPressed: () => showDialog(
+                    onPressed: () => showSketchyDialog(
                       context: context,
                       builder: (_) =>
                           ManageFrameDialog(frame: frame, onSave: onEdit),
                     ),
                   ),
                   SketchyIconButton(
-                    icon: Icon(Icons.delete, color: ink),
+                    icon: SketchySymbol(symbol: SketchySymbols.x, color: ink),
                     iconSize: 40,
-                    onPressed: () => showDialog(
+                    onPressed: () => showSketchyDialog(
                       context: context,
                       builder: (_) =>
                           DeleteFrameDialog(frame: frame, onDelete: onDelete),

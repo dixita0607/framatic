@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 
 class CircularActionButton extends StatelessWidget {
-  final IconData icon;
+  final SketchySymbols symbol;
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
@@ -10,7 +10,7 @@ class CircularActionButton extends StatelessWidget {
 
   const CircularActionButton({
     super.key,
-    required this.icon,
+    required this.symbol,
     required this.label,
     required this.onPressed,
     this.isLoading = false,
@@ -45,7 +45,7 @@ class CircularActionButton extends StatelessWidget {
                         strokeWidth: 2,
                         color: iconColor,
                       )
-                    : Icon(icon, color: iconColor),
+                    : SketchySymbol(symbol: symbol, color: iconColor, size: 24),
               ),
             ),
             const SizedBox(height: 8),

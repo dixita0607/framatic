@@ -1,5 +1,5 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/features/camera/presentation/widgets/clipped_camera_preview.dart';
 
@@ -33,7 +33,7 @@ class CameraArea extends StatelessWidget {
               Center(
                 child: Container(
                   decoration: BoxDecoration(
-                    border: Border.all(width: 16, color: Colors.white),
+                    border: Border.all(width: 16, color: const Color(0xFFFFFFFF)),
                   ),
                   child: ClippedCameraPreview(
                     controller: controller,

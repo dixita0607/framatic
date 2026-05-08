@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/widgets/circular_action_button.dart';
@@ -30,7 +30,7 @@ class PhotoPreviewScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       CircularActionButton(
-                        icon: Icons.close,
+                        symbol: SketchySymbols.x,
                         label: 'Retake',
                         onPressed: provider.isSaving
                             ? null
@@ -40,7 +40,7 @@ class PhotoPreviewScreen extends StatelessWidget {
                               },
                       ),
                       CircularActionButton(
-                        icon: Icons.check,
+                        symbol: SketchySymbols.check,
                         label: 'Save',
                         isPrimary: true,
                         onPressed: provider.isSaving
