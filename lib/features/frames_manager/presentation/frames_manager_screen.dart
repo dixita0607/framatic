@@ -57,6 +57,7 @@ class FramesManagerScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: GestureDetector(
+        key: const Key('add_frame_fab'),
         onTap: () => _showAddFrameDialog(context, context.read<FrameProvider>()),
         child: SketchyFrame(
           shape: SketchyFrameShape.circle,
