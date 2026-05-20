@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
+import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 import 'package:framatic/core/widgets/circular_action_button.dart';
 import 'package:framatic/features/photo_preview/presentation/photo_preview_provider.dart';
 import 'package:provider/provider.dart';
@@ -15,69 +16,67 @@ class PhotoPreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Preview the processed image (frame border is already baked in)
-            Expanded(
-              child: Center(child: Image.file(File(imagePath), fit: .contain)),
-            ),
+    return SketchScreen(
+      child: Column(
+        children: [
+          // Preview the processed image (frame border is already baked in)
+          Expanded(
+            child: Center(child: Image.file(File(imagePath), fit: .contain)),
+          ),
 
-            // Action buttons
-            Consumer<PhotoPreviewProvider>(
-              builder: (context, provider, _) {
-                return Container(
-                  padding: const .all(24),
-                  child: Row(
-                    mainAxisAlignment: .spaceEvenly,
-                    children: [
-                      // Retake button
-                      CircularActionButton(
-                        icon: Icons.close,
-                        label: 'Retake',
-                        onPressed: provider.isSaving
-                            ? null
-                            : () {
-                                provider.retakePhoto(imagePath);
-                                Navigator.of(context).pop(false);
-                              },
-                      ),
+          // Action buttons
+          Consumer<PhotoPreviewProvider>(
+            builder: (context, provider, _) {
+              return Container(
+                padding: const .all(24),
+                child: Row(
+                  mainAxisAlignment: .spaceEvenly,
+                  children: [
+                    // Retake button
+                    CircularActionButton(
+                      icon: SketchIconType.close,
+                      label: 'Retake',
+                      onPressed: provider.isSaving
+                          ? null
+                          : () {
+                              provider.retakePhoto(imagePath);
+                              Navigator.of(context).pop(false);
+                            },
+                    ),
 
-                      // Save button
-                      CircularActionButton(
-                        icon: Icons.check,
-                        label: 'Save',
-                        onPressed: provider.isSaving
-                            ? null
-                            : () async {
-                                try {
-                                  await provider.savePhoto(imagePath);
+                    // Save button
+                    CircularActionButton(
+                      icon: SketchIconType.check,
+                      label: 'Save',
+                      onPressed: provider.isSaving
+                          ? null
+                          : () async {
+                              try {
+                                await provider.savePhoto(imagePath);
 
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(provider.successMessage),
-                                        duration: const Duration(seconds: 2),
-                                      ),
-                                    );
-                                    Navigator.of(context).pop(true);
-                                  }
-                                } on AppError catch (e) {
-                                  if (context.mounted) {
-                                    context.showErrorSnackBar(e);
-                                  }
+                                if (context.mounted) {
+                                  SketchToast.show(
+                                    context,
+                                    provider.successMessage,
+                                  );
+                                  Navigator.of(context).pop(true);
                                 }
-                              },
-                        isLoading: provider.isSaving,
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+                              } on AppError catch (e) {
+                                if (context.mounted) {
+                                  context.showErrorToast(e);
+                                }
+                              }
+                            },
+                      isLoading: provider.isSaving,
+                      filled: true,
+                      primary: true,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

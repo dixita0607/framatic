@@ -1,5 +1,5 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/utils/frame_calculator.dart';
 
 /// Build camera preview that is clipped to the selected aspect ratio

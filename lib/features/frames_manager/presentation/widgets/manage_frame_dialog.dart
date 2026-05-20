@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/models/frame.dart';
+import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 
 class ManageFrameDialog extends StatefulWidget {
   final Frame? frame;
@@ -44,20 +45,29 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(_isEditing ? 'Edit Frame' : 'Add Frame'),
-      content: Form(
+    return SketchDialog(
+      title: _isEditing ? 'Edit Frame' : 'Add Frame',
+      actions: [
+        SketchButton(
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        SketchButton(
+          label: 'Save',
+          onPressed: _saveFrame,
+          filled: true,
+          primary: true,
+        ),
+      ],
+      child: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: .min,
           children: [
-            TextFormField(
+            SketchFormInput(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Frame Name',
-                hintText: 'e.x. Ultra Wide',
-                border: OutlineInputBorder(),
-              ),
+              label: 'Frame Name',
+              hint: 'e.x. Ultra Wide',
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Frame name is required';
@@ -70,14 +80,11 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
+                  child: SketchFormInput(
                     controller: _widthController,
                     keyboardType: .number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Width',
-                      border: OutlineInputBorder(),
-                    ),
+                    label: 'Width',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Enter width';
@@ -90,16 +97,13 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
                     },
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: TextFormField(
+                  child: SketchFormInput(
                     controller: _heightController,
                     keyboardType: .number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Height',
-                      border: OutlineInputBorder(),
-                    ),
+                    label: 'Height',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Enter height';
@@ -117,13 +121,6 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(onPressed: _saveFrame, child: const Text('Save')),
-      ],
     );
   }
 
@@ -149,13 +146,11 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_isEditing ? 'Frame updated' : 'Frame added')),
-        );
+        SketchToast.show(context, _isEditing ? 'Frame updated' : 'Frame added');
       }
     } on AppError catch (e) {
       if (mounted) {
-        context.showErrorSnackBar(e);
+        context.showErrorToast(e);
       }
     }
   }

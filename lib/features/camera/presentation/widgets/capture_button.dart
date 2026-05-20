@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 
 class CaptureButton extends StatefulWidget {
   final VoidCallback? onPressed;
@@ -39,6 +40,7 @@ class _CaptureButtonState extends State<CaptureButton>
 
   @override
   Widget build(BuildContext context) {
+    final theme = SketchTheme.of(context);
     return GestureDetector(
       onTapDown: (_) => _scaleController.forward(),
       onTapUp: (_) {
@@ -48,31 +50,27 @@ class _CaptureButtonState extends State<CaptureButton>
       onTapCancel: () => _scaleController.reverse(),
       child: ScaleTransition(
         scale: _scaleAnimation,
-        child: Container(
-          width: 88,
-          height: 88,
-          decoration: BoxDecoration(
-            shape: .circle,
-            color: Colors.white.withValues(alpha: 0.3),
-            border: .all(
-              color: Colors.white,
-              width: 3,
-            ),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: widget.isCapturing
-                ? const Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation(Colors.white),
+        child: SizedBox.square(
+          dimension: 88,
+          child: SketchSurface(
+            shape: SketchShape.circle,
+            fillColor: theme.ink.withValues(alpha: 0.18),
+            strokeColor: theme.ink,
+            seed: 909,
+            child: Center(
+              child: widget.isCapturing
+                  ? SketchProgress(size: 28, color: theme.ink)
+                  : SizedBox.square(
+                      dimension: 56,
+                      child: SketchSurface(
+                        shape: SketchShape.circle,
+                        fillColor: theme.paper,
+                        strokeColor: theme.ink,
+                        seed: 910,
+                        child: const SizedBox.shrink(),
                       ),
                     ),
-                  )
-                : null,
+            ),
           ),
         ),
       ),

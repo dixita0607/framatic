@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/services/permission_service.dart';

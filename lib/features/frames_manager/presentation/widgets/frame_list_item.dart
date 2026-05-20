@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/models/frame.dart';
+import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/delete_frame_dialog.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
 
@@ -19,60 +20,115 @@ class FrameListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ReorderableDragStartListener(
+    final theme = SketchTheme.of(context);
+    return Padding(
       key: ValueKey(frame.id),
-      index: order,
-      child: ListTile(
-        leading: Row(
-          mainAxisSize: .min,
-          children: [
-            const Icon(Icons.drag_handle),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: FittedBox(
-                fit: .contain,
-                child: ColoredBox(
-                  color: Colors.grey.withValues(alpha: 0.3),
-                  child: SizedBox(width: frame.aspectRatio * 100, height: 100),
-                ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          ReorderableDragStartListener(
+            index: order,
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: SketchIcon(
+                type: SketchIconType.drag,
+                color: theme.mutedInk,
               ),
             ),
-          ],
-        ),
-        title: Text(frame.title),
-        subtitle: Text(frame.formattedRatio),
-        trailing: frame.isCustom
-            ? MenuAnchor(
-                builder: (context, controller, child) => IconButton(
-                  icon: const Icon(Icons.more_vert),
-                  onPressed: () => controller.isOpen
-                      ? controller.close()
-                      : controller.open(),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 52,
+            height: 44,
+            child: Center(
+              child: _FrameRatioPreview(
+                aspectRatio: frame.aspectRatio,
+                seed: (frame.id ?? order) + 10,
+                theme: theme,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  frame.title,
+                  style: theme.bodyStyle.copyWith(fontWeight: FontWeight.w700),
                 ),
-                menuChildren: <Widget>[
-                  MenuItemButton(
-                    leadingIcon: const Icon(Icons.edit),
-                    onPressed: () => showDialog(
-                      context: context,
-                      builder: (_) =>
-                          ManageFrameDialog(frame: frame, onSave: onEdit),
-                    ),
-                    child: const Text('edit'),
+                const SizedBox(height: 3),
+                Text(frame.formattedRatio, style: theme.labelStyle),
+              ],
+            ),
+          ),
+          if (frame.isCustom)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SketchIconButton(
+                  icon: SketchIconType.edit,
+                  onPressed: () => showSketchDialog(
+                    context: context,
+                    builder: (_) =>
+                        ManageFrameDialog(frame: frame, onSave: onEdit),
                   ),
-                  MenuItemButton(
-                    leadingIcon: const Icon(Icons.delete),
-                    onPressed: () => showDialog(
-                      context: context,
-                      builder: (_) =>
-                          DeleteFrameDialog(frame: frame, onDelete: onDelete),
-                    ),
-                    child: const Text('delete'),
+                  tooltip: 'Edit Frame',
+                  size: 34,
+                  borderless: true,
+                ),
+                const SizedBox(width: 2),
+                SketchIconButton(
+                  icon: SketchIconType.delete,
+                  danger: true,
+                  onPressed: () => showSketchDialog(
+                    context: context,
+                    builder: (_) =>
+                        DeleteFrameDialog(frame: frame, onDelete: onDelete),
                   ),
-                ],
-              )
-            : null,
+                  tooltip: 'Delete Frame',
+                  size: 34,
+                  borderless: true,
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FrameRatioPreview extends StatelessWidget {
+  final double aspectRatio;
+  final int seed;
+  final SketchThemeData theme;
+
+  const _FrameRatioPreview({
+    required this.aspectRatio,
+    required this.seed,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const maxWidth = 52.0;
+    const maxHeight = 44.0;
+    final widthConstrainedHeight = maxWidth / aspectRatio;
+    final (width, height) = widthConstrainedHeight <= maxHeight
+        ? (maxWidth, widthConstrainedHeight)
+        : (maxHeight * aspectRatio, maxHeight);
+
+    return SizedBox(
+      width: width,
+      height: height,
+      child: SketchSurface(
+        fillColor: theme.paper.withValues(alpha: 0.18),
+        strokeColor: theme.mutedInk,
+        hachure: true,
+        hachureColor: theme.mutedInk.withValues(alpha: 0.24),
+        shape: SketchShape.rect,
+        seed: seed,
+        child: const SizedBox.expand(),
       ),
     );
   }

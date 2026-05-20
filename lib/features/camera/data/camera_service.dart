@@ -1,5 +1,5 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:framatic/features/camera/data/camera_repository.dart';
 import 'package:framatic/features/camera/domain/camera_error.dart';
 
@@ -14,9 +14,7 @@ class CameraService implements CameraRepository {
   CameraController? get controller => _controller;
 
   @override
-  Future<void> initialize({
-    CameraLensDirection direction = .back,
-  }) async {
+  Future<void> initialize({CameraLensDirection direction = .back}) async {
     if (_cameras.isEmpty) {
       _cameras = await availableCameras();
     }
@@ -101,11 +99,7 @@ class CameraService implements CameraRepository {
   Future<void> _initializeController(CameraDescription camera) async {
     await disposeController();
 
-    _controller = CameraController(
-      camera,
-      .max,
-      enableAudio: false,
-    );
+    _controller = CameraController(camera, .max, enableAudio: false);
 
     try {
       await _controller!.initialize();

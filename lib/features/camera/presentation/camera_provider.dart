@@ -1,15 +1,15 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/services/permission_service.dart';
 import 'package:framatic/features/camera/data/camera_repository.dart';
-import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/features/camera/domain/camera_error.dart';
 
 class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   final CameraRepository _cameraRepository;
 
   CameraProvider(CameraRepository cameraRepository)
-      : _cameraRepository = cameraRepository {
+    : _cameraRepository = cameraRepository {
     WidgetsBinding.instance.addObserver(this);
     _initialize();
   }
