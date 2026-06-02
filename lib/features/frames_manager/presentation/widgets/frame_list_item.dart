@@ -6,6 +6,7 @@ import 'package:framatic/features/frames_manager/presentation/widgets/manage_fra
 
 class FrameListItem extends StatelessWidget {
   final Frame frame;
+  final List<Frame> existingFrames;
   final int order;
   final Function(Frame) onEdit;
   final Function(int frameId) onDelete;
@@ -13,6 +14,7 @@ class FrameListItem extends StatelessWidget {
   const FrameListItem({
     super.key,
     required this.frame,
+    this.existingFrames = const [],
     required this.order,
     required this.onEdit,
     required this.onDelete,
@@ -23,16 +25,23 @@ class FrameListItem extends StatelessWidget {
     final theme = SketchTheme.of(context);
     return Padding(
       key: ValueKey(frame.id),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          ReorderableDragStartListener(
-            index: order,
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: SketchIcon(
-                type: SketchIconType.drag,
-                color: theme.mutedInk,
+          Semantics(
+            button: true,
+            label: 'Reorder ${frame.title}',
+            hint: 'Drag to change camera quick-access order',
+            child: ReorderableDragStartListener(
+              index: order,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                child: Center(
+                  child: SketchIcon(
+                    type: SketchIconType.drag,
+                    color: theme.mutedInk,
+                  ),
+                ),
               ),
             ),
           ),
@@ -70,11 +79,14 @@ class FrameListItem extends StatelessWidget {
                   icon: SketchIconType.edit,
                   onPressed: () => showSketchDialog(
                     context: context,
-                    builder: (_) =>
-                        ManageFrameDialog(frame: frame, onSave: onEdit),
+                    builder: (_) => ManageFrameDialog(
+                      frame: frame,
+                      existingFrames: existingFrames,
+                      onSave: onEdit,
+                    ),
                   ),
                   tooltip: 'Edit Frame',
-                  size: 34,
+                  size: 44,
                   borderless: true,
                 ),
                 const SizedBox(width: 2),
@@ -87,10 +99,19 @@ class FrameListItem extends StatelessWidget {
                         DeleteFrameDialog(frame: frame, onDelete: onDelete),
                   ),
                   tooltip: 'Delete Frame',
-                  size: 34,
+                  size: 44,
                   borderless: true,
                 ),
               ],
+            )
+          else
+            SketchSurface(
+              shape: SketchShape.pill,
+              fillColor: theme.panelStrong,
+              strokeColor: theme.mutedInk,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              seed: frame.title.hashCode,
+              child: Text('Built-in', style: theme.labelStyle),
             ),
         ],
       ),

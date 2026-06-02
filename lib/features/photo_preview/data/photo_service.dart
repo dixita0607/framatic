@@ -43,12 +43,11 @@ class PhotoService implements PhotoRepository {
     }
   }
 
-  /// Save processed photo to gallery and delete the temp file.
+  /// Save processed photo to gallery.
   @override
   Future<void> saveToGallery(String imagePath) async {
     try {
       await Gal.putImage(imagePath, album: AppConstants.appName);
-      await File(imagePath).delete();
     } on GalException catch (e) {
       throw SavePhotoError(
         'Error saving to gallery: ${e.type.message}',
@@ -97,7 +96,7 @@ class PhotoService implements PhotoRepository {
     );
 
     // This 4 as a multiplier works as an illusion here. It looks like the border is as thick as in camera preview screen.
-    // TODO: Revisit the calculations of border thickness if device specific issues are observed in future.
+    // TODO: Device-test live preview versus saved output before tuning this border thickness.
 
     final imageWithBorder = img.Image(
       width: croppedImage.width + (4 * AppConstants.frameBorder),

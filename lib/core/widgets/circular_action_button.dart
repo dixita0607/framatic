@@ -24,42 +24,49 @@ class CircularActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = SketchTheme.of(context);
-    return Column(
-      mainAxisSize: .min,
-      children: [
-        SizedBox.square(
-          dimension: 66,
-          child: SketchSurface(
-            shape: SketchShape.circle,
-            fillColor: primary
-                ? theme.primary
-                : filled
-                ? theme.paper
-                : theme.panel,
-            strokeColor: primary ? theme.primary : theme.ink,
-            seed: label.hashCode,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: isLoading ? null : onPressed,
-              child: Center(
-                child: isLoading
-                    ? const SketchProgress(size: 24)
-                    : SketchIcon(
-                        type: icon,
-                        color: primary
-                            ? theme.primaryInk
-                            : filled
-                            ? theme.paperInk
-                            : theme.ink,
-                        size: 28,
-                      ),
+    final enabled = onPressed != null && !isLoading;
+    return Semantics(
+      button: true,
+      label: label,
+      enabled: enabled,
+      value: isLoading ? 'Loading' : null,
+      child: Column(
+        mainAxisSize: .min,
+        children: [
+          SizedBox.square(
+            dimension: 66,
+            child: SketchSurface(
+              shape: SketchShape.circle,
+              fillColor: primary
+                  ? theme.primary
+                  : filled
+                  ? theme.paper
+                  : theme.panel,
+              strokeColor: primary ? theme.primary : theme.ink,
+              seed: label.hashCode,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: enabled ? onPressed : null,
+                child: Center(
+                  child: isLoading
+                      ? const SketchProgress(size: 24)
+                      : SketchIcon(
+                          type: icon,
+                          color: primary
+                              ? theme.primaryInk
+                              : filled
+                              ? theme.paperInk
+                              : theme.ink,
+                          size: 28,
+                        ),
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: theme.labelStyle.copyWith(color: theme.ink)),
-      ],
+          const SizedBox(height: 8),
+          Text(label, style: theme.labelStyle.copyWith(color: theme.ink)),
+        ],
+      ),
     );
   }
 }

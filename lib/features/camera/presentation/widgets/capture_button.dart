@@ -41,35 +41,44 @@ class _CaptureButtonState extends State<CaptureButton>
   @override
   Widget build(BuildContext context) {
     final theme = SketchTheme.of(context);
-    return GestureDetector(
-      onTapDown: (_) => _scaleController.forward(),
-      onTapUp: (_) {
-        _scaleController.reverse();
-        widget.onPressed?.call();
-      },
-      onTapCancel: () => _scaleController.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: SizedBox.square(
-          dimension: 88,
-          child: SketchSurface(
-            shape: SketchShape.circle,
-            fillColor: theme.ink.withValues(alpha: 0.18),
-            strokeColor: theme.ink,
-            seed: 909,
-            child: Center(
-              child: widget.isCapturing
-                  ? SketchProgress(size: 28, color: theme.ink)
-                  : SizedBox.square(
-                      dimension: 56,
-                      child: SketchSurface(
-                        shape: SketchShape.circle,
-                        fillColor: theme.paper,
-                        strokeColor: theme.ink,
-                        seed: 910,
-                        child: const SizedBox.shrink(),
+    final enabled = widget.onPressed != null && !widget.isCapturing;
+    return Semantics(
+      button: true,
+      label: 'Capture photo',
+      enabled: enabled,
+      value: widget.isCapturing ? 'Capturing' : null,
+      child: GestureDetector(
+        onTapDown: enabled ? (_) => _scaleController.forward() : null,
+        onTapUp: enabled
+            ? (_) {
+                _scaleController.reverse();
+                widget.onPressed?.call();
+              }
+            : null,
+        onTapCancel: enabled ? () => _scaleController.reverse() : null,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: SizedBox.square(
+            dimension: 88,
+            child: SketchSurface(
+              shape: SketchShape.circle,
+              fillColor: theme.ink.withValues(alpha: 0.18),
+              strokeColor: theme.ink,
+              seed: 909,
+              child: Center(
+                child: widget.isCapturing
+                    ? SketchProgress(size: 28, color: theme.ink)
+                    : SizedBox.square(
+                        dimension: 56,
+                        child: SketchSurface(
+                          shape: SketchShape.circle,
+                          fillColor: theme.paper,
+                          strokeColor: theme.ink,
+                          seed: 910,
+                          child: const SizedBox.shrink(),
+                        ),
                       ),
-                    ),
+              ),
             ),
           ),
         ),

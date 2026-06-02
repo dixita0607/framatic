@@ -29,47 +29,45 @@ class PhotoPreviewScreen extends StatelessWidget {
             builder: (context, provider, _) {
               return Container(
                 padding: const .all(24),
-                child: Row(
-                  mainAxisAlignment: .spaceEvenly,
+                child: Column(
+                  mainAxisSize: .min,
                   children: [
-                    // Retake button
-                    CircularActionButton(
-                      icon: SketchIconType.close,
-                      label: 'Retake',
-                      onPressed: provider.isSaving
-                          ? null
-                          : () {
-                              provider.retakePhoto(imagePath);
-                              Navigator.of(context).pop(false);
-                            },
-                    ),
+                    Row(
+                      mainAxisAlignment: .spaceEvenly,
+                      children: [
+                        CircularActionButton(
+                          icon: SketchIconType.close,
+                          label: 'Retake',
+                          onPressed: provider.isSaving
+                              ? null
+                              : () {
+                                  provider.retakePhoto(imagePath);
+                                  Navigator.of(context).pop(false);
+                                },
+                        ),
+                        CircularActionButton(
+                          icon: SketchIconType.check,
+                          label: 'Save',
+                          onPressed: provider.isSaving
+                              ? null
+                              : () async {
+                                  try {
+                                    await provider.savePhoto(imagePath);
 
-                    // Save button
-                    CircularActionButton(
-                      icon: SketchIconType.check,
-                      label: 'Save',
-                      onPressed: provider.isSaving
-                          ? null
-                          : () async {
-                              try {
-                                await provider.savePhoto(imagePath);
-
-                                if (context.mounted) {
-                                  SketchToast.show(
-                                    context,
-                                    provider.successMessage,
-                                  );
-                                  Navigator.of(context).pop(true);
-                                }
-                              } on AppError catch (e) {
-                                if (context.mounted) {
-                                  context.showErrorToast(e);
-                                }
-                              }
-                            },
-                      isLoading: provider.isSaving,
-                      filled: true,
-                      primary: true,
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop(true);
+                                    }
+                                  } on AppError catch (e) {
+                                    if (context.mounted) {
+                                      context.showErrorToast(e);
+                                    }
+                                  }
+                                },
+                          isLoading: provider.isSaving,
+                          filled: true,
+                          primary: true,
+                        ),
+                      ],
                     ),
                   ],
                 ),

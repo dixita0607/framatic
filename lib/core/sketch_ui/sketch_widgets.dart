@@ -420,26 +420,41 @@ class _SketchProgressPainter extends CustomPainter {
 class SketchSlider extends StatelessWidget {
   final double value;
   final ValueChanged<double> onChanged;
+  final String? semanticLabel;
 
-  const SketchSlider({super.key, required this.value, required this.onChanged});
+  const SketchSlider({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.semanticLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = SketchTheme.of(context);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (details) => _update(details.localPosition.dx, context),
-      onHorizontalDragUpdate: (details) =>
-          _update(details.localPosition.dx, context),
-      child: SizedBox(
-        height: 36,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return CustomPaint(
-              size: Size(constraints.maxWidth, 36),
-              painter: SketchSliderPainter(theme: theme, value: value),
-            );
-          },
+    return Semantics(
+      slider: true,
+      label: semanticLabel,
+      value: '${(value * 100).round()}%',
+      increasedValue: '${((value + 0.1).clamp(0.0, 1.0) * 100).round()}%',
+      decreasedValue: '${((value - 0.1).clamp(0.0, 1.0) * 100).round()}%',
+      onIncrease: () => onChanged((value + 0.1).clamp(0.0, 1.0)),
+      onDecrease: () => onChanged((value - 0.1).clamp(0.0, 1.0)),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (details) => _update(details.localPosition.dx, context),
+        onHorizontalDragUpdate: (details) =>
+            _update(details.localPosition.dx, context),
+        child: SizedBox(
+          height: 36,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return CustomPaint(
+                size: Size(constraints.maxWidth, 36),
+                painter: SketchSliderPainter(theme: theme, value: value),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -458,42 +473,49 @@ class SketchChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onSelected;
+  final String? semanticLabel;
 
   const SketchChip({
     super.key,
     required this.label,
     required this.selected,
     required this.onSelected,
+    this.semanticLabel,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = SketchTheme.of(context);
-    return GestureDetector(
-      onTap: onSelected,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 44),
-        child: SketchSurface(
-          shape: SketchShape.roundedRect,
-          radius: 5,
-          fillColor: theme.panel,
-          strokeColor: selected ? theme.accent : theme.mutedInk,
-          hachure: selected,
-          hachureColor: theme.accent.withValues(alpha: 0.26),
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          seed: label.hashCode,
-          child: Center(
-            widthFactor: 1,
-            heightFactor: 1,
-            child: Text(
-              label,
-              style: theme.labelStyle.copyWith(
-                color: selected ? theme.ink : theme.ink,
-                fontWeight: FontWeight.w700,
-                height: 1,
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: semanticLabel ?? label,
+      child: GestureDetector(
+        onTap: onSelected,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44),
+          child: SketchSurface(
+            shape: SketchShape.roundedRect,
+            radius: 5,
+            fillColor: theme.panel,
+            strokeColor: selected ? theme.accent : theme.mutedInk,
+            hachure: selected,
+            hachureColor: theme.accent.withValues(alpha: 0.26),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            seed: label.hashCode,
+            child: Center(
+              widthFactor: 1,
+              heightFactor: 1,
+              child: Text(
+                label,
+                style: theme.labelStyle.copyWith(
+                  color: selected ? theme.ink : theme.ink,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),

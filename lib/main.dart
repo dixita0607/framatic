@@ -95,7 +95,7 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
     final brightness =
         WidgetsBinding.instance.platformDispatcher.platformBrightness;
     return brightness == Brightness.dark
-        ? SketchThemeCatalog.monochromeDark
-        : SketchThemeCatalog.monochromeLight;
+        ? SketchThemeCatalog.graphiteDark
+        : SketchThemeCatalog.graphiteLight;
   }
 }

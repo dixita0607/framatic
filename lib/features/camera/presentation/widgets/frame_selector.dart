@@ -39,6 +39,8 @@ class FrameSelector extends StatelessWidget {
                 return SketchChip(
                   label: frame.title,
                   selected: isSelected,
+                  semanticLabel:
+                      '${frame.title}, ${frame.formattedRatio}${isSelected ? ', selected' : ''}',
                   onSelected: () {
                     onFrameSelected(frame.id!);
                     Scrollable.ensureVisible(

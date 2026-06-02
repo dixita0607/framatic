@@ -11,6 +11,7 @@ enum SketchIconType {
   edit,
   error,
   flipCamera,
+  grid,
   more,
   settings,
 }
@@ -123,6 +124,15 @@ class _SketchIconPainter extends CustomPainter {
         );
         canvas.drawLine(p(0.64, 0.48), p(0.75, 0.48), paint);
         canvas.drawLine(p(0.75, 0.48), p(0.69, 0.38), paint);
+      case SketchIconType.grid:
+        canvas.drawRect(
+          Rect.fromLTWH(w * 0.2, h * 0.2, w * 0.6, h * 0.6),
+          paint,
+        );
+        canvas.drawLine(p(0.4, 0.2), p(0.4, 0.8), paint);
+        canvas.drawLine(p(0.6, 0.2), p(0.6, 0.8), paint);
+        canvas.drawLine(p(0.2, 0.4), p(0.8, 0.4), paint);
+        canvas.drawLine(p(0.2, 0.6), p(0.8, 0.6), paint);
       case SketchIconType.more:
         for (final y in [0.3, 0.5, 0.7]) {
           canvas.drawCircle(p(0.5, y), w * 0.055, fill);

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 class SketchThemeData {
+  final Color success;
   final Color background;
   final Color panel;
   final Color panelStrong;
@@ -21,6 +22,7 @@ class SketchThemeData {
   final TextStyle titleStyle;
 
   const SketchThemeData({
+    required this.success,
     required this.background,
     required this.panel,
     required this.panelStrong,
@@ -42,7 +44,7 @@ class SketchThemeData {
   }) : primary = primary ?? accent,
        primaryInk = primaryInk ?? paperInk;
 
-  static const dark = SketchThemeCatalog.monochromeDark;
+  static const dark = SketchThemeCatalog.graphiteDark;
 }
 
 enum SketchBackgroundKind { isometricDots }
@@ -77,60 +79,78 @@ class SketchBackgroundCatalog {
 class SketchThemeCatalog {
   const SketchThemeCatalog._();
 
-  static const monochromeDark = SketchThemeData(
-    background: Color(0xFF050505),
-    panel: Color(0xFF151515),
-    panelStrong: Color(0xFF202020),
-    ink: Color(0xFFF2F2EE),
-    mutedInk: Color(0xFFB8B8B0),
-    paper: Color(0xFFEDEDE6),
-    paperInk: Color(0xFF111111),
-    accent: Color(0xFFFFFFFF),
-    primaryInk: Color(0xFF111111),
-    danger: Color(0xFFE06767),
-    disabled: Color(0xFF696969),
-    hachure: Color(0x334F4F4F),
+  static const _darkInk = Color(0xFFF0F0F0);
+  static const _darkPaper = Color(0xFF252525);
+  static const _darkPrimary = Color(0xFFD8D8D8);
+  static const _darkSecondary = Color(0xFFA8A8A8);
+  static const _darkError = Color(0xFFE06767);
+  static const _darkSuccess = Color(0xFF8DBF93);
+
+  static const _lightInk = Color(0xFF141414);
+  static const _lightPaper = Color(0xFFF0F0F0);
+  static const _lightPrimary = Color(0xFF393939);
+  static const _lightSecondary = Color(0xFF787878);
+  static const _lightError = Color(0xFFB83C3C);
+  static const _lightSuccess = Color(0xFF357A45);
+
+  static const graphiteDark = SketchThemeData(
+    success: _darkSuccess,
+    background: _darkPaper,
+    panel: _darkPaper,
+    panelStrong: _darkPaper,
+    ink: _darkInk,
+    mutedInk: _darkSecondary,
+    paper: _darkPaper,
+    paperInk: _darkInk,
+    accent: _darkPrimary,
+    primary: _darkPrimary,
+    primaryInk: _darkPaper,
+    danger: _darkError,
+    disabled: _darkSecondary,
+    hachure: Color(0x33F0F0F0),
     strokeWidth: 1.8,
     roughness: 1.35,
-    bodyStyle: TextStyle(color: Color(0xFFF2F2EE), fontSize: 16, height: 1.25),
+    bodyStyle: TextStyle(color: _darkInk, fontSize: 16, height: 1.25),
     labelStyle: TextStyle(
-      color: Color(0xFFB8B8B0),
+      color: _darkSecondary,
       fontSize: 13,
       height: 1.2,
       fontWeight: FontWeight.w600,
     ),
     titleStyle: TextStyle(
-      color: Color(0xFFF2F2EE),
+      color: _darkInk,
       fontSize: 20,
       height: 1.2,
       fontWeight: FontWeight.w700,
     ),
   );
 
-  static const monochromeLight = SketchThemeData(
-    background: Color(0xFFF7F7F2),
-    panel: Color(0xFFEDEDE6),
-    panelStrong: Color(0xFFE1E1D8),
-    ink: Color(0xFF111111),
-    mutedInk: Color(0xFF5E5E59),
-    paper: Color(0xFFFFFFFF),
-    paperInk: Color(0xFF111111),
-    accent: Color(0xFF111111),
-    primaryInk: Color(0xFFFFFFFF),
-    danger: Color(0xFFB83C3C),
-    disabled: Color(0xFFAAA99F),
-    hachure: Color(0x26242424),
+  static const graphiteLight = SketchThemeData(
+    success: _lightSuccess,
+    background: _lightPaper,
+    panel: _lightPaper,
+    panelStrong: _lightPaper,
+    ink: _lightInk,
+    mutedInk: _lightSecondary,
+    paper: _lightPaper,
+    paperInk: _lightInk,
+    accent: _lightPrimary,
+    primary: _lightPrimary,
+    primaryInk: _lightPaper,
+    danger: _lightError,
+    disabled: _lightSecondary,
+    hachure: Color(0x26141414),
     strokeWidth: 1.8,
     roughness: 1.35,
-    bodyStyle: TextStyle(color: Color(0xFF111111), fontSize: 16, height: 1.25),
+    bodyStyle: TextStyle(color: _lightInk, fontSize: 16, height: 1.25),
     labelStyle: TextStyle(
-      color: Color(0xFF5E5E59),
+      color: _lightSecondary,
       fontSize: 13,
       height: 1.2,
       fontWeight: FontWeight.w600,
     ),
     titleStyle: TextStyle(
-      color: Color(0xFF111111),
+      color: _lightInk,
       fontSize: 20,
       height: 1.2,
       fontWeight: FontWeight.w700,

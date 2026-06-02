@@ -117,6 +117,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
           // Horizontal slider (takes remaining space)
           Expanded(
             child: SketchSlider(
+              semanticLabel: 'Zoom',
               value: sliderValue,
               onChanged: (newSliderValue) {
                 final newZoom = _sliderValueToZoom(newSliderValue);
@@ -173,32 +174,41 @@ class _ZoomSliderState extends State<ZoomSlider> {
 
     final theme = SketchTheme.of(context);
 
-    return GestureDetector(
-      onTap: () {
-        if (_shouldTriggerHaptic(zoom)) {
-          HapticFeedback.mediumImpact();
-          _lastHapticZoom = zoom;
-        }
-        widget.onZoomChanged(zoom);
-      },
-      child: Padding(
-        padding: const .symmetric(vertical: 2),
-        child: SizedBox.square(
-          dimension: 30,
-          child: SketchSurface(
-            shape: SketchShape.circle,
-            fillColor: isActive
-                ? theme.paper
-                : theme.ink.withValues(alpha: 0.12),
-            strokeColor: theme.ink,
-            seed: label.hashCode,
-            child: Center(
-              child: Text(
-                label,
-                style: theme.labelStyle.copyWith(
-                  color: isActive ? theme.paperInk : theme.ink,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
+    return Semantics(
+      button: true,
+      selected: isActive,
+      label: 'Set zoom to $label',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (_shouldTriggerHaptic(zoom)) {
+            HapticFeedback.mediumImpact();
+            _lastHapticZoom = zoom;
+          }
+          widget.onZoomChanged(zoom);
+        },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+          child: Center(
+            child: SizedBox(
+              width: 38,
+              height: 30,
+              child: SketchSurface(
+                shape: SketchShape.pill,
+                fillColor: theme.panel,
+                strokeColor: theme.ink,
+                hachure: isActive,
+                hachureColor: theme.ink.withValues(alpha: 0.18),
+                seed: label.hashCode,
+                child: Center(
+                  child: Text(
+                    label,
+                    style: theme.labelStyle.copyWith(
+                      color: theme.ink,
+                      fontSize: 10,
+                      fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ),

@@ -61,7 +61,7 @@ void main() {
       expect(find.text('Open preview'), findsOneWidget);
     });
 
-    testWidgets('saves through the provider and waits for Done', (
+    testWidgets('saves through the provider and returns immediately', (
       tester,
     ) async {
       final imageFile = _createPreviewImage();
@@ -84,14 +84,10 @@ void main() {
 
       expect(provider.savedPaths, [imageFile.path]);
       expect(provider.retakenPaths, isEmpty);
-      expect(routeResult, isNull);
-      expect(find.text('Saved test photo'), findsWidgets);
-      expect(find.text('Done'), findsOneWidget);
-
-      await tester.tap(find.widgetWithText(CircularActionButton, 'Done'));
-      await tester.pumpAndSettle();
-
       expect(routeResult, isTrue);
+      expect(find.text('Open preview'), findsOneWidget);
+      expect(find.text('Done'), findsNothing);
+      expect(find.text('Saved test photo'), findsNothing);
 
       await tester.pump(const Duration(seconds: 3));
     });
