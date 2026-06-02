@@ -17,9 +17,10 @@ class PhotoService implements PhotoRepository {
     required String imagePath,
     required Frame frame,
   }) async {
+    final sourceFile = File(imagePath);
     try {
       // Read bytes on the main isolate (async I/O, non-blocking)
-      final imageBytes = await File(imagePath).readAsBytes();
+      final imageBytes = await sourceFile.readAsBytes();
 
       // All CPU-bound work runs in a background isolate so the UI stays free.
       // The closure captures only sendable values (Uint8List, double, int).
@@ -40,6 +41,8 @@ class PhotoService implements PhotoRepository {
         userMessage: 'Failed to process photo.',
         cause: e,
       );
+    } finally {
+      sourceFile.delete().ignore();
     }
   }
 

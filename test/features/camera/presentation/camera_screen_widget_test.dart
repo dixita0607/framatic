@@ -43,18 +43,62 @@ void main() {
       expect(find.byType(SketchProgress), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('shows camera errors even when the controller is missing', (
+      tester,
+    ) async {
+      final frameProvider = FrameProvider(
+        _FakeFrameRepository(
+          frames: [Frame(id: 1, title: '4:3', width: 4, height: 3)],
+          order: ['1'],
+        ),
+      );
+      addTearDown(frameProvider.dispose);
+
+      await tester.pumpWidget(
+        sketchTestApp(
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider<CameraProvider>.value(
+                value: _FakeCameraProvider(
+                  isLoading: false,
+                  error: const PermissionError(
+                    'Camera denied',
+                    userMessage: 'Camera permission is required.',
+                  ),
+                ),
+              ),
+              ChangeNotifierProvider<FrameProvider>.value(value: frameProvider),
+            ],
+            child: const CameraScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Camera permission is required.'), findsOneWidget);
+      expect(find.byType(SketchProgress), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
   });
 }
 
 class _FakeCameraProvider extends ChangeNotifier implements CameraProvider {
+  _FakeCameraProvider({bool isLoading = true, AppError? error})
+    : _isLoading = isLoading,
+      _error = error;
+
+  final bool _isLoading;
+  final AppError? _error;
+
   @override
-  bool get isLoading => true;
+  bool get isLoading => _isLoading;
 
   @override
   bool get isCapturing => false;
 
   @override
-  AppError? get error => null;
+  AppError? get error => _error;
 
   @override
   CameraController? get controller => null;

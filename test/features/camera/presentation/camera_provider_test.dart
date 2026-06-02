@@ -161,6 +161,34 @@ void main() {
       expect(provider.currentZoom, 1.5);
     },
   );
+
+  test(
+    'resumed lifecycle waits for inactive disposal before reinitializing',
+    () async {
+      mockCameraPermission(isGranted: true);
+      final provider = CameraProvider(repository);
+      addTearDown(provider.dispose);
+      await _waitForInitialization(provider);
+
+      final disposeCompleter = Completer<void>();
+      repository.disposeCompleter = disposeCompleter;
+
+      provider.didChangeAppLifecycleState(AppLifecycleState.inactive);
+      await pumpEventQueue();
+      expect(repository.disposeControllerCalls, 1);
+
+      repository.zoomLimits = (1.5, 6.0);
+      provider.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await pumpEventQueue(times: 5);
+      expect(repository.reinitializeCalls, 0);
+
+      disposeCompleter.complete();
+      await _waitForInitialization(provider);
+
+      expect(repository.reinitializeCalls, 1);
+      expect(provider.currentZoom, 1.5);
+    },
+  );
 }
 
 Future<void> _waitForInitialization(CameraProvider provider) async {
@@ -184,6 +212,7 @@ class _FakeCameraRepository implements CameraRepository {
   Object? initializeError;
   Object? reinitializeError;
   Object? toggleCameraDirectionError;
+  Completer<void>? disposeCompleter;
   Future<XFile?> takePictureResult = Future.value(XFile('/tmp/capture.jpg'));
 
   @override
@@ -212,6 +241,8 @@ class _FakeCameraRepository implements CameraRepository {
   @override
   Future<void> disposeController() async {
     disposeControllerCalls += 1;
+    final completer = disposeCompleter;
+    if (completer != null) await completer.future;
   }
 
   @override

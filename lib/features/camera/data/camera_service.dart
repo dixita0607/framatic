@@ -6,6 +6,7 @@ import 'package:framatic/features/camera/domain/camera_error.dart';
 class CameraService implements CameraRepository {
   CameraController? _controller;
   List<CameraDescription> _cameras = [];
+  CameraLensDirection _currentDirection = .back;
 
   double _minZoom = 1.0;
   double _maxZoom = 1.0;
@@ -27,6 +28,7 @@ class CameraService implements CameraRepository {
     }
 
     final camera = _findCamera(direction);
+    _currentDirection = camera.lensDirection;
     await _initializeController(camera);
     await _adjustZoomLevels();
   }
@@ -46,8 +48,7 @@ class CameraService implements CameraRepository {
         userMessage: 'Failed to reinitialize camera.',
       );
     }
-    final currentDirection = _controller?.description.lensDirection ?? .back;
-    final camera = _findCamera(currentDirection);
+    final camera = _findCamera(_currentDirection);
     await _initializeController(camera);
     await _adjustZoomLevels();
   }
@@ -63,13 +64,15 @@ class CameraService implements CameraRepository {
 
     final camera = _findCamera(targetDirection);
     await _controller!.setDescription(camera);
+    _currentDirection = camera.lensDirection;
     await _adjustZoomLevels();
   }
 
   @override
   Future<void> disposeController() async {
-    await _controller?.dispose();
+    final controller = _controller;
     _controller = null;
+    await controller?.dispose();
   }
 
   @override

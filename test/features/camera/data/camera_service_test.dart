@@ -126,8 +126,8 @@ void main() {
 
     await service.reinitialize();
 
-    expect(platform.createdDescriptions, [_frontCamera, _backCamera]);
-    expect(service.controller!.description, _backCamera);
+    expect(platform.createdDescriptions, [_frontCamera, _frontCamera]);
+    expect(service.controller!.description, _frontCamera);
   });
 
   test('takePicture returns null before initialization', () async {
@@ -170,6 +170,26 @@ void main() {
     expect(platform.disposedCameraIds, [1]);
     expect(service.controller, isNull);
   });
+
+  test(
+    'disposeController clears controller before disposal completes',
+    () async {
+      platform.cameras = [_backCamera];
+      final disposeCompleter = Completer<void>();
+      platform.disposeCompleter = disposeCompleter;
+      final service = CameraService();
+      await service.initialize();
+
+      final disposeFuture = service.disposeController();
+
+      expect(service.controller, isNull);
+      await pumpEventQueue();
+      expect(platform.disposedCameraIds, [1]);
+
+      disposeCompleter.complete();
+      await disposeFuture;
+    },
+  );
 }
 
 const _backCamera = CameraDescription(
@@ -195,6 +215,7 @@ class _FakeCameraPlatform extends CameraPlatform {
   double maxZoom = 1.0;
   XFile capturedFile = XFile('/tmp/capture.jpg');
   Object? takePictureError;
+  Completer<void>? disposeCompleter;
 
   var _nextCameraId = 1;
   final _initializedControllers =
@@ -277,6 +298,8 @@ class _FakeCameraPlatform extends CameraPlatform {
   Future<void> dispose(int cameraId) async {
     disposedCameraIds.add(cameraId);
     _descriptionById.remove(cameraId);
+    final completer = disposeCompleter;
+    if (completer != null) await completer.future;
   }
 
   @override

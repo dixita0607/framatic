@@ -62,6 +62,15 @@ class FrameProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
+      final existingFrame = _frames
+          .where((loadedFrame) => loadedFrame.id == frame.id)
+          .firstOrNull;
+      if (existingFrame != null && !existingFrame.isCustom) {
+        throw UpdateFrameError(
+          'Predefined frame cannot be updated: ${frame.id}',
+          userMessage: 'Built-in frames cannot be edited.',
+        );
+      }
       final updatedFrame = await _frameRepository.updateFrame(frame);
       final updatedFrameIndex = _frames.indexWhere((f) => f.id == frame.id);
       if (updatedFrameIndex != -1) {
@@ -81,6 +90,15 @@ class FrameProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
+      final existingFrame = _frames
+          .where((loadedFrame) => loadedFrame.id == frameId)
+          .firstOrNull;
+      if (existingFrame != null && !existingFrame.isCustom) {
+        throw DeleteFrameError(
+          'Predefined frame cannot be deleted: $frameId',
+          userMessage: 'Built-in frames cannot be deleted.',
+        );
+      }
       await _frameRepository.deleteFrame(frameId);
       _frames.removeWhere((frame) => frame.id == frameId);
       if (_activeFrameId != null && _activeFrameId == frameId) {

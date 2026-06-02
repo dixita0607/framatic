@@ -121,17 +121,17 @@ class _CameraScreenState extends State<CameraScreen> {
     return SketchScreen(
       child: Consumer2<CameraProvider, FrameProvider>(
         builder: (context, cameraProvider, frameProvider, child) {
-          // Show loading when initializing or controller is null
-          if (cameraProvider.isLoading || cameraProvider.controller == null) {
-            return const Center(child: SketchProgress(size: 42));
-          }
-
           // Show error if present
           if (cameraProvider.error != null) {
             return CameraErrorWidget(
               error: cameraProvider.error,
               onRetry: cameraProvider.retry,
             );
+          }
+
+          // Show loading when initializing or controller is null
+          if (cameraProvider.isLoading || cameraProvider.controller == null) {
+            return const Center(child: SketchProgress(size: 42));
           }
 
           if (frameProvider.isLoading) {
