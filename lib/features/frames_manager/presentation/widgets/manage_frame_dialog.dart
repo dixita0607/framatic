@@ -4,6 +4,7 @@ import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
+import 'package:framatic/features/frames_manager/presentation/widgets/frame_preview.dart';
 
 class ManageFrameDialog extends StatefulWidget {
   final Frame? frame;
@@ -237,10 +238,11 @@ class _RatioPreview extends StatelessWidget {
               width: 68,
               height: 48,
               child: Center(
-                child: _PreviewBox(
+                child: FramePreview(
                   aspectRatio: aspectRatio,
-                  enabled: hasValidRatio,
-                  theme: theme,
+                  maxWidth: 52,
+                  maxHeight: 44,
+                  seed: (width ?? 1) * 31 + (height ?? 1),
                 ),
               ),
             ),
@@ -253,44 +255,6 @@ class _RatioPreview extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _PreviewBox extends StatelessWidget {
-  final double aspectRatio;
-  final bool enabled;
-  final SketchThemeData theme;
-
-  const _PreviewBox({
-    required this.aspectRatio,
-    required this.enabled,
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    const maxWidth = 68.0;
-    const maxHeight = 48.0;
-    final widthConstrainedHeight = maxWidth / aspectRatio;
-    final (width, height) = widthConstrainedHeight <= maxHeight
-        ? (maxWidth, widthConstrainedHeight)
-        : (maxHeight * aspectRatio, maxHeight);
-
-    return SizedBox(
-      width: width,
-      height: height,
-      child: SketchSurface(
-        shape: SketchShape.rect,
-        fillColor: enabled
-            ? theme.paper.withValues(alpha: 0.22)
-            : theme.panelStrong.withValues(alpha: 0.5),
-        strokeColor: enabled ? theme.ink : theme.mutedInk,
-        hachure: true,
-        hachureColor: theme.mutedInk.withValues(alpha: 0.24),
-        seed: aspectRatio.hashCode,
-        child: const SizedBox.expand(),
       ),
     );
   }

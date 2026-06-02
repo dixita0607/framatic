@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/delete_frame_dialog.dart';
+import 'package:framatic/features/frames_manager/presentation/widgets/frame_preview.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
 
 class FrameListItem extends StatelessWidget {
@@ -27,6 +28,7 @@ class FrameListItem extends StatelessWidget {
       key: ValueKey(frame.id),
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Semantics(
             button: true,
@@ -50,10 +52,9 @@ class FrameListItem extends StatelessWidget {
             width: 52,
             height: 44,
             child: Center(
-              child: _FrameRatioPreview(
+              child: FramePreview(
                 aspectRatio: frame.aspectRatio,
                 seed: (frame.id ?? order) + 10,
-                theme: theme,
               ),
             ),
           ),
@@ -72,37 +73,20 @@ class FrameListItem extends StatelessWidget {
             ),
           ),
           if (frame.isCustom)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SketchIconButton(
-                  icon: SketchIconType.edit,
-                  onPressed: () => showSketchDialog(
-                    context: context,
-                    builder: (_) => ManageFrameDialog(
-                      frame: frame,
-                      existingFrames: existingFrames,
-                      onSave: onEdit,
-                    ),
-                  ),
-                  tooltip: 'Edit Frame',
-                  size: 44,
-                  borderless: true,
+            _FrameRowActions(
+              onEdit: () => showSketchDialog(
+                context: context,
+                builder: (_) => ManageFrameDialog(
+                  frame: frame,
+                  existingFrames: existingFrames,
+                  onSave: onEdit,
                 ),
-                const SizedBox(width: 2),
-                SketchIconButton(
-                  icon: SketchIconType.delete,
-                  danger: true,
-                  onPressed: () => showSketchDialog(
-                    context: context,
-                    builder: (_) =>
-                        DeleteFrameDialog(frame: frame, onDelete: onDelete),
-                  ),
-                  tooltip: 'Delete Frame',
-                  size: 44,
-                  borderless: true,
-                ),
-              ],
+              ),
+              onDelete: () => showSketchDialog(
+                context: context,
+                builder: (_) =>
+                    DeleteFrameDialog(frame: frame, onDelete: onDelete),
+              ),
             )
           else
             SketchSurface(
@@ -119,37 +103,85 @@ class FrameListItem extends StatelessWidget {
   }
 }
 
-class _FrameRatioPreview extends StatelessWidget {
-  final double aspectRatio;
-  final int seed;
-  final SketchThemeData theme;
+class _FrameRowActions extends StatelessWidget {
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
-  const _FrameRatioPreview({
-    required this.aspectRatio,
-    required this.seed,
-    required this.theme,
+  const _FrameRowActions({required this.onEdit, required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = SketchTheme.of(context);
+    const iconSize = 26.0;
+    const iconGap = 8.0;
+    const hitSize = 48.0;
+
+    return SizedBox(
+      width: (iconSize * 2) + iconGap + (hitSize - iconSize),
+      height: hitSize,
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            right: 0,
+            child: _FrameRowActionIcon(
+              icon: SketchIconType.delete,
+              label: 'Delete Frame',
+              color: theme.danger,
+              iconSize: iconSize,
+              onPressed: onDelete,
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: iconSize + iconGap,
+            child: _FrameRowActionIcon(
+              icon: SketchIconType.edit,
+              label: 'Edit Frame',
+              color: theme.ink,
+              iconSize: iconSize,
+              onPressed: onEdit,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FrameRowActionIcon extends StatelessWidget {
+  final SketchIconType icon;
+  final String label;
+  final Color color;
+  final double iconSize;
+  final VoidCallback onPressed;
+
+  const _FrameRowActionIcon({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.iconSize,
+    required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    const maxWidth = 52.0;
-    const maxHeight = 44.0;
-    final widthConstrainedHeight = maxWidth / aspectRatio;
-    final (width, height) = widthConstrainedHeight <= maxHeight
-        ? (maxWidth, widthConstrainedHeight)
-        : (maxHeight * aspectRatio, maxHeight);
-
-    return SizedBox(
-      width: width,
-      height: height,
-      child: SketchSurface(
-        fillColor: theme.paper.withValues(alpha: 0.18),
-        strokeColor: theme.mutedInk,
-        hachure: true,
-        hachureColor: theme.mutedInk.withValues(alpha: 0.24),
-        shape: SketchShape.rect,
-        seed: seed,
-        child: const SizedBox.expand(),
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: SizedBox.square(
+          dimension: 48,
+          child: Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: SketchIcon(type: icon, size: iconSize, color: color),
+            ),
+          ),
+        ),
       ),
     );
   }

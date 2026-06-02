@@ -72,7 +72,7 @@ class FramesManagerScreen extends StatelessWidget {
                   icon: SketchIconType.add,
                   onPressed: () => _showAddFrameDialog(context, frameProvider),
                   tooltip: 'Add Custom Frame',
-                  size: 58,
+                  size: 50,
                   filled: true,
                   primary: true,
                 ),

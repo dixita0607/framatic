@@ -27,6 +27,7 @@ class DeleteFrameDialog extends StatelessWidget {
         SketchButton(
           label: 'Delete',
           danger: true,
+          filled: true,
           onPressed: () async {
             Navigator.of(context).pop();
             try {

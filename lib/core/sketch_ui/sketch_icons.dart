@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 enum SketchIconType {
   add,
+  back,
   check,
   close,
   delete,
@@ -56,29 +57,47 @@ class _SketchIconPainter extends CustomPainter {
 
     switch (type) {
       case SketchIconType.add:
-        canvas.drawLine(p(0.5, 0.18), p(0.5, 0.82), paint);
-        canvas.drawLine(p(0.18, 0.5), p(0.82, 0.5), paint);
+        final vertical = Path()
+          ..moveTo(w * 0.49, h * 0.22)
+          ..quadraticBezierTo(w * 0.53, h * 0.5, w * 0.48, h * 0.79);
+        final horizontal = Path()
+          ..moveTo(w * 0.2, h * 0.52)
+          ..quadraticBezierTo(w * 0.5, h * 0.46, w * 0.8, h * 0.5);
+        canvas.drawPath(vertical, paint);
+        canvas.drawPath(horizontal, paint);
+      case SketchIconType.back:
+        final path = Path()
+          ..moveTo(w * 0.68, h * 0.2)
+          ..quadraticBezierTo(w * 0.47, h * 0.34, w * 0.28, h * 0.5)
+          ..quadraticBezierTo(w * 0.49, h * 0.66, w * 0.66, h * 0.82);
+        canvas.drawPath(path, paint);
       case SketchIconType.check:
         final path = Path()
-          ..moveTo(w * 0.18, h * 0.52)
-          ..lineTo(w * 0.42, h * 0.76)
-          ..lineTo(w * 0.84, h * 0.25);
+          ..moveTo(w * 0.18, h * 0.54)
+          ..quadraticBezierTo(w * 0.31, h * 0.66, w * 0.42, h * 0.74)
+          ..quadraticBezierTo(w * 0.58, h * 0.48, w * 0.84, h * 0.24);
         canvas.drawPath(path, paint);
       case SketchIconType.close:
-        canvas.drawLine(p(0.22, 0.22), p(0.78, 0.78), paint);
-        canvas.drawLine(p(0.78, 0.22), p(0.22, 0.78), paint);
+        final slashDown = Path()
+          ..moveTo(w * 0.22, h * 0.24)
+          ..quadraticBezierTo(w * 0.52, h * 0.48, w * 0.78, h * 0.76);
+        final slashUp = Path()
+          ..moveTo(w * 0.77, h * 0.22)
+          ..quadraticBezierTo(w * 0.5, h * 0.52, w * 0.23, h * 0.79);
+        canvas.drawPath(slashDown, paint);
+        canvas.drawPath(slashUp, paint);
       case SketchIconType.delete:
-        canvas.drawLine(p(0.25, 0.32), p(0.75, 0.32), paint);
-        canvas.drawLine(p(0.38, 0.22), p(0.62, 0.22), paint);
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(w * 0.3, h * 0.36, w * 0.4, h * 0.46),
-            Radius.circular(w * 0.05),
-          ),
-          paint,
-        );
-        canvas.drawLine(p(0.43, 0.46), p(0.43, 0.72), paint);
-        canvas.drawLine(p(0.57, 0.46), p(0.57, 0.72), paint);
+        canvas.drawLine(p(0.24, 0.33), p(0.76, 0.31), paint);
+        canvas.drawLine(p(0.39, 0.22), p(0.62, 0.23), paint);
+        final bin = Path()
+          ..moveTo(w * 0.31, h * 0.37)
+          ..lineTo(w * 0.7, h * 0.36)
+          ..lineTo(w * 0.66, h * 0.82)
+          ..lineTo(w * 0.35, h * 0.8)
+          ..close();
+        canvas.drawPath(bin, paint);
+        canvas.drawLine(p(0.43, 0.46), p(0.42, 0.71), paint);
+        canvas.drawLine(p(0.57, 0.45), p(0.56, 0.72), paint);
       case SketchIconType.drag:
         for (final y in [0.32, 0.5, 0.68]) {
           canvas.drawLine(p(0.22, y), p(0.78, y), paint);
@@ -86,18 +105,18 @@ class _SketchIconPainter extends CustomPainter {
       case SketchIconType.edit:
         final body = Path()
           ..moveTo(w * 0.24, h * 0.72)
-          ..lineTo(w * 0.62, h * 0.34)
-          ..lineTo(w * 0.75, h * 0.47)
-          ..lineTo(w * 0.37, h * 0.85)
+          ..lineTo(w * 0.63, h * 0.33)
+          ..lineTo(w * 0.76, h * 0.46)
+          ..lineTo(w * 0.38, h * 0.84)
           ..close();
         canvas.drawPath(body, paint);
-        canvas.drawLine(p(0.58, 0.31), p(0.68, 0.21), paint);
-        canvas.drawLine(p(0.68, 0.21), p(0.84, 0.37), paint);
-        canvas.drawLine(p(0.84, 0.37), p(0.75, 0.47), paint);
+        canvas.drawLine(p(0.58, 0.32), p(0.69, 0.2), paint);
+        canvas.drawLine(p(0.69, 0.2), p(0.84, 0.36), paint);
+        canvas.drawLine(p(0.84, 0.36), p(0.76, 0.46), paint);
         final tip = Path()
           ..moveTo(w * 0.24, h * 0.72)
-          ..lineTo(w * 0.18, h * 0.92)
-          ..lineTo(w * 0.37, h * 0.85)
+          ..lineTo(w * 0.18, h * 0.9)
+          ..lineTo(w * 0.38, h * 0.84)
           ..close();
         canvas.drawPath(tip, paint);
         canvas.drawCircle(p(0.21, 0.88), w * 0.025, fill);

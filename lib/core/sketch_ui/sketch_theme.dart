@@ -90,7 +90,7 @@ class SketchThemeCatalog {
   static const _lightPaper = Color(0xFFF0F0F0);
   static const _lightPrimary = Color(0xFF393939);
   static const _lightSecondary = Color(0xFF787878);
-  static const _lightError = Color(0xFFB83C3C);
+  static const _lightError = Color(0xFFB95B5B);
   static const _lightSuccess = Color(0xFF357A45);
 
   static const graphiteDark = SketchThemeData(

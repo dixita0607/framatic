@@ -90,9 +90,10 @@ class SketchTopBar extends StatelessWidget {
                 width: 44,
                 height: 44,
                 child: Center(
-                  child: Text(
-                    '<',
-                    style: theme.titleStyle.copyWith(fontSize: 24),
+                  child: SketchIcon(
+                    type: SketchIconType.back,
+                    size: 18,
+                    color: theme.ink,
                   ),
                 ),
               ),
@@ -202,7 +203,9 @@ class _SketchButtonState extends State<SketchButton> {
               : theme.paper
         : theme.panel;
     final textColor = widget.filled
-        ? widget.primary
+        ? widget.danger
+              ? theme.primaryInk
+              : widget.primary
               ? theme.primaryInk
               : theme.paperInk
         : stroke;
@@ -315,7 +318,7 @@ class SketchIconButton extends StatelessWidget {
                 ? Center(
                     child: SketchIcon(
                       type: icon,
-                      size: size * 0.82,
+                      size: size * 0.52,
                       color: color,
                     ),
                   )
@@ -736,22 +739,55 @@ class SketchToast {
     entry = OverlayEntry(
       builder: (context) {
         final theme = SketchTheme.of(context);
+        final fillColor = isError ? theme.danger : theme.primary;
+        final contentColor = theme.primaryInk;
         return Positioned(
           left: 18,
           right: 18,
           bottom: 34,
-          child: IgnorePointer(
-            child: SketchSurface(
-              fillColor: theme.panelStrong,
-              strokeColor: isError ? theme.danger : theme.accent,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              seed: message.hashCode,
-              child: Text(
-                message,
-                style: theme.bodyStyle.copyWith(
-                  color: isError ? theme.danger : theme.ink,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: IgnorePointer(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420, minHeight: 40),
+                child: SketchSurface(
+                  fillColor: fillColor,
+                  strokeColor: fillColor,
+                  hachure: true,
+                  hachureColor: contentColor.withValues(alpha: 0.12),
+                  radius: 6,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  seed: message.hashCode,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SketchIcon(
+                        type: isError
+                            ? SketchIconType.error
+                            : SketchIconType.check,
+                        size: 18,
+                        color: contentColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          message,
+                          style: theme.bodyStyle.copyWith(
+                            color: contentColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ),
