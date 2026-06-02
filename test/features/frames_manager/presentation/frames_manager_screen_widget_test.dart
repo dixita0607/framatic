@@ -58,14 +58,17 @@ void main() {
       await _settleProvider(tester);
 
       expect(find.byType(FrameListItem), findsNWidgets(3));
+      expect(find.text('Drag to set camera quick-access order.'), findsNothing);
       expect(find.text('Panorama'), findsOneWidget);
       expect(find.text('21:9'), findsOneWidget);
       expect(find.bySemanticsLabel('Edit Frame'), findsOneWidget);
       expect(find.bySemanticsLabel('Delete Frame'), findsOneWidget);
+      expect(find.bySemanticsLabel('Reorder Panorama'), findsOneWidget);
 
       tester
           .widget<ReorderableList>(find.byType(ReorderableList))
-          .onReorder(0, 3);
+          .onReorderItem!
+          .call(0, 2);
       await _settleProvider(tester);
 
       expect(provider.frames.map((frame) => frame.id), [2, 3, 1]);

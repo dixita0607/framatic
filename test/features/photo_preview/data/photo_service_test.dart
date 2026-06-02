@@ -94,13 +94,13 @@ void main() {
     },
   );
 
-  test('saveToGallery saves to the app album and deletes temp file', () async {
+  test('saveToGallery saves to the app album and keeps preview file', () async {
     final sourceFile = File('${tempDir.path}/processed.jpg');
     await sourceFile.writeAsString('processed image bytes');
 
     await PhotoService().saveToGallery(sourceFile.path);
 
-    expect(await sourceFile.exists(), isFalse);
+    expect(await sourceFile.exists(), isTrue);
     expect(galCalls.map((call) => call.method), ['requestAccess', 'putImage']);
     expect(galCalls[0].arguments, {'toAlbum': true});
     expect(galCalls[1].arguments, {

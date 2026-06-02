@@ -87,6 +87,52 @@ void main() {
       expect(_editableTextAt(tester, 1), '4');
       expect(_editableTextAt(tester, 2), '5');
     });
+
+    testWidgets('shows entered ratio preview while typing', (tester) async {
+      await tester.pumpWidget(
+        _testApp(
+          _DialogLauncher(
+            builder: (_) => ManageFrameDialog(onSave: (_) async {}),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      expect(find.text('Preview'), findsOneWidget);
+
+      await tester.enterText(find.byType(EditableText).at(1), '8');
+      await tester.enterText(find.byType(EditableText).at(2), '16');
+      await tester.pump();
+
+      expect(find.text('Preview 8:16'), findsOneWidget);
+    });
+
+    testWidgets('warns about duplicate names and ratios', (tester) async {
+      await tester.pumpWidget(
+        _testApp(
+          _DialogLauncher(
+            builder: (_) => ManageFrameDialog(
+              existingFrames: [
+                Frame(id: 1, title: 'Cinema', width: 21, height: 9),
+              ],
+              onSave: (_) async {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(EditableText).at(0), 'cinema');
+      await tester.enterText(find.byType(EditableText).at(1), '7');
+      await tester.enterText(find.byType(EditableText).at(2), '3');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Frame name already exists'), findsOneWidget);
+      expect(find.text('Ratio already exists'), findsOneWidget);
+    });
   });
 
   group('DeleteFrameDialog', () {
@@ -175,6 +221,7 @@ void main() {
       expect(find.text('21:9'), findsOneWidget);
       expect(find.bySemanticsLabel('Edit Frame'), findsOneWidget);
       expect(find.bySemanticsLabel('Delete Frame'), findsOneWidget);
+      expect(find.bySemanticsLabel('Reorder Panorama'), findsOneWidget);
 
       await tester.tap(find.bySemanticsLabel('Edit Frame'));
       await tester.pumpAndSettle();
@@ -193,7 +240,7 @@ String _editableTextAt(WidgetTester tester, int index) {
 }
 
 Widget _testApp(Widget child) {
-  const theme = SketchThemeCatalog.monochromeLight;
+  const theme = SketchThemeCatalog.graphiteLight;
   return SketchTheme(
     data: theme,
     child: WidgetsApp(

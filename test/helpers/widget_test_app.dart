@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 
 Widget sketchTestApp(Widget home) {
-  const theme = SketchThemeCatalog.monochromeLight;
+  const theme = SketchThemeCatalog.graphiteLight;
   return SketchTheme(
     data: theme,
     child: WidgetsApp(

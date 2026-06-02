@@ -6,6 +6,7 @@ import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 import 'package:framatic/features/camera/presentation/widgets/camera_error_widget.dart';
 import 'package:framatic/features/camera/presentation/widgets/capture_button.dart';
 import 'package:framatic/features/camera/presentation/widgets/frame_selector.dart';
+import 'package:framatic/features/camera/presentation/widgets/zoom_slider.dart';
 
 void main() {
   group('FrameSelector', () {
@@ -50,6 +51,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(selectedFrameId, 3);
+      expect(find.bySemanticsLabel(RegExp(r'Square, 1:1')), findsOneWidget);
     });
 
     testWidgets('does not overflow on a narrow viewport smoke test', (
@@ -152,6 +154,31 @@ void main() {
       );
 
       expect(find.byType(SketchProgress), findsOneWidget);
+      expect(find.bySemanticsLabel('Capture photo'), findsOneWidget);
+    });
+  });
+
+  group('ZoomSlider', () {
+    testWidgets('labels zoom controls and keeps quick zoom targets large', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _testApp(
+          ZoomSlider(
+            minZoom: 0.5,
+            maxZoom: 4,
+            currentZoom: 1,
+            onZoomChanged: (_) {},
+          ),
+        ),
+      );
+
+      expect(find.bySemanticsLabel('Zoom'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp(r'Set zoom to 1x')), findsOneWidget);
+      expect(
+        tester.getSize(find.bySemanticsLabel(RegExp(r'Set zoom to 1x'))).height,
+        greaterThanOrEqualTo(44),
+      );
     });
   });
 }
@@ -165,7 +192,7 @@ List<Frame> _frames() {
 }
 
 Widget _testApp(Widget child) {
-  const theme = SketchThemeCatalog.monochromeLight;
+  const theme = SketchThemeCatalog.graphiteLight;
   return SketchTheme(
     data: theme,
     child: WidgetsApp(

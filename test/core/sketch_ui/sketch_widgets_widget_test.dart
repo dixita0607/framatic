@@ -147,7 +147,7 @@ void main() {
 }
 
 Widget _testApp(Widget child) {
-  const theme = SketchThemeCatalog.monochromeLight;
+  const theme = SketchThemeCatalog.graphiteLight;
   return SketchTheme(
     data: theme,
     child: WidgetsApp(
