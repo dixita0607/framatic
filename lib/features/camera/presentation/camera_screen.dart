@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
+import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 import 'package:framatic/features/camera/presentation/camera_provider.dart';
 import 'package:framatic/features/camera/presentation/widgets/camera_area.dart';
 import 'package:framatic/features/camera/presentation/widgets/camera_error_widget.dart';
@@ -22,8 +23,12 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> {
   double _baseZoom = 1.0; // For pinch gesture
+  bool _isPreparingPreview = false;
+  bool _showGuides = true;
 
   Future<void> _capturePhoto() async {
+    if (_isPreparingPreview) return;
+
     final cameraProvider = context.read<CameraProvider>();
     final frameProvider = context.read<FrameProvider>();
     final photoProvider = context.read<PhotoPreviewProvider>();
@@ -31,9 +36,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     if (activeFrame == null) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('No frame selected')));
+        SketchToast.show(context, 'No frame selected', isError: true);
       }
       return;
     }
@@ -42,14 +45,15 @@ class _CameraScreenState extends State<CameraScreen> {
       final xFile = await cameraProvider.takePicture();
       if (xFile == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to capture photo')),
-          );
+          SketchToast.show(context, 'Failed to capture photo', isError: true);
         }
         return;
       }
 
-      // Process with overlay
+      if (mounted) {
+        setState(() => _isPreparingPreview = true);
+      }
+
       final processedPath = await photoProvider.processPhotoWithFrame(
         imagePath: xFile.path,
         frame: activeFrame,
@@ -57,21 +61,28 @@ class _CameraScreenState extends State<CameraScreen> {
 
       // Navigate to preview screen
       if (mounted) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PhotoPreviewScreen(imagePath: processedPath),
+        final didSave = await Navigator.of(context).push<bool>(
+          sketchPageRoute(
+            (context) => PhotoPreviewScreen(imagePath: processedPath),
           ),
         );
+        if (didSave == true && mounted) {
+          SketchToast.show(context, photoProvider.successMessage);
+        }
       }
     } on AppError catch (e) {
       if (mounted) {
-        context.showErrorSnackBar(e);
+        context.showErrorToast(e);
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar(
+        context.showErrorToast(
           UnexpectedError('Unexpected error during capture: $e', cause: e),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPreparingPreview = false);
       }
     }
   }
@@ -103,95 +114,252 @@ class _CameraScreenState extends State<CameraScreen> {
 
   void _onManageFrames() => Navigator.of(
     context,
-  ).push(MaterialPageRoute(builder: (context) => const FramesManagerScreen()));
+  ).push(sketchPageRoute((context) => const FramesManagerScreen()));
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Consumer2<CameraProvider, FrameProvider>(
-          builder: (context, cameraProvider, frameProvider, child) {
-            // Show loading when initializing or controller is null
-            if (cameraProvider.isLoading || cameraProvider.controller == null) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    return SketchScreen(
+      child: Consumer2<CameraProvider, FrameProvider>(
+        builder: (context, cameraProvider, frameProvider, child) {
+          // Show error if present
+          if (cameraProvider.error != null) {
+            return CameraErrorWidget(
+              error: cameraProvider.error,
+              onRetry: cameraProvider.retry,
+            );
+          }
 
-            // Show error if present
-            if (cameraProvider.error != null) {
-              return CameraErrorWidget(
-                error: cameraProvider.error,
-                onRetry: cameraProvider.retry,
-              );
-            }
+          // Show loading when initializing or controller is null
+          if (cameraProvider.isLoading || cameraProvider.controller == null) {
+            return const Center(child: SketchProgress(size: 42));
+          }
 
-            // Show camera view
-            return Column(
-              children: [
-                Expanded(
-                  child: CameraArea(
-                    controller: cameraProvider.controller!,
-                    activeFrame: frameProvider.activeFrame!,
-                    onScaleStart: _onScaleStart,
-                    onScaleUpdate: _onScaleUpdate,
-                  ),
+          if (frameProvider.isLoading) {
+            return const _FrameStateMessage(
+              title: 'Loading frames',
+              message: 'Preparing your frame choices.',
+              isLoading: true,
+            );
+          }
+
+          final activeFrame = frameProvider.activeFrame;
+          if (activeFrame == null) {
+            return _FrameStateMessage(
+              title: 'No frames available',
+              message:
+                  'Add a custom frame or restart the app to restore the built-in ratios.',
+              primaryLabel: 'Manage Frames',
+              onPrimary: _onManageFrames,
+            );
+          }
+
+          // Show camera view
+          return Column(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    CameraArea(
+                      controller: cameraProvider.controller!,
+                      activeFrame: activeFrame,
+                      onScaleStart: _onScaleStart,
+                      onScaleUpdate: _onScaleUpdate,
+                      showGuides: _showGuides,
+                    ),
+                    Positioned(
+                      right: 18,
+                      top: 18,
+                      child: _GridToggle(
+                        isEnabled: _showGuides,
+                        onPressed: () {
+                          setState(() => _showGuides = !_showGuides);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                Container(
-                  color: Colors.black,
-                  padding: const .fromLTRB(16, 0, 16, 64),
-                  child: Column(
-                    mainAxisAlignment: .start,
-                    children: [
-                      // Zoom slider
-                      Padding(
-                        padding: const .only(bottom: 16),
-                        child: ZoomSlider(
-                          minZoom: cameraProvider.minZoom,
-                          maxZoom: cameraProvider.maxZoom,
-                          currentZoom: cameraProvider.currentZoom,
-                          onZoomChanged: _onZoomChanged,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 64),
+                child: Column(
+                  mainAxisAlignment: .start,
+                  children: [
+                    // Zoom slider
+                    Padding(
+                      padding: const .only(bottom: 16),
+                      child: ZoomSlider(
+                        minZoom: cameraProvider.minZoom,
+                        maxZoom: cameraProvider.maxZoom,
+                        currentZoom: cameraProvider.currentZoom,
+                        onZoomChanged: _onZoomChanged,
+                      ),
+                    ),
+
+                    // Control buttons row (settings, capture, flip camera)
+                    Row(
+                      mainAxisAlignment: .spaceEvenly,
+                      crossAxisAlignment: .center,
+                      children: [
+                        SketchIconButton(
+                          icon: SketchIconType.settings,
+                          onPressed: _onManageFrames,
+                          tooltip: 'Manage Frames',
+                        ),
+
+                        CaptureButton(
+                          isCapturing:
+                              cameraProvider.isCapturing || _isPreparingPreview,
+                          onPressed: _isPreparingPreview ? null : _capturePhoto,
+                        ),
+
+                        SketchIconButton(
+                          onPressed: () => cameraProvider.switchCamera(),
+                          icon: SketchIconType.flipCamera,
+                          tooltip: 'Switch Camera',
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 44,
+                      child: Center(
+                        child: AnimatedOpacity(
+                          opacity: _isPreparingPreview ? 1 : 0,
+                          duration: const Duration(milliseconds: 120),
+                          child: Text(
+                            'Preparing preview',
+                            style: SketchTheme.of(
+                              context,
+                            ).labelStyle.copyWith(fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ),
-
-                      // Control buttons row (settings, capture, flip camera)
-                      Row(
-                        mainAxisAlignment: .spaceEvenly,
-                        crossAxisAlignment: .center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.settings, size: 28),
-                            color: Colors.white,
-                            onPressed: _onManageFrames,
-                            tooltip: 'Manage Frames',
-                          ),
-
-                          CaptureButton(
-                            isCapturing: cameraProvider.isCapturing,
-                            onPressed: _capturePhoto,
-                          ),
-
-                          IconButton(
-                            onPressed: () => cameraProvider.switchCamera(),
-                            icon: const Icon(Icons.flip_camera_ios, size: 28),
-                            color: Colors.white,
-                          ),
-                        ],
+                    ),
+                    SizedBox(
+                      height: 48,
+                      child: FrameSelector(
+                        frames: frameProvider.frames,
+                        activeFrame: activeFrame,
+                        isLoading: frameProvider.isLoading,
+                        onFrameSelected: frameProvider.setActiveFrame,
                       ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        height: 48,
-                        child: FrameSelector(
-                          frames: frameProvider.frames,
-                          activeFrame: frameProvider.activeFrame!,
-                          isLoading: frameProvider.isLoading,
-                          onFrameSelected: frameProvider.setActiveFrame,
-                        ),
-                      ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _GridToggle extends StatelessWidget {
+  final bool isEnabled;
+  final VoidCallback onPressed;
+
+  const _GridToggle({required this.isEnabled, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = SketchTheme.of(context);
+    return Semantics(
+      button: true,
+      toggled: isEnabled,
+      label: isEnabled ? 'Hide grid' : 'Show grid',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+          child: Center(
+            child: SketchSurface(
+              shape: SketchShape.pill,
+              fillColor: theme.panel,
+              strokeColor: theme.ink,
+              hachure: isEnabled,
+              hachureColor: theme.ink.withValues(alpha: 0.18),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              seed: 731,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SketchIcon(
+                    type: SketchIconType.grid,
+                    size: 18,
+                    color: theme.ink,
                   ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Grid',
+                    style: theme.labelStyle.copyWith(
+                      color: theme.ink,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FrameStateMessage extends StatelessWidget {
+  final String title;
+  final String message;
+  final bool isLoading;
+  final String? primaryLabel;
+  final VoidCallback? onPrimary;
+
+  const _FrameStateMessage({
+    required this.title,
+    required this.message,
+    this.isLoading = false,
+    this.primaryLabel,
+    this.onPrimary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = SketchTheme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: SketchSurface(
+          fillColor: theme.panelStrong,
+          hachure: true,
+          padding: const EdgeInsets.all(20),
+          seed: title.hashCode,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isLoading) ...[
+                const SketchProgress(size: 36),
+                const SizedBox(height: 16),
+              ],
+              Text(title, style: theme.titleStyle, textAlign: TextAlign.center),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                style: theme.bodyStyle,
+                textAlign: TextAlign.center,
+              ),
+              if (primaryLabel != null) ...[
+                const SizedBox(height: 18),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    SketchButton(label: primaryLabel!, onPressed: onPrimary),
+                  ],
                 ),
               ],
-            );
-          },
+            ],
+          ),
         ),
       ),
     );

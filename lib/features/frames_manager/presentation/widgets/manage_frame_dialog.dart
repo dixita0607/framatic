@@ -1,14 +1,22 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/models/frame.dart';
+import 'package:framatic/core/sketch_ui/sketch_ui.dart';
+import 'package:framatic/features/frames_manager/presentation/widgets/frame_preview.dart';
 
 class ManageFrameDialog extends StatefulWidget {
   final Frame? frame;
+  final List<Frame> existingFrames;
   final Function(Frame) onSave;
 
-  const ManageFrameDialog({super.key, this.frame, required this.onSave});
+  const ManageFrameDialog({
+    super.key,
+    this.frame,
+    this.existingFrames = const [],
+    required this.onSave,
+  });
 
   @override
   State<ManageFrameDialog> createState() => _ManageFrameDialogState();
@@ -32,10 +40,17 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
       _widthController.text = widget.frame!.width.toString();
       _heightController.text = widget.frame!.height.toString();
     }
+
+    _nameController.addListener(_refreshPreview);
+    _widthController.addListener(_refreshPreview);
+    _heightController.addListener(_refreshPreview);
   }
 
   @override
   void dispose() {
+    _nameController.removeListener(_refreshPreview);
+    _widthController.removeListener(_refreshPreview);
+    _heightController.removeListener(_refreshPreview);
     _nameController.dispose();
     _widthController.dispose();
     _heightController.dispose();
@@ -44,23 +59,35 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(_isEditing ? 'Edit Frame' : 'Add Frame'),
-      content: Form(
+    return SketchDialog(
+      title: _isEditing ? 'Edit Frame' : 'Add Frame',
+      actions: [
+        SketchButton(
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        SketchButton(
+          label: 'Save',
+          onPressed: _saveFrame,
+          filled: true,
+          primary: true,
+        ),
+      ],
+      child: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: .min,
           children: [
-            TextFormField(
+            SketchFormInput(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Frame Name',
-                hintText: 'e.x. Ultra Wide',
-                border: OutlineInputBorder(),
-              ),
+              label: 'Frame Name',
+              hint: 'e.g. Ultra Wide',
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Frame name is required';
+                }
+                if (_hasDuplicateName(value.trim())) {
+                  return 'Frame name already exists';
                 }
                 return null;
               },
@@ -70,14 +97,11 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
+                  child: SketchFormInput(
                     controller: _widthController,
                     keyboardType: .number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Width',
-                      border: OutlineInputBorder(),
-                    ),
+                    label: 'Width',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Enter width';
@@ -90,16 +114,13 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
                     },
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: TextFormField(
+                  child: SketchFormInput(
                     controller: _heightController,
                     keyboardType: .number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Height',
-                      border: OutlineInputBorder(),
-                    ),
+                    label: 'Height',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Enter height';
@@ -108,22 +129,23 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
                       if (number == null || number <= 0) {
                         return 'Must be > 0';
                       }
+                      if (_hasDuplicateRatio()) {
+                        return 'Ratio already exists';
+                      }
                       return null;
                     },
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            _RatioPreview(
+              width: int.tryParse(_widthController.text),
+              height: int.tryParse(_heightController.text),
+            ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(onPressed: _saveFrame, child: const Text('Save')),
-      ],
     );
   }
 
@@ -149,14 +171,96 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_isEditing ? 'Frame updated' : 'Frame added')),
-        );
+        SketchToast.show(context, _isEditing ? 'Frame updated' : 'Frame added');
       }
     } on AppError catch (e) {
       if (mounted) {
-        context.showErrorSnackBar(e);
+        context.showErrorToast(e);
       }
     }
   }
+
+  void _refreshPreview() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  bool _hasDuplicateName(String name) {
+    final currentId = widget.frame?.id;
+    return widget.existingFrames.any(
+      (frame) =>
+          (currentId == null || frame.id != currentId) &&
+          frame.title.trim().toLowerCase() == name.toLowerCase(),
+    );
+  }
+
+  bool _hasDuplicateRatio() {
+    final width = int.tryParse(_widthController.text);
+    final height = int.tryParse(_heightController.text);
+    if (width == null || height == null || width <= 0 || height <= 0) {
+      return false;
+    }
+
+    final currentId = widget.frame?.id;
+    final ratio = _normalizeRatio(width, height);
+    return widget.existingFrames.any((frame) {
+      if (currentId != null && frame.id == currentId) return false;
+      return _normalizeRatio(frame.width, frame.height) == ratio;
+    });
+  }
+}
+
+class _RatioPreview extends StatelessWidget {
+  final int? width;
+  final int? height;
+
+  const _RatioPreview({required this.width, required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = SketchTheme.of(context);
+    final hasValidRatio =
+        width != null && height != null && width! > 0 && height! > 0;
+    final ratioText = hasValidRatio ? '${width!}:${height!}' : null;
+    final aspectRatio = hasValidRatio ? width! / height! : 1.0;
+
+    return Semantics(
+      label: hasValidRatio ? 'Preview ${width!} by ${height!}' : 'Preview',
+      child: SketchSurface(
+        fillColor: theme.panel,
+        strokeColor: theme.mutedInk,
+        padding: const EdgeInsets.all(12),
+        seed: (width ?? 1) * 31 + (height ?? 1),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 68,
+              height: 48,
+              child: Center(
+                child: FramePreview(
+                  aspectRatio: aspectRatio,
+                  maxWidth: 52,
+                  maxHeight: 44,
+                  seed: (width ?? 1) * 31 + (height ?? 1),
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                hasValidRatio ? 'Preview $ratioText' : 'Preview',
+                style: theme.labelStyle.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+(int, int) _normalizeRatio(int width, int height) {
+  final divisor = width.gcd(height);
+  return (width ~/ divisor, height ~/ divisor);
 }

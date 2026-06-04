@@ -1,15 +1,15 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/services/permission_service.dart';
 import 'package:framatic/features/camera/data/camera_repository.dart';
-import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/features/camera/domain/camera_error.dart';
 
 class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   final CameraRepository _cameraRepository;
 
   CameraProvider(CameraRepository cameraRepository)
-      : _cameraRepository = cameraRepository {
+    : _cameraRepository = cameraRepository {
     WidgetsBinding.instance.addObserver(this);
     _initialize();
   }
@@ -21,6 +21,9 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   double _minZoom = 1.0;
   double _maxZoom = 1.0;
   double _currentZoom = 1.0;
+  Future<void> _lifecycleOperation = Future.value();
+  int _lifecycleGeneration = 0;
+  bool _isDisposed = false;
 
   bool get isLoading => _isLoading;
   bool get isCapturing => _isCapturing;
@@ -117,21 +120,40 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.inactive) {
-      _cameraRepository.disposeController();
-      notifyListeners();
+      final generation = ++_lifecycleGeneration;
+      _queueLifecycleOperation(() => _disposeForInactive(generation));
     } else if (state == AppLifecycleState.resumed) {
       // Re-initialize the camera controller after app resumes
-      _reinitialize();
+      final generation = ++_lifecycleGeneration;
+      _queueLifecycleOperation(() => _reinitialize(generation));
     }
   }
 
-  Future<void> _reinitialize() async {
+  void _queueLifecycleOperation(Future<void> Function() operation) {
+    _lifecycleOperation = _lifecycleOperation
+        .then((_) => operation())
+        .catchError((Object e) {
+          debugPrint('Error handling camera lifecycle: $e');
+        });
+  }
+
+  Future<void> _disposeForInactive(int generation) async {
+    await _cameraRepository.disposeController();
+    if (_isDisposed || generation != _lifecycleGeneration) return;
+    notifyListeners();
+  }
+
+  Future<void> _reinitialize(int generation) async {
+    if (_isDisposed || generation != _lifecycleGeneration) return;
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
     try {
       await _cameraRepository.reinitialize();
+      if (_isDisposed || generation != _lifecycleGeneration) return;
       final (minZoom, maxZoom) = await _cameraRepository.getZoomLimits();
+      if (_isDisposed || generation != _lifecycleGeneration) return;
       _minZoom = minZoom;
       _maxZoom = maxZoom;
       _currentZoom = minZoom;
@@ -145,13 +167,16 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
       );
       debugPrint('Error reinitializing camera: $e');
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (!_isDisposed && generation == _lifecycleGeneration) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     WidgetsBinding.instance.removeObserver(this);
     _cameraRepository.disposeController();
     super.dispose();

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 
 /// A horizontal zoom slider widget with non-linear mapping for better visualization
 ///
@@ -90,57 +91,42 @@ class _ZoomSliderState extends State<ZoomSlider> {
     }
 
     final sliderValue = _zoomToSliderValue(widget.currentZoom);
+    final theme = SketchTheme.of(context);
 
-    return Container(
-      padding: const .symmetric(vertical: 6, horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.4),
-        borderRadius: .circular(20),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           // Zoom level indicator (left side)
-          Container(
+          SketchSurface(
             padding: const .symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.6),
-              borderRadius: .circular(8),
-            ),
+            fillColor: theme.panelStrong,
+            strokeColor: theme.mutedInk,
+            shape: SketchShape.pill,
+            seed: 621,
             child: Text(
               '${widget.currentZoom.toStringAsFixed(1)}x',
-              style: const TextStyle(
-                color: Colors.white,
+              style: theme.labelStyle.copyWith(
+                color: theme.ink,
                 fontSize: 12,
-                fontWeight: .bold,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
           const SizedBox(width: 8),
           // Horizontal slider (takes remaining space)
           Expanded(
-            child: SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                trackHeight: 4,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-                activeTrackColor: Colors.white,
-                inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
-                thumbColor: Colors.white,
-                overlayColor: Colors.white.withValues(alpha: 0.2),
-              ),
-              child: Slider(
-                value: sliderValue,
-                min: 0.0,
-                max: 1.0,
-                onChanged: (newSliderValue) {
-                  final newZoom = _sliderValueToZoom(newSliderValue);
-                  if (_shouldTriggerHaptic(newZoom)) {
-                    HapticFeedback.mediumImpact();
-                    _lastHapticZoom = newZoom;
-                  }
-                  widget.onZoomChanged(newZoom);
-                },
-              ),
+            child: SketchSlider(
+              semanticLabel: 'Zoom',
+              value: sliderValue,
+              onChanged: (newSliderValue) {
+                final newZoom = _sliderValueToZoom(newSliderValue);
+                if (_shouldTriggerHaptic(newZoom)) {
+                  HapticFeedback.mediumImpact();
+                  _lastHapticZoom = newZoom;
+                }
+                widget.onZoomChanged(newZoom);
+              },
             ),
           ),
           const SizedBox(width: 8),
@@ -186,30 +172,45 @@ class _ZoomSliderState extends State<ZoomSlider> {
       return const SizedBox.shrink();
     }
 
-    return GestureDetector(
-      onTap: () {
-        if (_shouldTriggerHaptic(zoom)) {
-          HapticFeedback.mediumImpact();
-          _lastHapticZoom = zoom;
-        }
-        widget.onZoomChanged(zoom);
-      },
-      child: Container(
-        margin: const .symmetric(vertical: 2),
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          shape: .circle,
-          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.2),
-          border: .all(color: Colors.white, width: 1),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isActive ? Colors.black : Colors.white,
-              fontSize: 10,
-              fontWeight: .bold,
+    final theme = SketchTheme.of(context);
+
+    return Semantics(
+      button: true,
+      selected: isActive,
+      label: 'Set zoom to $label',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (_shouldTriggerHaptic(zoom)) {
+            HapticFeedback.mediumImpact();
+            _lastHapticZoom = zoom;
+          }
+          widget.onZoomChanged(zoom);
+        },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+          child: Center(
+            child: SizedBox(
+              width: 38,
+              height: 30,
+              child: SketchSurface(
+                shape: SketchShape.pill,
+                fillColor: theme.panel,
+                strokeColor: theme.ink,
+                hachure: isActive,
+                hachureColor: theme.ink.withValues(alpha: 0.18),
+                seed: label.hashCode,
+                child: Center(
+                  child: Text(
+                    label,
+                    style: theme.labelStyle.copyWith(
+                      color: theme.ink,
+                      fontSize: 10,
+                      fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),

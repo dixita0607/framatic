@@ -3,11 +3,14 @@ import 'package:framatic/core/services/preferences_service.dart';
 import 'package:framatic/core/utils/db.dart';
 import 'package:framatic/features/frames_manager/data/frame_repository.dart';
 import 'package:framatic/features/frames_manager/domain/frame_error.dart';
+import 'package:sqflite/sqflite.dart';
 
 const _orderKey = 'frames_order';
 
 class FrameService implements FrameRepository {
-  final _db = FramaticDB.instance.db;
+  final Database _db;
+
+  FrameService({Database? db}) : _db = db ?? FramaticDB.instance.db;
 
   @override
   Future<List<String>> getOrder() =>
@@ -58,6 +61,13 @@ class FrameService implements FrameRepository {
         userMessage: 'Failed to update frame. Please try again.',
       );
     }
+    final existingFrame = await getFrameById(frame.id!);
+    if (!existingFrame.isCustom) {
+      throw UpdateFrameError(
+        'Predefined frame cannot be updated: ${frame.id}',
+        userMessage: 'Built-in frames cannot be edited.',
+      );
+    }
     final updatedFrameId = await _db.update(
       FramesTable.name,
       frame.toJson(),
@@ -75,6 +85,13 @@ class FrameService implements FrameRepository {
 
   @override
   Future<int> deleteFrame(int id) async {
+    final existingFrame = await getFrameById(id);
+    if (!existingFrame.isCustom) {
+      throw DeleteFrameError(
+        'Predefined frame cannot be deleted: $id',
+        userMessage: 'Built-in frames cannot be deleted.',
+      );
+    }
     final deletedFrame = await _db.delete(
       FramesTable.name,
       where: 'id = ?',
