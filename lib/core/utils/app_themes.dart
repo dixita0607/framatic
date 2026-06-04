@@ -228,7 +228,7 @@ final _graphite = (
     inkColor:       const Color(0xFF141414), // C-10 near-black
     paperColor:     const Color(0xFFF0F0F0), // C-0 near-white
     primaryColor:   const Color(0xFF393939), // C-9 dark grey
-    secondaryColor: const Color(0xFFB0B0B0), // C-4 mid grey
+    secondaryColor: const Color(0xFF787878), // C-6 mid grey — passes WCAG AA 3:1 on paper
     roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),
@@ -236,7 +236,7 @@ final _graphite = (
     inkColor:       const Color(0xFFF0F0F0), // C-0 near-white
     paperColor:     const Color(0xFF141414), // C-10 near-black
     primaryColor:   const Color(0xFFD8D8D8), // C-2 light grey
-    secondaryColor: const Color(0xFF424242), // C-8/9 dark grey
+    secondaryColor: const Color(0xFF606060), // C-7 dark grey — passes WCAG AA 3:1 on paper
     roughness: 0.35,
     typography: SketchyTypographyData.comicShanns(),
   ),

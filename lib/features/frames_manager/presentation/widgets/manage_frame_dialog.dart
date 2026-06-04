@@ -10,8 +10,14 @@ import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 class ManageFrameDialog extends StatefulWidget {
   final Frame? frame;
   final Function(Frame) onSave;
+  final List<String> existingTitles;
 
-  const ManageFrameDialog({super.key, this.frame, required this.onSave});
+  const ManageFrameDialog({
+    super.key,
+    this.frame,
+    required this.onSave,
+    this.existingTitles = const [],
+  });
 
   @override
   State<ManageFrameDialog> createState() => _ManageFrameDialogState();
@@ -36,14 +42,47 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
       _widthController.text = widget.frame!.width.toString();
       _heightController.text = widget.frame!.height.toString();
     }
+    _widthController.addListener(_onRatioChanged);
+    _heightController.addListener(_onRatioChanged);
   }
+
+  void _onRatioChanged() => setState(() {});
 
   @override
   void dispose() {
+    _widthController.removeListener(_onRatioChanged);
+    _heightController.removeListener(_onRatioChanged);
     _nameController.dispose();
     _widthController.dispose();
     _heightController.dispose();
     super.dispose();
+  }
+
+  Widget _buildAspectRatioPreview() {
+    final w = int.tryParse(_widthController.text);
+    final h = int.tryParse(_heightController.text);
+    if (w == null || h == null || w <= 0 || h <= 0) return const SizedBox.shrink();
+
+    const maxW = 120.0;
+    const maxH = 80.0;
+    final ratio = w / h;
+    final double previewW;
+    final double previewH;
+    if (ratio >= maxW / maxH) {
+      previewW = maxW;
+      previewH = maxW / ratio;
+    } else {
+      previewH = maxH;
+      previewW = maxH * ratio;
+    }
+
+    return Center(
+      child: SketchyFrame(
+        width: previewW,
+        height: previewH,
+        child: const SizedBox.shrink(),
+      ),
+    );
   }
 
   @override
@@ -81,7 +120,7 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
-                        labelText: 'Width',
+                        labelText: 'Ratio Width',
                         errorText: _widthError,
                       ),
                     ),
@@ -93,14 +132,16 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
-                        labelText: 'Height',
+                        labelText: 'Ratio Height',
                         errorText: _heightError,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
+              _buildAspectRatioPreview(),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -124,36 +165,32 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
   }
 
   void _saveFrame() async {
+    final name = _nameController.text.trim();
+    final width = int.tryParse(_widthController.text);
+    final height = int.tryParse(_heightController.text);
+
+    String? nameError;
+    if (name.isEmpty) {
+      nameError = 'Frame name is required';
+    } else if (name != widget.frame?.title &&
+        widget.existingTitles.contains(name)) {
+      nameError = 'A frame with this name already exists';
+    }
+
     setState(() {
-      _nameError = null;
-      _widthError = null;
-      _heightError = null;
+      _nameError = nameError;
+      _widthError = (width == null || width <= 0) ? 'Must be > 0' : null;
+      _heightError = (height == null || height <= 0) ? 'Must be > 0' : null;
     });
 
-    final name = _nameController.text.trim();
-    if (name.isEmpty) {
-      setState(() => _nameError = 'Frame name is required');
-      return;
-    }
-
-    final width = int.tryParse(_widthController.text);
-    if (width == null || width <= 0) {
-      setState(() => _widthError = 'Must be > 0');
-      return;
-    }
-
-    final height = int.tryParse(_heightController.text);
-    if (height == null || height <= 0) {
-      setState(() => _heightError = 'Must be > 0');
-      return;
-    }
+    if (_nameError != null || _widthError != null || _heightError != null) return;
 
     try {
       final frame = Frame(
         id: _isEditing ? widget.frame!.id : null,
         title: name,
-        width: width,
-        height: height,
+        width: width!,
+        height: height!,
         isCustom: true,
       );
 

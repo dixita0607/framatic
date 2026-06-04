@@ -66,12 +66,15 @@ class FakeCameraProvider extends ChangeNotifier
 class FakeFrameProvider extends ChangeNotifier implements FrameProvider {
   @override List<Frame> frames;
   @override bool isLoading;
+  @override bool isMutating = false;
+  @override AppError? initError;
   int? _activeFrameId;
 
   FakeFrameProvider({
     List<Frame>? frames,
     this.isLoading = false,
     int? activeFrameId,
+    this.initError,
   })  : frames = frames ?? [],
         _activeFrameId = activeFrameId ?? frames?.firstOrNull?.id;
 
@@ -86,6 +89,7 @@ class FakeFrameProvider extends ChangeNotifier implements FrameProvider {
     notifyListeners();
   }
 
+  @override Future<void> retry() async {}
   @override Future<Frame> createFrame(Frame f) async => f;
   @override Future<Frame> updateFrame(Frame f) async => f;
   @override Future<void> deleteFrame(int id) async {}

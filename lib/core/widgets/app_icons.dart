@@ -9,8 +9,10 @@ class PencilIcon extends StatelessWidget {
   const PencilIcon({super.key, required this.color, this.size = 24});
 
   @override
-  Widget build(BuildContext context) =>
-      CustomPaint(size: Size(size, size), painter: _PencilPainter(color));
+  Widget build(BuildContext context) => Semantics(
+    label: 'Edit',
+    child: CustomPaint(size: Size(size, size), painter: _PencilPainter(color)),
+  );
 }
 
 class RotateCameraIcon extends StatelessWidget {
@@ -20,8 +22,10 @@ class RotateCameraIcon extends StatelessWidget {
   const RotateCameraIcon({super.key, required this.color, this.size = 24});
 
   @override
-  Widget build(BuildContext context) =>
-      CustomPaint(size: Size(size, size), painter: _RotateCameraPainter(color));
+  Widget build(BuildContext context) => Semantics(
+    label: 'Switch camera',
+    child: CustomPaint(size: Size(size, size), painter: _RotateCameraPainter(color)),
+  );
 }
 
 class ErrorOutlineIcon extends StatelessWidget {
@@ -31,8 +35,10 @@ class ErrorOutlineIcon extends StatelessWidget {
   const ErrorOutlineIcon({super.key, required this.color, this.size = 24});
 
   @override
-  Widget build(BuildContext context) =>
-      CustomPaint(size: Size(size, size), painter: _ErrorOutlinePainter(color));
+  Widget build(BuildContext context) => Semantics(
+    label: 'Error',
+    child: CustomPaint(size: Size(size, size), painter: _ErrorOutlinePainter(color)),
+  );
 }
 
 class _PencilPainter extends CustomPainter {

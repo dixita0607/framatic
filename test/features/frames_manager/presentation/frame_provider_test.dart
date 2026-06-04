@@ -462,39 +462,39 @@ void main() {
     });
 
     group('isLoading toggles', () {
-      test('isLoading is true during createFrame', () async {
+      test('isMutating is true during createFrame', () async {
         final repo = FakeFrameRepository(frames: [], order: []);
         final provider = FrameProvider(repo);
         await pumpEventQueue();
 
-        bool loadingDuringCreate = false;
+        bool mutatingDuringCreate = false;
         provider.addListener(() {
-          if (provider.isLoading) loadingDuringCreate = true;
+          if (provider.isMutating) mutatingDuringCreate = true;
         });
 
         await provider.createFrame(
           Frame(title: 'New', width: 4, height: 3, isCustom: true),
         );
 
-        expect(loadingDuringCreate, isTrue);
-        expect(provider.isLoading, isFalse);
+        expect(mutatingDuringCreate, isTrue);
+        expect(provider.isMutating, isFalse);
       });
 
-      test('isLoading is true during deleteFrame', () async {
+      test('isMutating is true during deleteFrame', () async {
         final frames = [_frame(1, 'A')];
         final repo = FakeFrameRepository(frames: frames, order: ['1']);
         final provider = FrameProvider(repo);
         await pumpEventQueue();
 
-        bool loadingDuringDelete = false;
+        bool mutatingDuringDelete = false;
         provider.addListener(() {
-          if (provider.isLoading) loadingDuringDelete = true;
+          if (provider.isMutating) mutatingDuringDelete = true;
         });
 
         await provider.deleteFrame(1);
 
-        expect(loadingDuringDelete, isTrue);
-        expect(provider.isLoading, isFalse);
+        expect(mutatingDuringDelete, isTrue);
+        expect(provider.isMutating, isFalse);
       });
     });
   });

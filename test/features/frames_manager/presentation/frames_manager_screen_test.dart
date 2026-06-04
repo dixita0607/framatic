@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
 import 'package:framatic/features/frames_manager/presentation/frames_manager_screen.dart';
@@ -12,6 +13,8 @@ import 'package:sketchy_design_lang/sketchy_design_lang.dart';
 class FakeFrameProvider extends ChangeNotifier implements FrameProvider {
   @override List<Frame> frames;
   @override bool isLoading;
+  @override bool isMutating = false;
+  @override AppError? initError;
   int? _activeFrameId;
 
   FakeFrameProvider({
@@ -45,6 +48,8 @@ class FakeFrameProvider extends ChangeNotifier implements FrameProvider {
     notifyListeners();
     return frame;
   }
+
+  @override Future<void> retry() async {}
 
   @override
   Future<void> deleteFrame(int frameId) async {

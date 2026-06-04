@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/features/frames_manager/data/frame_repository.dart';
 import 'package:framatic/features/frames_manager/domain/frame_error.dart';
@@ -8,7 +9,9 @@ class FrameProvider extends ChangeNotifier {
 
   List<Frame> _frames = [];
   bool _isLoading = false;
+  bool _isMutating = false;
   int? _activeFrameId;
+  AppError? _initError;
 
   FrameProvider(FrameRepository frameRepository)
     : _frameRepository = frameRepository {
@@ -17,9 +20,16 @@ class FrameProvider extends ChangeNotifier {
 
   List<Frame> get frames => _frames;
   bool get isLoading => _isLoading;
+  bool get isMutating => _isMutating;
+  AppError? get initError => _initError;
   Frame? get activeFrame => _activeFrameId == null
       ? null
       : _frames.where((frame) => frame.id == _activeFrameId).firstOrNull;
+
+  Future<void> retry() async {
+    _initError = null;
+    await _initialize();
+  }
 
   Future<void> _initialize() async {
     _isLoading = true;
@@ -32,7 +42,11 @@ class FrameProvider extends ChangeNotifier {
         _activeFrameId = _frames[0].id!;
       }
     } catch (e) {
-      debugPrint('Error initializing frames: $e');
+      _initError = DatabaseError(
+        'Frame initialization failed: $e',
+        userMessage: 'Unable to load frames. Please try again.',
+        cause: e,
+      );
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -40,7 +54,7 @@ class FrameProvider extends ChangeNotifier {
   }
 
   Future<Frame> createFrame(Frame newFrame) async {
-    _isLoading = true;
+    _isMutating = true;
     notifyListeners();
     try {
       final createdFrame = await _frameRepository.createFrame(newFrame);
@@ -53,13 +67,13 @@ class FrameProvider extends ChangeNotifier {
       debugPrint('Error creating frame: $e');
       rethrow;
     } finally {
-      _isLoading = false;
+      _isMutating = false;
       notifyListeners();
     }
   }
 
   Future<Frame> updateFrame(Frame frame) async {
-    _isLoading = true;
+    _isMutating = true;
     notifyListeners();
     try {
       final updatedFrame = await _frameRepository.updateFrame(frame);
@@ -72,13 +86,13 @@ class FrameProvider extends ChangeNotifier {
       debugPrint('Error updating frame: $e');
       rethrow;
     } finally {
-      _isLoading = false;
+      _isMutating = false;
       notifyListeners();
     }
   }
 
   Future<void> deleteFrame(int frameId) async {
-    _isLoading = true;
+    _isMutating = true;
     notifyListeners();
     try {
       await _frameRepository.deleteFrame(frameId);
@@ -93,7 +107,7 @@ class FrameProvider extends ChangeNotifier {
       debugPrint('Error deleting frame: $e');
       rethrow;
     } finally {
-      _isLoading = false;
+      _isMutating = false;
       notifyListeners();
     }
   }

@@ -11,6 +11,7 @@ class FrameListItem extends StatelessWidget {
   final int order;
   final Function(Frame) onEdit;
   final Function(int frameId) onDelete;
+  final List<String> existingTitles;
 
   const FrameListItem({
     super.key,
@@ -18,6 +19,7 @@ class FrameListItem extends StatelessWidget {
     required this.order,
     required this.onEdit,
     required this.onDelete,
+    this.existingTitles = const [],
   });
 
   @override
@@ -73,8 +75,11 @@ class FrameListItem extends StatelessWidget {
                     iconSize: 40,
                     onPressed: () => showSketchyDialog(
                       context: context,
-                      builder: (_) =>
-                          ManageFrameDialog(frame: frame, onSave: onEdit),
+                      builder: (_) => ManageFrameDialog(
+                          frame: frame,
+                          onSave: onEdit,
+                          existingTitles: existingTitles,
+                        ),
                     ),
                   ),
                   SketchyIconButton(

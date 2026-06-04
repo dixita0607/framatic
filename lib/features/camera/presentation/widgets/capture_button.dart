@@ -42,31 +42,35 @@ class _CaptureButtonState extends State<CaptureButton>
   @override
   Widget build(BuildContext context) {
     final primary = SketchyTheme.of(context).primaryColor;
-    return GestureDetector(
-      onTapDown: (_) => _scaleController.forward(),
-      onTapUp: (_) {
-        _scaleController.reverse();
-        widget.onPressed?.call();
-      },
-      onTapCancel: () => _scaleController.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: SketchyFrame(
-          shape: SketchyFrameShape.circle,
-          width: 88,
-          height: 88,
-          fill: SketchyFill.solid,
-          fillColor: primary.withValues(alpha: 0.35),
-          strokeColor: primary,
-          child: widget.isCapturing
-              ? Center(
-                  child: SketchyCircularProgressIndicator(
-                    size: 24,
-                    strokeWidth: 2.5,
-                    color: onColor(primary),
-                  ),
-                )
-              : const SizedBox.shrink(),
+    return Semantics(
+      button: true,
+      label: 'Take photo',
+      child: GestureDetector(
+        onTapDown: (_) => _scaleController.forward(),
+        onTapUp: (_) {
+          _scaleController.reverse();
+          widget.onPressed?.call();
+        },
+        onTapCancel: () => _scaleController.reverse(),
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: SketchyFrame(
+            shape: SketchyFrameShape.circle,
+            width: 88,
+            height: 88,
+            fill: SketchyFill.solid,
+            fillColor: primary.withValues(alpha: 0.35),
+            strokeColor: primary,
+            child: widget.isCapturing
+                ? Center(
+                    child: SketchyCircularProgressIndicator(
+                      size: 24,
+                      strokeWidth: 2.5,
+                      color: onColor(primary),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
         ),
       ),
     );

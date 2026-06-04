@@ -52,7 +52,22 @@ class _ZoomSliderState extends State<ZoomSlider> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.maxZoom <= widget.minZoom) return const SizedBox.shrink();
+    if (widget.maxZoom <= widget.minZoom) {
+      final ink = SketchyTheme.of(context).inkColor;
+      final paper = SketchyTheme.of(context).paperColor;
+      return SketchyFrame(
+        fill: SketchyFill.solid,
+        fillColor: paper.withValues(alpha: 0.6),
+        cornerRadius: 20,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          child: Text(
+            '${widget.currentZoom.toStringAsFixed(1)}x',
+            style: TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
 
     final sliderValue = _zoomToSliderValue(widget.currentZoom);
     final ink = SketchyTheme.of(context).inkColor;
@@ -108,7 +123,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
   Widget _buildQuickZoomButtons(Color ink) {
     final buttons = <Widget>[];
 
-    if (widget.minZoom <= 0.6) buttons.add(_buildZoomButton(0.5, '0.5', ink));
+    if (widget.minZoom <= 0.6) buttons.add(_buildZoomButton(0.5, '½x', ink));
     buttons.add(_buildZoomButton(1.0, '1x', ink));
     if (widget.maxZoom >= 2.0) buttons.add(_buildZoomButton(2.0, '2x', ink));
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:framatic/core/widgets/app_icons.dart';
 import 'package:framatic/core/widgets/dotted_background.dart';
@@ -48,10 +50,16 @@ class _CameraScreenState extends State<CameraScreen> {
         return;
       }
 
-      final processedPath = await photoProvider.processPhotoWithFrame(
-        imagePath: xFile.path,
-        frame: activeFrame,
-      );
+      final String processedPath;
+      try {
+        processedPath = await photoProvider.processPhotoWithFrame(
+          imagePath: xFile.path,
+          frame: activeFrame,
+        );
+      } catch (_) {
+        try { await File(xFile.path).delete(); } catch (_) {}
+        rethrow;
+      }
 
       if (mounted) {
         await Navigator.of(context).push(
@@ -102,7 +110,9 @@ class _CameraScreenState extends State<CameraScreen> {
       body: SafeArea(
         child: Consumer2<CameraProvider, FrameProvider>(
           builder: (context, cameraProvider, frameProvider, child) {
-            if (cameraProvider.isLoading || cameraProvider.controller == null) {
+            if (cameraProvider.isLoading ||
+                cameraProvider.controller == null ||
+                frameProvider.isLoading) {
               return const Center(child: SketchyCircularProgressIndicator());
             }
 
@@ -113,18 +123,55 @@ class _CameraScreenState extends State<CameraScreen> {
               );
             }
 
+            if (frameProvider.activeFrame == null) {
+              return CameraErrorWidget(
+                error: frameProvider.initError,
+                onRetry: frameProvider.retry,
+              );
+            }
+
             return Column(
               children: [
                 Expanded(
-                  child: CameraArea(
-                    controller: cameraProvider.controller!,
-                    activeFrame: frameProvider.activeFrame!,
-                    onScaleStart: _onScaleStart,
-                    onScaleUpdate: _onScaleUpdate,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CameraArea(
+                        controller: cameraProvider.controller!,
+                        activeFrame: frameProvider.activeFrame!,
+                        onScaleStart: _onScaleStart,
+                        onScaleUpdate: _onScaleUpdate,
+                      ),
+                      Positioned(
+                        bottom: 8,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: SketchyFrame(
+                            fill: SketchyFill.solid,
+                            fillColor: ink.withValues(alpha: 0.55),
+                            cornerRadius: 12,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 3),
+                              child: Text(
+                                frameProvider.activeFrame!.title,
+                                style: TextStyle(
+                                  color: SketchyTheme.of(context).paperColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 64),
+                    padding: EdgeInsets.fromLTRB(
+                        16, 0, 16,
+                        16 + MediaQuery.of(context).viewPadding.bottom),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -159,7 +206,7 @@ class _CameraScreenState extends State<CameraScreen> {
                         ),
                         const SizedBox(height: 32),
                         SizedBox(
-                          height: 48,
+                          height: 50,
                           child: FrameSelector(
                             frames: frameProvider.frames,
                             activeFrame: frameProvider.activeFrame!,
