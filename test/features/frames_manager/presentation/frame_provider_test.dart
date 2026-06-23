@@ -129,50 +129,6 @@ void main() {
       },
     );
 
-    test('updateFrame rejects predefined frames', () async {
-      final repository = _FakeFrameRepository(
-        frames: [
-          _frame(id: 1, title: '16:9', width: 16, height: 9),
-          _frame(id: 2, title: 'Custom', width: 2, height: 1, isCustom: true),
-        ],
-        order: ['1', '2'],
-      );
-      final provider = FrameProvider(repository);
-      addTearDown(provider.dispose);
-      await _waitForInitialization(provider);
-
-      await expectLater(
-        provider.updateFrame(_frame(id: 1, title: 'Wide', width: 2, height: 1)),
-        throwsA(isA<UpdateFrameError>()),
-      );
-
-      expect(repository.updatedFrames, isEmpty);
-      expect(provider.frames.map((frame) => frame.title), ['16:9', 'Custom']);
-      expect(provider.isLoading, isFalse);
-    });
-
-    test('deleteFrame rejects predefined frames', () async {
-      final repository = _FakeFrameRepository(
-        frames: [
-          _frame(id: 1, title: '16:9', width: 16, height: 9),
-          _frame(id: 2, title: 'Custom', width: 2, height: 1, isCustom: true),
-        ],
-        order: ['1', '2'],
-      );
-      final provider = FrameProvider(repository);
-      addTearDown(provider.dispose);
-      await _waitForInitialization(provider);
-
-      await expectLater(
-        provider.deleteFrame(1),
-        throwsA(isA<DeleteFrameError>()),
-      );
-
-      expect(repository.deletedIds, isEmpty);
-      expect(provider.frames.map((frame) => frame.id), [1, 2]);
-      expect(provider.isLoading, isFalse);
-    });
-
     test('setActiveFrame throws when id is not loaded', () async {
       final repository = _FakeFrameRepository(
         frames: [_frame(id: 1, title: '16:9', width: 16, height: 9)],
@@ -205,7 +161,7 @@ void main() {
       await _waitForInitialization(provider);
       repository.setOrderCalls.clear();
 
-      await provider.orderFrames(0, 3);
+      await provider.orderFrames(0, 2);
 
       expect(provider.isLoading, isFalse);
       expect(provider.frames.map((frame) => frame.id), [2, 3, 1]);

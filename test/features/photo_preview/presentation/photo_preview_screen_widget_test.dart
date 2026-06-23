@@ -23,7 +23,7 @@ void main() {
         tester,
         ChangeNotifierProvider<PhotoPreviewProvider>.value(
           value: provider,
-          child: sketchTestApp(PhotoPreviewScreen(imagePath: imageFile.path)),
+          child: buildTestApp(PhotoPreviewScreen(imagePath: imageFile.path)),
         ),
       );
       await _settleFileImage(tester);
@@ -147,7 +147,7 @@ Widget _launchingApp({
 }) {
   return ChangeNotifierProvider<PhotoPreviewProvider>.value(
     value: provider,
-    child: sketchTestApp(
+    child: buildTestApp(
       _PreviewLauncher(imagePath: imagePath, onResult: onResult),
     ),
   );

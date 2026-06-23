@@ -21,6 +21,14 @@ void main() {
     expect(value, isEmpty);
   });
 
+  test('getStringList returns values for an existing key', () async {
+    const key = 'existing_frames_order';
+    const order = ['3', '1', '2'];
+    await PreferencesService.setStringList(key, order);
+
+    expect(await PreferencesService.getStringList(key), order);
+  });
+
   test('setStringList persists and reads frame ordering values', () async {
     const key = 'frames_order_test_key';
     const order = ['2', '1', '3'];

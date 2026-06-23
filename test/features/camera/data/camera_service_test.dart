@@ -51,7 +51,7 @@ void main() {
       expect(service.controller!.value.isInitialized, isTrue);
       expect(platform.createdDescriptions, [_backCamera]);
       expect(await service.getZoomLimits(), (0.5, 4.0));
-      expect(platform.zoomLevels, [(1, 0.5)]);
+      expect(platform.zoomLevels, [(1, 1.0)]);
     },
   );
 

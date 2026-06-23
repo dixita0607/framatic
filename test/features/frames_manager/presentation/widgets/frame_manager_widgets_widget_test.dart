@@ -2,9 +2,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
+import 'package:framatic/features/frames_manager/data/frame_repository.dart';
+import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/delete_frame_dialog.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/frame_list_item.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/manage_frame_dialog.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   group('ManageFrameDialog', () {
@@ -112,26 +115,51 @@ void main() {
       await tester.pumpWidget(
         _testApp(
           _DialogLauncher(
-            builder: (_) => ManageFrameDialog(
-              existingFrames: [
-                Frame(id: 1, title: 'Cinema', width: 21, height: 9),
-              ],
-              onSave: (_) async {},
-            ),
+            builder: (_) => ManageFrameDialog(onSave: (_) async {}),
           ),
+          frames: [Frame(id: 1, title: 'Cinema', width: 21, height: 9)],
         ),
       );
 
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(EditableText).at(0), 'cinema');
-      await tester.enterText(find.byType(EditableText).at(1), '7');
-      await tester.enterText(find.byType(EditableText).at(2), '3');
+      await tester.enterText(find.byType(EditableText).at(1), '21');
+      await tester.enterText(find.byType(EditableText).at(2), '9');
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(find.text('Frame name already exists'), findsOneWidget);
       expect(find.text('Ratio already exists'), findsOneWidget);
+    });
+
+    testWidgets('allows proportionally equivalent dimensions', (tester) async {
+      Frame? savedFrame;
+      await tester.pumpWidget(
+        _testApp(
+          _DialogLauncher(
+            builder: (_) => ManageFrameDialog(
+              onSave: (frame) async {
+                savedFrame = frame;
+              },
+            ),
+          ),
+          frames: [Frame(id: 1, title: 'Classic', width: 4, height: 3)],
+        ),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(EditableText).at(0), 'Large Classic');
+      await tester.enterText(find.byType(EditableText).at(1), '8');
+      await tester.enterText(find.byType(EditableText).at(2), '6');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(savedFrame?.width, 8);
+      expect(savedFrame?.height, 6);
+
+      await tester.pump(const Duration(seconds: 3));
     });
   });
 
@@ -239,21 +267,59 @@ String _editableTextAt(WidgetTester tester, int index) {
       .text;
 }
 
-Widget _testApp(Widget child) {
+Widget _testApp(Widget child, {List<Frame> frames = const []}) {
   const theme = SketchThemeCatalog.graphiteLight;
-  return SketchTheme(
-    data: theme,
-    child: WidgetsApp(
-      color: theme.background,
-      textStyle: theme.bodyStyle,
-      pageRouteBuilder: <T>(settings, builder) => PageRouteBuilder<T>(
-        settings: settings,
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            builder(context),
+  return ChangeNotifierProvider<FrameProvider>(
+    create: (_) => _TestFrameProvider(frames),
+    child: SketchTheme(
+      data: theme,
+      child: WidgetsApp(
+        color: theme.background,
+        textStyle: theme.bodyText,
+        pageRouteBuilder: <T>(settings, builder) => PageRouteBuilder<T>(
+          settings: settings,
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              builder(context),
+        ),
+        home: DefaultTextStyle(style: theme.bodyText, child: child),
       ),
-      home: DefaultTextStyle(style: theme.bodyStyle, child: child),
     ),
   );
+}
+
+class _TestFrameProvider extends FrameProvider {
+  final List<Frame> _testFrames;
+
+  _TestFrameProvider(this._testFrames)
+    : super(_TestFrameRepository(_testFrames));
+
+  @override
+  List<Frame> get frames => _testFrames;
+}
+
+class _TestFrameRepository implements FrameRepository {
+  final List<Frame> frames;
+
+  _TestFrameRepository(this.frames);
+
+  @override
+  Future<List<Frame>> getAllFrames() async => frames;
+
+  @override
+  Future<List<String>> getOrder() async =>
+      frames.map((frame) => frame.id.toString()).toList();
+
+  @override
+  Future<void> setOrder(List<String> order) async {}
+
+  @override
+  Future<Frame> createFrame(Frame frame) async => frame;
+
+  @override
+  Future<Frame> updateFrame(Frame frame) async => frame;
+
+  @override
+  Future<int> deleteFrame(int id) async => id;
 }
 
 class _DialogLauncher extends StatelessWidget {

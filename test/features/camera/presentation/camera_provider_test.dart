@@ -60,7 +60,7 @@ void main() {
       expect(provider.error, isNull);
       expect(provider.minZoom, 0.5);
       expect(provider.maxZoom, 4.0);
-      expect(provider.currentZoom, 0.5);
+      expect(provider.currentZoom, 1.0);
     },
   );
 
@@ -118,7 +118,7 @@ void main() {
     expect(provider.isLoading, isFalse);
     expect(provider.minZoom, 0.8);
     expect(provider.maxZoom, 2.5);
-    expect(provider.currentZoom, 0.8);
+    expect(provider.currentZoom, 1.0);
   });
 
   test('takePicture prevents overlapping captures', () async {

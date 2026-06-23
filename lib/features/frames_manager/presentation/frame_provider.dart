@@ -117,7 +117,7 @@ class FrameProvider extends ChangeNotifier {
     if (oldPos < 0 ||
         oldPos >= _frames.length ||
         newPos < 0 ||
-        newPos > _frames.length) {
+        newPos >= _frames.length) {
       throw ReorderFrameError(
         'Invalid reorder indices: oldPos=$oldPos, newPos=$newPos, length=${_frames.length}',
         userMessage: 'Failed to reorder frames.',
@@ -126,11 +126,7 @@ class FrameProvider extends ChangeNotifier {
 
     try {
       final frameToMove = _frames.removeAt(oldPos);
-      var adjustedIndex = newPos;
-      if (oldPos < newPos) {
-        adjustedIndex -= 1;
-      }
-      _frames.insert(adjustedIndex, frameToMove);
+      _frames.insert(newPos, frameToMove);
       notifyListeners();
 
       await _frameRepository.setOrder(

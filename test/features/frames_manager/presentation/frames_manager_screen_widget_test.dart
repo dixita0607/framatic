@@ -171,11 +171,9 @@ void main() {
 }
 
 Widget _screen(FrameProvider provider) {
-  return sketchTestApp(
-    ChangeNotifierProvider<FrameProvider>.value(
-      value: provider,
-      child: const FramesManagerScreen(),
-    ),
+  return ChangeNotifierProvider<FrameProvider>.value(
+    value: provider,
+    child: buildTestApp(const FramesManagerScreen()),
   );
 }
 

@@ -197,13 +197,13 @@ Widget _testApp(Widget child) {
     data: theme,
     child: WidgetsApp(
       color: theme.background,
-      textStyle: theme.bodyStyle,
+      textStyle: theme.bodyText,
       pageRouteBuilder: <T>(settings, builder) => PageRouteBuilder<T>(
         settings: settings,
         pageBuilder: (context, animation, secondaryAnimation) =>
             builder(context),
       ),
-      home: DefaultTextStyle(style: theme.bodyStyle, child: child),
+      home: DefaultTextStyle(style: theme.bodyText, child: child),
     ),
   );
 }

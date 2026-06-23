@@ -26,7 +26,7 @@ void main() {
       addTearDown(frameProvider.dispose);
 
       await tester.pumpWidget(
-        sketchTestApp(
+        buildTestApp(
           MultiProvider(
             providers: [
               ChangeNotifierProvider<CameraProvider>.value(
@@ -56,7 +56,7 @@ void main() {
       addTearDown(frameProvider.dispose);
 
       await tester.pumpWidget(
-        sketchTestApp(
+        buildTestApp(
           MultiProvider(
             providers: [
               ChangeNotifierProvider<CameraProvider>.value(
