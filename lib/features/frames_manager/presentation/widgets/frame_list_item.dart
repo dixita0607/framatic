@@ -7,7 +7,6 @@ import 'package:framatic/features/frames_manager/presentation/widgets/manage_fra
 
 class FrameListItem extends StatelessWidget {
   final Frame frame;
-  final List<Frame> existingFrames;
   final int order;
   final Function(Frame) onEdit;
   final Function(int frameId) onDelete;
@@ -15,7 +14,6 @@ class FrameListItem extends StatelessWidget {
   const FrameListItem({
     super.key,
     required this.frame,
-    this.existingFrames = const [],
     required this.order,
     required this.onEdit,
     required this.onDelete,
@@ -51,12 +49,7 @@ class FrameListItem extends StatelessWidget {
           SizedBox(
             width: 52,
             height: 44,
-            child: Center(
-              child: FramePreview(
-                aspectRatio: frame.aspectRatio,
-                seed: (frame.id ?? order) + 10,
-              ),
-            ),
+            child: Center(child: FramePreview(aspectRatio: frame.aspectRatio)),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -65,10 +58,10 @@ class FrameListItem extends StatelessWidget {
               children: [
                 Text(
                   frame.title,
-                  style: theme.bodyStyle.copyWith(fontWeight: FontWeight.w700),
+                  style: theme.bodyText.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 3),
-                Text(frame.formattedRatio, style: theme.labelStyle),
+                Text(frame.formattedRatio, style: theme.label),
               ],
             ),
           ),
@@ -76,11 +69,7 @@ class FrameListItem extends StatelessWidget {
             _FrameRowActions(
               onEdit: () => showSketchDialog(
                 context: context,
-                builder: (_) => ManageFrameDialog(
-                  frame: frame,
-                  existingFrames: existingFrames,
-                  onSave: onEdit,
-                ),
+                builder: (_) => ManageFrameDialog(frame: frame, onSave: onEdit),
               ),
               onDelete: () => showSketchDialog(
                 context: context,
@@ -95,7 +84,7 @@ class FrameListItem extends StatelessWidget {
               strokeColor: theme.mutedInk,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               seed: frame.title.hashCode,
-              child: Text('Built-in', style: theme.labelStyle),
+              child: Text('Built-in', style: theme.label),
             ),
         ],
       ),
@@ -113,35 +102,27 @@ class _FrameRowActions extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = SketchTheme.of(context);
     const iconSize = 26.0;
-    const iconGap = 8.0;
     const hitSize = 48.0;
 
     return SizedBox(
-      width: (iconSize * 2) + iconGap + (hitSize - iconSize),
+      width: 104,
       height: hitSize,
-      child: Stack(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Positioned(
-            top: 0,
-            right: 0,
-            child: _FrameRowActionIcon(
-              icon: SketchIconType.delete,
-              label: 'Delete Frame',
-              color: theme.danger,
-              iconSize: iconSize,
-              onPressed: onDelete,
-            ),
+          _FrameRowActionIcon(
+            icon: SketchIconType.edit,
+            label: 'Edit Frame',
+            color: theme.ink,
+            iconSize: iconSize,
+            onPressed: onEdit,
           ),
-          Positioned(
-            top: 0,
-            right: iconSize + iconGap,
-            child: _FrameRowActionIcon(
-              icon: SketchIconType.edit,
-              label: 'Edit Frame',
-              color: theme.ink,
-              iconSize: iconSize,
-              onPressed: onEdit,
-            ),
+          _FrameRowActionIcon(
+            icon: SketchIconType.delete,
+            label: 'Delete Frame',
+            color: theme.danger,
+            iconSize: iconSize,
+            onPressed: onDelete,
           ),
         ],
       ),
@@ -176,10 +157,7 @@ class _FrameRowActionIcon extends StatelessWidget {
           dimension: 48,
           child: Align(
             alignment: Alignment.topRight,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 1),
-              child: SketchIcon(type: icon, size: iconSize, color: color),
-            ),
+            child: SketchIcon(type: icon, size: iconSize, color: color),
           ),
         ),
       ),

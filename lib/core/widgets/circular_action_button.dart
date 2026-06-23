@@ -64,7 +64,7 @@ class CircularActionButton extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(label, style: theme.labelStyle.copyWith(color: theme.ink)),
+          Text(label, style: theme.label.copyWith(color: theme.ink)),
         ],
       ),
     );

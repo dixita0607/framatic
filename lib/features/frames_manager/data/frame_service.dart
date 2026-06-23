@@ -10,6 +10,9 @@ const _orderKey = 'frames_order';
 class FrameService implements FrameRepository {
   final Database _db;
 
+  // The db is expected as argument but not required.
+  // Reason: To be able to mock the database at the time of testing this service
+  // For app logic, a real sqflite database instance is used
   FrameService({Database? db}) : _db = db ?? FramaticDB.instance.db;
 
   @override

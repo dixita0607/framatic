@@ -8,11 +8,11 @@ import 'package:provider/provider.dart';
 class FramesManagerScreen extends StatelessWidget {
   const FramesManagerScreen({super.key});
 
-  void _showAddFrameDialog(BuildContext context, FrameProvider frameProvider) {
+  void _showAddFrameDialog(BuildContext context) {
+    final frameProvider = context.read<FrameProvider>();
     showSketchDialog(
       context: context,
       builder: (context) => ManageFrameDialog(
-        existingFrames: frameProvider.frames,
         onSave: (newFrame) async {
           await frameProvider.createFrame(newFrame);
         },
@@ -41,17 +41,13 @@ class FramesManagerScreen extends StatelessWidget {
                   itemCount: allFrames.length,
                   padding: const EdgeInsets.fromLTRB(14, 6, 24, 92),
                   onReorderItem: (oldIndex, newIndex) async {
-                    final providerNewIndex = oldIndex < newIndex
-                        ? newIndex + 1
-                        : newIndex;
-                    await frameProvider.orderFrames(oldIndex, providerNewIndex);
+                    await frameProvider.orderFrames(oldIndex, newIndex);
                   },
                   itemBuilder: (context, index) {
                     final frame = allFrames[index];
                     return FrameListItem(
                       key: ValueKey(frame.id),
                       frame: frame,
-                      existingFrames: allFrames,
                       order: index,
                       onEdit: (updatedFrame) async {
                         await frameProvider.updateFrame(updatedFrame);
@@ -70,7 +66,7 @@ class FramesManagerScreen extends StatelessWidget {
                 bottom: 18,
                 child: SketchIconButton(
                   icon: SketchIconType.add,
-                  onPressed: () => _showAddFrameDialog(context, frameProvider),
+                  onPressed: () => _showAddFrameDialog(context),
                   tooltip: 'Add Custom Frame',
                   size: 50,
                   filled: true,

@@ -45,7 +45,7 @@ class DeleteFrameDialog extends StatelessWidget {
       ],
       child: Text(
         'Are you sure you want to delete "${frame.title}"?',
-        style: theme.bodyStyle,
+        style: theme.bodyText,
       ),
     );
   }

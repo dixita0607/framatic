@@ -99,7 +99,6 @@ class PhotoService implements PhotoRepository {
     );
 
     // This 4 as a multiplier works as an illusion here. It looks like the border is as thick as in camera preview screen.
-    // TODO: Device-test live preview versus saved output before tuning this border thickness.
 
     final imageWithBorder = img.Image(
       width: croppedImage.width + (4 * AppConstants.frameBorder),

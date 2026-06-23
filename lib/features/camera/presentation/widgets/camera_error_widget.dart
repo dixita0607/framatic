@@ -30,7 +30,7 @@ class CameraErrorWidget extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               error?.userMessage ?? 'An error occurred',
-              style: theme.bodyStyle,
+              style: theme.bodyText,
               textAlign: .center,
             ),
             const SizedBox(height: 16),

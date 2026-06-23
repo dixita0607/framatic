@@ -4,19 +4,15 @@ import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
+import 'package:framatic/features/frames_manager/presentation/frame_provider.dart';
 import 'package:framatic/features/frames_manager/presentation/widgets/frame_preview.dart';
+import 'package:provider/provider.dart';
 
 class ManageFrameDialog extends StatefulWidget {
   final Frame? frame;
-  final List<Frame> existingFrames;
   final Function(Frame) onSave;
 
-  const ManageFrameDialog({
-    super.key,
-    this.frame,
-    this.existingFrames = const [],
-    required this.onSave,
-  });
+  const ManageFrameDialog({super.key, this.frame, required this.onSave});
 
   @override
   State<ManageFrameDialog> createState() => _ManageFrameDialogState();
@@ -40,17 +36,10 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
       _widthController.text = widget.frame!.width.toString();
       _heightController.text = widget.frame!.height.toString();
     }
-
-    _nameController.addListener(_refreshPreview);
-    _widthController.addListener(_refreshPreview);
-    _heightController.addListener(_refreshPreview);
   }
 
   @override
   void dispose() {
-    _nameController.removeListener(_refreshPreview);
-    _widthController.removeListener(_refreshPreview);
-    _heightController.removeListener(_refreshPreview);
     _nameController.dispose();
     _widthController.dispose();
     _heightController.dispose();
@@ -139,9 +128,9 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
               ],
             ),
             const SizedBox(height: 16),
-            _RatioPreview(
-              width: int.tryParse(_widthController.text),
-              height: int.tryParse(_heightController.text),
+            _RatioPreviewFields(
+              widthController: _widthController,
+              heightController: _heightController,
             ),
           ],
         ),
@@ -180,15 +169,9 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
     }
   }
 
-  void _refreshPreview() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
   bool _hasDuplicateName(String name) {
     final currentId = widget.frame?.id;
-    return widget.existingFrames.any(
+    return context.read<FrameProvider>().frames.any(
       (frame) =>
           (currentId == null || frame.id != currentId) &&
           frame.title.trim().toLowerCase() == name.toLowerCase(),
@@ -203,11 +186,38 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
     }
 
     final currentId = widget.frame?.id;
-    final ratio = _normalizeRatio(width, height);
-    return widget.existingFrames.any((frame) {
+    return context.read<FrameProvider>().frames.any((frame) {
       if (currentId != null && frame.id == currentId) return false;
-      return _normalizeRatio(frame.width, frame.height) == ratio;
+      return frame.width == width && frame.height == height;
     });
+  }
+}
+
+class _RatioPreviewFields extends StatelessWidget {
+  final TextEditingController widthController;
+  final TextEditingController heightController;
+
+  const _RatioPreviewFields({
+    required this.widthController,
+    required this.heightController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: widthController,
+      builder: (context, widthValue, child) {
+        return ValueListenableBuilder(
+          valueListenable: heightController,
+          builder: (context, heightValue, child) {
+            return _RatioPreview(
+              width: int.tryParse(widthValue.text),
+              height: int.tryParse(heightValue.text),
+            );
+          },
+        );
+      },
+    );
   }
 }
 
@@ -234,15 +244,13 @@ class _RatioPreview extends StatelessWidget {
         seed: (width ?? 1) * 31 + (height ?? 1),
         child: Row(
           children: [
-            SizedBox(
-              width: 68,
-              height: 48,
+            SizedBox.square(
+              dimension: 52,
               child: Center(
                 child: FramePreview(
                   aspectRatio: aspectRatio,
-                  maxWidth: 52,
+                  maxWidth: 44,
                   maxHeight: 44,
-                  seed: (width ?? 1) * 31 + (height ?? 1),
                 ),
               ),
             ),
@@ -250,7 +258,7 @@ class _RatioPreview extends StatelessWidget {
             Expanded(
               child: Text(
                 hasValidRatio ? 'Preview $ratioText' : 'Preview',
-                style: theme.labelStyle.copyWith(fontWeight: FontWeight.w700),
+                style: theme.label.copyWith(fontWeight: FontWeight.w700),
               ),
             ),
           ],
@@ -258,9 +266,4 @@ class _RatioPreview extends StatelessWidget {
       ),
     );
   }
-}
-
-(int, int) _normalizeRatio(int width, int height) {
-  final divisor = width.gcd(height);
-  return (width ~/ divisor, height ~/ divisor);
 }

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/services/permission_service.dart';
 import 'package:framatic/features/camera/data/camera_repository.dart';
+import 'package:framatic/features/camera/domain/camera_constants.dart';
 import 'package:framatic/features/camera/domain/camera_error.dart';
 
 class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
@@ -18,9 +19,9 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool _isCapturing = false;
   AppError? _error;
 
-  double _minZoom = 1.0;
-  double _maxZoom = 1.0;
-  double _currentZoom = 1.0;
+  double _minZoom = defaultZoomLevel;
+  double _maxZoom = defaultZoomLevel;
+  double _currentZoom = defaultZoomLevel;
   Future<void> _lifecycleOperation = Future.value();
   int _lifecycleGeneration = 0;
   bool _isDisposed = false;
@@ -59,7 +60,7 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
       final (minZoom, maxZoom) = await _cameraRepository.getZoomLimits();
       _minZoom = minZoom;
       _maxZoom = maxZoom;
-      _currentZoom = minZoom;
+      _currentZoom = defaultZoomLevel.clamp(minZoom, maxZoom);
     } on CameraError catch (e) {
       _error = e;
     } catch (e) {
@@ -90,7 +91,7 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
       final (minZoom, maxZoom) = await _cameraRepository.getZoomLimits();
       _minZoom = minZoom;
       _maxZoom = maxZoom;
-      _currentZoom = minZoom;
+      _currentZoom = defaultZoomLevel.clamp(minZoom, maxZoom);
     } catch (e) {
       _error = SwitchCameraError(
         'Failed to switch camera: $e',
@@ -156,7 +157,7 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
       if (_isDisposed || generation != _lifecycleGeneration) return;
       _minZoom = minZoom;
       _maxZoom = maxZoom;
-      _currentZoom = minZoom;
+      _currentZoom = defaultZoomLevel.clamp(minZoom, maxZoom);
     } on CameraError catch (e) {
       _error = e;
     } catch (e) {

@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:framatic/features/camera/data/camera_repository.dart';
+import 'package:framatic/features/camera/domain/camera_constants.dart';
 import 'package:framatic/features/camera/domain/camera_error.dart';
 
 class CameraService implements CameraRepository {
@@ -8,8 +9,8 @@ class CameraService implements CameraRepository {
   List<CameraDescription> _cameras = [];
   CameraLensDirection _currentDirection = .back;
 
-  double _minZoom = 1.0;
-  double _maxZoom = 1.0;
+  double _minZoom = defaultZoomLevel;
+  double _maxZoom = defaultZoomLevel;
 
   @override
   CameraController? get controller => _controller;
@@ -121,11 +122,13 @@ class CameraService implements CameraRepository {
     try {
       _minZoom = await _controller!.getMinZoomLevel();
       _maxZoom = await _controller!.getMaxZoomLevel();
-      await _controller!.setZoomLevel(_minZoom);
+      await _controller!.setZoomLevel(
+        defaultZoomLevel.clamp(_minZoom, _maxZoom),
+      );
     } catch (e) {
       debugPrint('Error getting zoom levels: $e');
-      _minZoom = 1.0;
-      _maxZoom = 1.0;
+      _minZoom = defaultZoomLevel;
+      _maxZoom = defaultZoomLevel;
     }
   }
 

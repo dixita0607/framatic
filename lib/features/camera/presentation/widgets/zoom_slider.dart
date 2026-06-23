@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
+import 'package:framatic/features/camera/domain/camera_constants.dart';
 
 /// A horizontal zoom slider widget with non-linear mapping for better visualization
 ///
@@ -29,23 +30,18 @@ class ZoomSlider extends StatefulWidget {
 }
 
 class _ZoomSliderState extends State<ZoomSlider> {
-  double? _lastHapticZoom;
+  double? _previousZoom;
 
   /// Check if we should trigger haptic feedback when crossing zoom thresholds
   bool _shouldTriggerHaptic(double newZoom) {
-    final lastZoom = _lastHapticZoom ?? widget.currentZoom;
+    final previousZoom = _previousZoom ?? widget.currentZoom;
+    _previousZoom = newZoom;
 
-    // Check if crossing 1.0x threshold
-    if ((lastZoom - 1.0).abs() > 0.1 && (newZoom - 1.0).abs() <= 0.1) {
-      return true;
-    }
-
-    // Check if crossing 2.0x threshold
-    if ((lastZoom - 2.0).abs() > 0.1 && (newZoom - 2.0).abs() <= 0.1) {
-      return true;
-    }
-
-    return false;
+    return [defaultZoomLevel, 2.0].any(
+      (threshold) =>
+          (previousZoom < threshold && newZoom >= threshold) ||
+          (previousZoom > threshold && newZoom <= threshold),
+    );
   }
 
   /// Convert actual zoom value to slider position (0.0-1.0)
@@ -106,7 +102,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
             seed: 621,
             child: Text(
               '${widget.currentZoom.toStringAsFixed(1)}x',
-              style: theme.labelStyle.copyWith(
+              style: theme.label.copyWith(
                 color: theme.ink,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -122,8 +118,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
               onChanged: (newSliderValue) {
                 final newZoom = _sliderValueToZoom(newSliderValue);
                 if (_shouldTriggerHaptic(newZoom)) {
-                  HapticFeedback.mediumImpact();
-                  _lastHapticZoom = newZoom;
+                  HapticFeedback.selectionClick();
                 }
                 widget.onZoomChanged(newZoom);
               },
@@ -146,7 +141,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
     }
 
     // Always show 1x
-    buttons.add(_buildZoomButton(1.0, '1x'));
+    buttons.add(_buildZoomButton(defaultZoomLevel, '1x'));
 
     // Show 2x if within range
     if (widget.maxZoom >= 2.0) {
@@ -182,8 +177,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
         behavior: HitTestBehavior.opaque,
         onTap: () {
           if (_shouldTriggerHaptic(zoom)) {
-            HapticFeedback.mediumImpact();
-            _lastHapticZoom = zoom;
+            HapticFeedback.selectionClick();
           }
           widget.onZoomChanged(zoom);
         },
@@ -203,7 +197,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
                 child: Center(
                   child: Text(
                     label,
-                    style: theme.labelStyle.copyWith(
+                    style: theme.label.copyWith(
                       color: theme.ink,
                       fontSize: 10,
                       fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,

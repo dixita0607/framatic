@@ -5,12 +5,10 @@ class FramePreview extends StatelessWidget {
   final double aspectRatio;
   final double maxWidth;
   final double maxHeight;
-  final int seed;
 
   const FramePreview({
     super.key,
     required this.aspectRatio,
-    required this.seed,
     this.maxWidth = 52,
     this.maxHeight = 44,
   });
@@ -32,7 +30,7 @@ class FramePreview extends StatelessWidget {
         hachure: true,
         hachureColor: theme.mutedInk.withValues(alpha: 0.24),
         shape: SketchShape.rect,
-        seed: seed,
+        seed: 1,
         child: const SizedBox.expand(),
       ),
     );

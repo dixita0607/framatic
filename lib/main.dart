@@ -18,7 +18,7 @@ const activeSketchBackground = SketchBackgroundCatalog.isometricDots;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Set preferred orientations
+  // TODO: Support landscape and foldable modes
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -46,10 +46,13 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
+  late SketchThemeData theme;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    theme = _getSketchThemeData();
   }
 
   @override
@@ -60,13 +63,13 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
 
   @override
   void didChangePlatformBrightness() {
-    setState(() {});
+    setState(() {
+      theme = _getSketchThemeData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final activeSketchTheme = _themeForSystemBrightness();
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => FrameProvider(FrameService())),
@@ -76,12 +79,12 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
         ),
       ],
       child: SketchTheme(
-        data: activeSketchTheme,
+        data: theme,
         background: activeSketchBackground,
         child: WidgetsApp(
           title: AppConstants.appName,
-          color: activeSketchTheme.background,
-          textStyle: activeSketchTheme.bodyStyle,
+          color: theme.background,
+          textStyle: theme.bodyText,
           pageRouteBuilder: <T>(settings, builder) =>
               sketchPageRoute<T>(builder, settings: settings),
           home: const CameraScreen(),
@@ -91,10 +94,9 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
     );
   }
 
-  SketchThemeData _themeForSystemBrightness() {
-    final brightness =
-        WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    return brightness == Brightness.dark
+  SketchThemeData _getSketchThemeData() {
+    return WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+            Brightness.dark
         ? SketchThemeCatalog.graphiteDark
         : SketchThemeCatalog.graphiteLight;
   }

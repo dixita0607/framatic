@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
+import 'package:framatic/features/camera/domain/camera_constants.dart';
 import 'package:framatic/features/camera/presentation/camera_provider.dart';
 import 'package:framatic/features/camera/presentation/widgets/camera_area.dart';
 import 'package:framatic/features/camera/presentation/widgets/camera_error_widget.dart';
@@ -22,7 +23,7 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  double _baseZoom = 1.0; // For pinch gesture
+  double _baseZoom = defaultZoomLevel; // For pinch gesture
   bool _isPreparingPreview = false;
   bool _showGuides = true;
 
@@ -229,7 +230,7 @@ class _CameraScreenState extends State<CameraScreen> {
                             'Preparing preview',
                             style: SketchTheme.of(
                               context,
-                            ).labelStyle.copyWith(fontWeight: FontWeight.w700),
+                            ).label.copyWith(fontWeight: FontWeight.w700),
                           ),
                         ),
                       ),
@@ -292,7 +293,7 @@ class _GridToggle extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     'Grid',
-                    style: theme.labelStyle.copyWith(
+                    style: theme.label.copyWith(
                       color: theme.ink,
                       fontWeight: FontWeight.w800,
                     ),
@@ -340,13 +341,9 @@ class _FrameStateMessage extends StatelessWidget {
                 const SketchProgress(size: 36),
                 const SizedBox(height: 16),
               ],
-              Text(title, style: theme.titleStyle, textAlign: TextAlign.center),
+              Text(title, style: theme.title, textAlign: TextAlign.center),
               const SizedBox(height: 8),
-              Text(
-                message,
-                style: theme.bodyStyle,
-                textAlign: TextAlign.center,
-              ),
+              Text(message, style: theme.bodyText, textAlign: TextAlign.center),
               if (primaryLabel != null) ...[
                 const SizedBox(height: 18),
                 Wrap(
