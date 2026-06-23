@@ -17,9 +17,9 @@ class SketchThemeData {
   final Color hachure;
   final double strokeWidth;
   final double roughness;
-  final TextStyle bodyStyle;
-  final TextStyle labelStyle;
-  final TextStyle titleStyle;
+  final TextStyle bodyText;
+  final TextStyle label;
+  final TextStyle title;
 
   const SketchThemeData({
     required this.success,
@@ -38,9 +38,9 @@ class SketchThemeData {
     required this.hachure,
     required this.strokeWidth,
     required this.roughness,
-    required this.bodyStyle,
-    required this.labelStyle,
-    required this.titleStyle,
+    required this.bodyText,
+    required this.label,
+    required this.title,
   }) : primary = primary ?? accent,
        primaryInk = primaryInk ?? paperInk;
 
@@ -110,14 +110,14 @@ class SketchThemeCatalog {
     hachure: Color(0x33F0F0F0),
     strokeWidth: 1.8,
     roughness: 1.35,
-    bodyStyle: TextStyle(color: _darkInk, fontSize: 16, height: 1.25),
-    labelStyle: TextStyle(
+    bodyText: TextStyle(color: _darkInk, fontSize: 16, height: 1.25),
+    label: TextStyle(
       color: _darkSecondary,
       fontSize: 13,
       height: 1.2,
       fontWeight: FontWeight.w600,
     ),
-    titleStyle: TextStyle(
+    title: TextStyle(
       color: _darkInk,
       fontSize: 20,
       height: 1.2,
@@ -142,14 +142,14 @@ class SketchThemeCatalog {
     hachure: Color(0x26141414),
     strokeWidth: 1.8,
     roughness: 1.35,
-    bodyStyle: TextStyle(color: _lightInk, fontSize: 16, height: 1.25),
-    labelStyle: TextStyle(
+    bodyText: TextStyle(color: _lightInk, fontSize: 16, height: 1.25),
+    label: TextStyle(
       color: _lightSecondary,
       fontSize: 13,
       height: 1.2,
       fontWeight: FontWeight.w600,
     ),
-    titleStyle: TextStyle(
+    title: TextStyle(
       color: _lightInk,
       fontSize: 20,
       height: 1.2,
