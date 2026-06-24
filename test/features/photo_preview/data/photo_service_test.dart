@@ -55,29 +55,44 @@ void main() {
     }
   });
 
-  test(
-    'processPhotoWithFrame crops to frame ratio and adds white border',
-    () async {
-      final sourceFile = File('${tempDir.path}/source.jpg');
-      final sourceImage = img.Image(width: 100, height: 80);
-      img.fill(sourceImage, color: img.ColorRgb8(20, 40, 60));
-      await sourceFile.writeAsBytes(img.encodeJpg(sourceImage));
+  test('processPhotoWithFrame crops and scales its white border', () async {
+    final sourceFile = File('${tempDir.path}/source.jpg');
+    final sourceImage = img.Image(width: 100, height: 80);
+    img.fill(sourceImage, color: img.ColorRgb8(20, 40, 60));
+    await sourceFile.writeAsBytes(img.encodeJpg(sourceImage));
 
-      final resultPath = await PhotoService().processPhotoWithFrame(
-        imagePath: sourceFile.path,
-        frame: Frame(title: 'Square', width: 1, height: 1),
-      );
+    final resultPath = await PhotoService().processPhotoWithFrame(
+      imagePath: sourceFile.path,
+      frame: Frame(title: 'Square', width: 1, height: 1),
+    );
 
-      final resultFile = File(resultPath);
-      final resultImage = img.decodeJpg(await resultFile.readAsBytes());
+    final resultFile = File(resultPath);
+    final resultImage = img.decodeJpg(await resultFile.readAsBytes());
 
-      expect(resultFile.path, startsWith('${tempDir.path}/frame_'));
-      expect(await sourceFile.exists(), isFalse);
-      expect(resultImage, isNotNull);
-      expect(resultImage!.width, 144);
-      expect(resultImage.height, 144);
-    },
-  );
+    expect(resultFile.path, startsWith('${tempDir.path}/frame_'));
+    expect(await sourceFile.exists(), isFalse);
+    expect(resultImage, isNotNull);
+    expect(resultImage!.width, 86);
+    expect(resultImage.height, 86);
+  });
+
+  test('processPhotoWithFrame strengthens borders for tall frames', () async {
+    final sourceFile = File('${tempDir.path}/portrait_source.jpg');
+    final sourceImage = img.Image(width: 100, height: 100);
+    img.fill(sourceImage, color: img.ColorRgb8(20, 40, 60));
+    await sourceFile.writeAsBytes(img.encodeJpg(sourceImage));
+
+    final resultPath = await PhotoService().processPhotoWithFrame(
+      imagePath: sourceFile.path,
+      frame: Frame(title: 'Portrait', width: 1, height: 2),
+    );
+
+    final resultImage = img.decodeJpg(await File(resultPath).readAsBytes());
+
+    expect(resultImage, isNotNull);
+    expect(resultImage!.width, 58);
+    expect(resultImage.height, 108);
+  });
 
   test(
     'processPhotoWithFrame wraps decode failures in ProcessPhotoError',

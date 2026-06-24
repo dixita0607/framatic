@@ -75,4 +75,72 @@ void main() {
       }
     });
   });
+
+  group('fitFramedAspectRatio', () {
+    test('uses the shared border rule and fits within bounds', () {
+      final ratios = [16 / 9, 4 / 3, 1.0, 3 / 4, 9 / 16];
+
+      for (final ratio in ratios) {
+        final result = fitFramedAspectRatio(
+          maxWidth: 400,
+          maxHeight: 300,
+          aspectRatio: ratio,
+          longSideBorderRatio: 0.04,
+          shortSideBorderCapRatio: 0.08,
+        );
+
+        expect(
+          result.borderWidth,
+          closeTo(
+            calculateFrameBorderWidth(
+              width: result.width,
+              height: result.height,
+              longSideRatio: 0.04,
+              shortSideCapRatio: 0.08,
+            ),
+            0.0001,
+          ),
+        );
+        expect(
+          result.width + (2 * result.borderWidth),
+          lessThanOrEqualTo(400.0001),
+        );
+        expect(
+          result.height + (2 * result.borderWidth),
+          lessThanOrEqualTo(300.0001),
+        );
+      }
+    });
+  });
+
+  group('calculateFrameBorderWidth', () {
+    test('gives rotated frames the same border width', () {
+      final landscape = calculateFrameBorderWidth(
+        width: 400,
+        height: 225,
+        longSideRatio: 0.04,
+        shortSideCapRatio: 0.08,
+      );
+      final portrait = calculateFrameBorderWidth(
+        width: 225,
+        height: 400,
+        longSideRatio: 0.04,
+        shortSideCapRatio: 0.08,
+      );
+
+      expect(landscape, 16);
+      expect(portrait, landscape);
+    });
+
+    test('caps the border for extreme aspect ratios', () {
+      final border = calculateFrameBorderWidth(
+        width: 400,
+        height: 100,
+        longSideRatio: 0.04,
+        shortSideCapRatio: 0.08,
+      );
+
+      expect(border, 8);
+    });
+  });
 }

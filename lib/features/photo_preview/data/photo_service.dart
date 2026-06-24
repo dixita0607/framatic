@@ -98,11 +98,16 @@ class PhotoService implements PhotoRepository {
       height: cropHeight,
     );
 
-    // This 4 as a multiplier works as an illusion here. It looks like the border is as thick as in camera preview screen.
+    final borderWidth = calculateFrameBorderWidth(
+      width: croppedImage.width.toDouble(),
+      height: croppedImage.height.toDouble(),
+      longSideRatio: AppConstants.frameBorderRatio,
+      shortSideCapRatio: AppConstants.maxFrameBorderShortSideRatio,
+    ).round();
 
     final imageWithBorder = img.Image(
-      width: croppedImage.width + (4 * AppConstants.frameBorder),
-      height: croppedImage.height + (4 * AppConstants.frameBorder),
+      width: croppedImage.width + (2 * borderWidth),
+      height: croppedImage.height + (2 * borderWidth),
     );
 
     img.fill(imageWithBorder, color: img.ColorRgba8(255, 255, 255, 255));

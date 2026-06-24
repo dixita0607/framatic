@@ -27,17 +27,17 @@ class CameraArea extends StatelessWidget {
     final theme = SketchTheme.of(context);
     final guideLineColor = theme.ink;
     final selectedAspectRatio = activeFrame.aspectRatio;
-    final borderWidth = AppConstants.frameBorder.toDouble();
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxPreviewWidth = constraints.maxWidth - (borderWidth * 2);
-        final maxPreviewHeight = constraints.maxHeight - (borderWidth * 2);
-        final previewSize = fitToAspectRatio(
-          maxWidth: maxPreviewWidth > 0 ? maxPreviewWidth : 0,
-          maxHeight: maxPreviewHeight > 0 ? maxPreviewHeight : 0,
+        final previewSize = fitFramedAspectRatio(
+          maxWidth: constraints.maxWidth,
+          maxHeight: constraints.maxHeight,
           aspectRatio: selectedAspectRatio,
+          longSideBorderRatio: AppConstants.frameBorderRatio,
+          shortSideBorderCapRatio: AppConstants.maxFrameBorderShortSideRatio,
         );
+        final borderWidth = previewSize.borderWidth;
 
         return GestureDetector(
           onScaleStart: onScaleStart,
