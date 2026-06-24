@@ -145,7 +145,9 @@ void main() {
       expect(find.text('Preview 8:16'), findsOneWidget);
     });
 
-    testWidgets('warns about duplicate names and ratios', (tester) async {
+    testWidgets('warns about a duplicate name when the ratio is unique', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _testApp(
           _DialogLauncher(
@@ -158,12 +160,36 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(EditableText).at(0), 'cinema');
-      await tester.enterText(find.byType(EditableText).at(1), '21');
+      await tester.enterText(find.byType(EditableText).at(1), '32');
       await tester.enterText(find.byType(EditableText).at(2), '9');
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(find.text('Frame name already exists'), findsOneWidget);
+      expect(find.text('Ratio already exists'), findsNothing);
+    });
+
+    testWidgets('warns about a duplicate ratio when the name is unique', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _testApp(
+          _DialogLauncher(
+            builder: (_) => ManageFrameDialog(onSave: (_) async {}),
+          ),
+          frames: [Frame(id: 1, title: 'Cinema', width: 21, height: 9)],
+        ),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(EditableText).at(0), 'Vista');
+      await tester.enterText(find.byType(EditableText).at(1), '21');
+      await tester.enterText(find.byType(EditableText).at(2), '9');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Frame name already exists'), findsNothing);
       expect(find.text('Ratio already exists'), findsOneWidget);
     });
 

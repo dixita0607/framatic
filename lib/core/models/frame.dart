@@ -81,6 +81,8 @@ class Frame {
 
 abstract class FramesTable {
   static const String name = 'frames';
+  static const String uniqueTitleIndex = 'frames_unique_title';
+  static const String uniqueRatioIndex = 'frames_unique_ratio';
 
   // Columns
   static const String id = 'id';

@@ -46,7 +46,19 @@ class FrameService implements FrameRepository {
 
   @override
   Future<Frame> createFrame(Frame frame) async {
-    final createdFrameId = await _db.insert(FramesTable.name, frame.toJson());
+    final int createdFrameId;
+    try {
+      createdFrameId = await _db.insert(FramesTable.name, frame.toJson());
+    } on DatabaseException catch (error) {
+      if (error.isUniqueConstraintError()) {
+        throw CreateFrameError(
+          'Frame name or ratio already exists',
+          userMessage: 'A frame with that name or ratio already exists.',
+          cause: error,
+        );
+      }
+      rethrow;
+    }
     if (createdFrameId == 0) {
       throw CreateFrameError(
         'Failed to create the frame',
@@ -71,12 +83,24 @@ class FrameService implements FrameRepository {
         userMessage: 'Built-in frames cannot be edited.',
       );
     }
-    final updatedFrameId = await _db.update(
-      FramesTable.name,
-      frame.toJson(),
-      where: 'id = ?',
-      whereArgs: [frame.id],
-    );
+    final int updatedFrameId;
+    try {
+      updatedFrameId = await _db.update(
+        FramesTable.name,
+        frame.toJson(),
+        where: 'id = ?',
+        whereArgs: [frame.id],
+      );
+    } on DatabaseException catch (error) {
+      if (error.isUniqueConstraintError()) {
+        throw UpdateFrameError(
+          'Frame name or ratio already exists',
+          userMessage: 'A frame with that name or ratio already exists.',
+          cause: error,
+        );
+      }
+      rethrow;
+    }
     if (updatedFrameId == 0) {
       throw UpdateFrameError(
         'Failed to update the frame with id: ${frame.id}',

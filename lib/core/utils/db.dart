@@ -36,7 +36,7 @@ class FramaticDB {
       _db = await openDatabase(
         dbPath,
         version: DBSchemaValues.dbVersion,
-        onCreate: _createDatabase,
+        onCreate: DBSchema.create,
       );
       _initCompleter!.complete();
     } catch (e) {
@@ -45,7 +45,11 @@ class FramaticDB {
     }
   }
 
-  FutureOr<void> _createDatabase(Database db, int version) async {
+  Future<void> close() async => await _db.close();
+}
+
+abstract class DBSchema {
+  static FutureOr<void> create(Database db, int version) async {
     await db.execute('''
           CREATE TABLE ${FramesTable.name} (
             ${FramesTable.id} ${DBTypes.integer} primary key autoincrement,
@@ -55,6 +59,8 @@ class FramaticDB {
             ${FramesTable.isCustom} ${DBTypes.integer} not null
           )
         ''');
+
+    await _createFrameUniquenessIndexes(db);
 
     await db.insert(
       FramesTable.name,
@@ -70,7 +76,16 @@ class FramaticDB {
     );
   }
 
-  Future<void> close() async => await _db.close();
+  static Future<void> _createFrameUniquenessIndexes(Database db) async {
+    await db.execute('''
+      CREATE UNIQUE INDEX ${FramesTable.uniqueTitleIndex}
+      ON ${FramesTable.name} (LOWER(TRIM(${FramesTable.title})))
+    ''');
+    await db.execute('''
+      CREATE UNIQUE INDEX ${FramesTable.uniqueRatioIndex}
+      ON ${FramesTable.name} (${FramesTable.width}, ${FramesTable.height})
+    ''');
+  }
 }
 
 abstract class DBTypes {
