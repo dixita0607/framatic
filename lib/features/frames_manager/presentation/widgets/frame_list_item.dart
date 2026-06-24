@@ -8,8 +8,8 @@ import 'package:framatic/features/frames_manager/presentation/widgets/manage_fra
 class FrameListItem extends StatelessWidget {
   final Frame frame;
   final int order;
-  final Function(Frame) onEdit;
-  final Function(int frameId) onDelete;
+  final Future<void> Function(Frame frame) onEdit;
+  final Future<void> Function(int frameId) onDelete;
 
   const FrameListItem({
     super.key,

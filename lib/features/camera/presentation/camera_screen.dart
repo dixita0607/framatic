@@ -275,7 +275,7 @@ class _GridToggle extends StatelessWidget {
           constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
           child: Center(
             child: SketchSurface(
-              shape: SketchShape.pill,
+              shape: SketchShape.rect,
               fillColor: theme.panel,
               strokeColor: theme.ink,
               hachure: isEnabled,

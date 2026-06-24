@@ -1,16 +1,14 @@
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 import 'package:framatic/features/camera/domain/camera_constants.dart';
 
-/// A horizontal zoom slider widget with non-linear mapping for better visualization
+/// A horizontal zoom slider widget with proportional non-linear mapping.
 ///
-/// The slider uses non-linear mapping:
-/// - First half (0.0-0.5): Maps to 0.5x - 2.0x zoom range
-/// - Second half (0.5-1.0): Maps to 2.0x - maxZoom range
-///
-/// This provides better visual distinction for common zoom levels (0.5x, 1x, 2x)
-/// while still allowing access to the full zoom range.
+/// Logarithmic mapping gives lower zoom levels more room on the slider while
+/// supporting any positive zoom range reported by the selected camera.
 class ZoomSlider extends StatefulWidget {
   final double minZoom;
   final double maxZoom;
@@ -44,39 +42,21 @@ class _ZoomSliderState extends State<ZoomSlider> {
     );
   }
 
-  /// Convert actual zoom value to slider position (0.0-1.0)
-  /// Uses non-linear mapping for better visualization
+  /// Convert an actual zoom value to a proportional slider position (0.0-1.0).
   double _zoomToSliderValue(double zoom) {
-    // Normalize zoom to effective range [minZoom, maxZoom]
     final clampedZoom = zoom.clamp(widget.minZoom, widget.maxZoom);
+    final rangeRatio = widget.maxZoom / widget.minZoom;
+    final zoomRatio = clampedZoom / widget.minZoom;
 
-    // Non-linear mapping:
-    // First half: minZoom to 2.0x → slider 0.0 to 0.5
-    // Second half: 2.0x to maxZoom → slider 0.5 to 1.0
-    if (clampedZoom <= 2.0) {
-      // First half: map [minZoom, 2.0] to [0.0, 0.5]
-      return ((clampedZoom - widget.minZoom) / (2.0 - widget.minZoom)) * 0.5;
-    } else {
-      // Second half: map [2.0, maxZoom] to [0.5, 1.0]
-      return 0.5 + ((clampedZoom - 2.0) / (widget.maxZoom - 2.0)) * 0.5;
-    }
+    return math.log(zoomRatio) / math.log(rangeRatio);
   }
 
-  /// Convert slider position (0.0-1.0) to actual zoom value
-  /// Uses non-linear mapping for better visualization
+  /// Convert a slider position (0.0-1.0) to an actual zoom value.
   double _sliderValueToZoom(double sliderValue) {
     final clampedValue = sliderValue.clamp(0.0, 1.0);
 
-    // Non-linear mapping (inverse):
-    // Slider 0.0 to 0.5 → zoom minZoom to 2.0x
-    // Slider 0.5 to 1.0 → zoom 2.0x to maxZoom
-    if (clampedValue <= 0.5) {
-      // First half: map [0.0, 0.5] to [minZoom, 2.0]
-      return widget.minZoom + (clampedValue / 0.5) * (2.0 - widget.minZoom);
-    } else {
-      // Second half: map [0.5, 1.0] to [2.0, maxZoom]
-      return 2.0 + ((clampedValue - 0.5) / 0.5) * (widget.maxZoom - 2.0);
-    }
+    return widget.minZoom *
+        math.pow(widget.maxZoom / widget.minZoom, clampedValue);
   }
 
   @override
@@ -135,12 +115,7 @@ class _ZoomSliderState extends State<ZoomSlider> {
   Widget _buildQuickZoomButtons() {
     final buttons = <Widget>[];
 
-    // Add 0.5x button if device supports ultra-wide
-    if (widget.minZoom <= 0.6) {
-      buttons.add(_buildZoomButton(0.5, '0.5'));
-    }
-
-    // Always show 1x
+    // Show 1x as the default quick zoom when it is supported.
     buttons.add(_buildZoomButton(defaultZoomLevel, '1x'));
 
     // Show 2x if within range

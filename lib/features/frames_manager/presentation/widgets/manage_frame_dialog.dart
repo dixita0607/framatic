@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 
 class ManageFrameDialog extends StatefulWidget {
   final Frame? frame;
-  final Function(Frame) onSave;
+  final Future<void> Function(Frame frame) onSave;
 
   const ManageFrameDialog({super.key, this.frame, required this.onSave});
 

@@ -6,7 +6,7 @@ import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 
 class DeleteFrameDialog extends StatelessWidget {
   final Frame frame;
-  final Function(int frameId) onDelete;
+  final Future<void> Function(int frameId) onDelete;
 
   const DeleteFrameDialog({
     super.key,

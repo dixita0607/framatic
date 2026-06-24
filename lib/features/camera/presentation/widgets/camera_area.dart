@@ -9,8 +9,8 @@ import 'package:framatic/features/camera/presentation/widgets/clipped_camera_pre
 class CameraArea extends StatelessWidget {
   final CameraController controller;
   final Frame activeFrame;
-  final Function(ScaleStartDetails) onScaleStart;
-  final Function(ScaleUpdateDetails) onScaleUpdate;
+  final GestureScaleStartCallback onScaleStart;
+  final GestureScaleUpdateCallback onScaleUpdate;
   final bool showGuides;
 
   const CameraArea({

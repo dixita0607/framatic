@@ -159,26 +159,59 @@ void main() {
   });
 
   group('ZoomSlider', () {
-    testWidgets('labels zoom controls and keeps quick zoom targets large', (
+    testWidgets('shows current zoom with supported 1x and 2x shortcuts', (
       tester,
     ) async {
+      final zoomLevels = <double>[];
+
       await tester.pumpWidget(
         _testApp(
           ZoomSlider(
             minZoom: 0.5,
-            maxZoom: 4,
+            maxZoom: 8,
             currentZoom: 1,
-            onZoomChanged: (_) {},
+            onZoomChanged: zoomLevels.add,
           ),
         ),
       );
 
+      expect(find.text('1.0x'), findsOneWidget);
       expect(find.bySemanticsLabel('Zoom'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp(r'Set zoom to 0\.5')), findsNothing);
       expect(find.bySemanticsLabel(RegExp(r'Set zoom to 1x')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp(r'Set zoom to 2x')), findsOneWidget);
       expect(
         tester.getSize(find.bySemanticsLabel(RegExp(r'Set zoom to 1x'))).height,
         greaterThanOrEqualTo(44),
       );
+
+      await tester.tap(find.bySemanticsLabel(RegExp(r'Set zoom to 2x')));
+
+      expect(zoomLevels.last, 2);
+    });
+
+    testWidgets('uses non-linear mapping when maximum zoom is below 2x', (
+      tester,
+    ) async {
+      final zoomLevels = <double>[];
+
+      await tester.pumpWidget(
+        _testApp(
+          ZoomSlider(
+            minZoom: 1,
+            maxZoom: 1.8,
+            currentZoom: 1,
+            onZoomChanged: zoomLevels.add,
+          ),
+        ),
+      );
+
+      expect(find.bySemanticsLabel(RegExp(r'Set zoom to 1x')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp(r'Set zoom to 2x')), findsNothing);
+
+      await tester.tapAt(tester.getCenter(find.byType(SketchSlider)));
+
+      expect(zoomLevels.last, closeTo(1.34, 0.01));
     });
   });
 }
