@@ -1,6 +1,7 @@
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
+import 'package:framatic/core/widgets/paper_frame.dart';
 
 /// Supplies the app's sketch theme and a local overlay to every preview.
 Widget wrapSketchPreview(Widget child) {
@@ -79,6 +80,41 @@ Widget sketchFormFieldsPreview() => const _SketchFormCatalog();
   wrapper: wrapSketchPreview,
 )
 Widget sketchFeedbackPreview() => const _SketchFeedbackCatalog();
+
+@Preview(
+  group: 'Framatic · Frames',
+  name: 'Soft cut paper · Light',
+  size: Size(390, 260),
+  brightness: Brightness.light,
+  wrapper: wrapSketchPreview,
+)
+@Preview(
+  group: 'Framatic · Frames',
+  name: 'Soft cut paper · Dark',
+  size: Size(390, 260),
+  brightness: Brightness.dark,
+  wrapper: wrapSketchPreview,
+)
+Widget softCutPaperFramePreview() {
+  return const Center(
+    child: PaperFrame(
+      imageWidth: 300,
+      imageHeight: 168.75,
+      borderWidth: 12,
+      bottomBorderWidth: 18.6,
+      ratioLabel: '16 x 9',
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF94A7B4), Color(0xFF394A42)],
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
 class _SketchControlsCatalog extends StatefulWidget {
   const _SketchControlsCatalog();

@@ -22,6 +22,9 @@ class Frame {
   /// Get formatted aspect ratio string (e.g., "16:9" or "2:8")
   String get formattedRatio => '$width:$height';
 
+  /// Ratio written on the paper border (e.g., "16 x 9").
+  String get paperRatio => '$width x $height';
+
   /// Create from JSON
   factory Frame.fromJson(Map<String, dynamic> json) {
     return Frame(

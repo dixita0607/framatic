@@ -3,6 +3,12 @@ import 'package:framatic/core/models/frame.dart';
 
 void main() {
   group('Frame model serialization', () {
+    test('formats the paper ratio for built-in fonts', () {
+      final frame = Frame(title: 'Widescreen', width: 16, height: 9);
+
+      expect(frame.paperRatio, '16 x 9');
+    });
+
     test('toJson maps isCustom bool to int', () {
       final json = Frame(
         id: 1,

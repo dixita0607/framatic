@@ -4,6 +4,7 @@ import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 import 'package:framatic/core/utils/constants.dart';
 import 'package:framatic/core/utils/frame_calculator.dart';
+import 'package:framatic/core/widgets/paper_frame.dart';
 import 'package:framatic/features/camera/presentation/widgets/clipped_camera_preview.dart';
 
 class CameraArea extends StatelessWidget {
@@ -36,46 +37,44 @@ class CameraArea extends StatelessWidget {
           aspectRatio: selectedAspectRatio,
           longSideBorderRatio: AppConstants.frameBorderRatio,
           shortSideBorderCapRatio: AppConstants.maxFrameBorderShortSideRatio,
+          bottomBorderMultiplier: AppConstants.frameBottomBorderMultiplier,
         );
         final borderWidth = previewSize.borderWidth;
+        final bottomBorderWidth =
+            borderWidth * AppConstants.frameBottomBorderMultiplier;
 
         return GestureDetector(
           onScaleStart: onScaleStart,
           onScaleUpdate: onScaleUpdate,
           child: Center(
-            child: SizedBox(
-              width: previewSize.width + (borderWidth * 2),
-              height: previewSize.height + (borderWidth * 2),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    width: borderWidth,
-                    color: const Color(0xFFFFFFFF),
+            child: PaperFrame(
+              imageWidth: previewSize.width,
+              imageHeight: previewSize.height,
+              borderWidth: borderWidth,
+              bottomBorderWidth: bottomBorderWidth,
+              ratioLabel: activeFrame.paperRatio,
+              child: Stack(
+                alignment: .center,
+                children: [
+                  // Camera preview - clipped to selected aspect ratio
+                  ClippedCameraPreview(
+                    controller: controller,
+                    targetAspectRatio: selectedAspectRatio,
                   ),
-                ),
-                child: Stack(
-                  alignment: .center,
-                  children: [
-                    // Camera preview - clipped to selected aspect ratio
-                    ClippedCameraPreview(
-                      controller: controller,
-                      targetAspectRatio: selectedAspectRatio,
-                    ),
-                    if (showGuides)
-                      IgnorePointer(
-                        child: SizedBox(
-                          width: previewSize.width,
-                          height: previewSize.height,
-                          child: CustomPaint(
-                            painter: _CompositionGuidePainter(
-                              color: guideLineColor,
-                            ),
-                            child: const SizedBox.expand(),
+                  if (showGuides)
+                    IgnorePointer(
+                      child: SizedBox(
+                        width: previewSize.width,
+                        height: previewSize.height,
+                        child: CustomPaint(
+                          painter: _CompositionGuidePainter(
+                            color: guideLineColor,
                           ),
+                          child: const SizedBox.expand(),
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
           ),

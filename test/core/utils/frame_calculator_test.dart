@@ -111,6 +111,22 @@ void main() {
         );
       }
     });
+
+    test('reserves room for a deeper bottom paper edge', () {
+      final result = fitFramedAspectRatio(
+        maxWidth: 400,
+        maxHeight: 300,
+        aspectRatio: 16 / 9,
+        longSideBorderRatio: 0.04,
+        shortSideBorderCapRatio: 0.08,
+        bottomBorderMultiplier: 1.55,
+      );
+
+      expect(
+        result.height + result.borderWidth + (result.borderWidth * 1.55),
+        lessThanOrEqualTo(300.0001),
+      );
+    });
   });
 
   group('calculateFrameBorderWidth', () {

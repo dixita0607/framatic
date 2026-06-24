@@ -23,6 +23,7 @@
   required double aspectRatio,
   required double longSideBorderRatio,
   required double shortSideBorderCapRatio,
+  double bottomBorderMultiplier = 1,
 }) {
   final borderRatioRelativeToWidth =
       calculateFrameBorderWidth(
@@ -34,7 +35,9 @@
       aspectRatio;
   final widthLimitedByWidth = maxWidth / (1 + (2 * borderRatioRelativeToWidth));
   final widthLimitedByHeight =
-      maxHeight / ((1 / aspectRatio) + (2 * borderRatioRelativeToWidth));
+      maxHeight /
+      ((1 / aspectRatio) +
+          (borderRatioRelativeToWidth * (1 + bottomBorderMultiplier)));
   final width = widthLimitedByWidth < widthLimitedByHeight
       ? widthLimitedByWidth
       : widthLimitedByHeight;

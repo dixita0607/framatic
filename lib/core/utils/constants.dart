@@ -7,4 +7,12 @@ class AppConstants {
 
   /// Prevents the border from overwhelming very narrow frames.
   static const double maxFrameBorderShortSideRatio = 0.08;
+
+  /// Gives the handwritten ratio enough room without turning the frame into a
+  /// heavy Polaroid-style border.
+  static const double frameBottomBorderMultiplier = 1.55;
+
+  static const int paperRed = 255;
+  static const int paperGreen = 253;
+  static const int paperBlue = 247;
 }
