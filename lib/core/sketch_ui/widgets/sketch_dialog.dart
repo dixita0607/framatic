@@ -17,34 +17,41 @@ class SketchDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = SketchTheme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(22),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: SketchSurface(
-            fillColor: theme.panelStrong,
-            hachure: true,
-            padding: const EdgeInsets.all(20),
-            seed: title.hashCode,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: theme.title),
-                const SizedBox(height: 18),
-                child,
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    return SafeArea(
+      child: AnimatedPadding(
+        duration: const Duration(milliseconds: 140),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.fromLTRB(22, 22, 22, 22 + bottomInset),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: SketchSurface(
+              fillColor: theme.panelStrong,
+              hachure: true,
+              padding: const EdgeInsets.all(20),
+              seed: title.hashCode,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (var i = 0; i < actions.length; i++) ...[
-                      if (i > 0) const SizedBox(width: 10),
-                      actions[i],
-                    ],
+                    Text(title, style: theme.title),
+                    const SizedBox(height: 18),
+                    child,
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        for (var i = 0; i < actions.length; i++) ...[
+                          if (i > 0) const SizedBox(width: 10),
+                          actions[i],
+                        ],
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

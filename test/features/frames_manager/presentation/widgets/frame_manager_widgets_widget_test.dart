@@ -11,6 +11,40 @@ import 'package:provider/provider.dart';
 
 void main() {
   group('ManageFrameDialog', () {
+    testWidgets('stays scrollable above the keyboard on a short viewport', (
+      tester,
+    ) async {
+      addTearDown(tester.view.reset);
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(400, 500);
+
+      await tester.pumpWidget(
+        _testApp(
+          _DialogLauncher(
+            builder: (_) => ManageFrameDialog(onSave: (_) async {}),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      await tester.showKeyboard(find.byType(EditableText).last);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 220);
+      await tester.pumpAndSettle();
+
+      final scrollable = find.descendant(
+        of: find.byType(SketchDialog),
+        matching: find.byType(SingleChildScrollView),
+      );
+      expect(scrollable, findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await tester.ensureVisible(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(find.text('Save').hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('validates required fields before saving', (tester) async {
       await tester.pumpWidget(
         _testApp(

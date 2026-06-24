@@ -16,17 +16,21 @@ class SketchTopBar extends StatelessWidget {
       child: Row(
         children: [
           if (onBack != null) ...[
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onBack,
-              child: SizedBox(
-                width: 44,
-                height: 44,
-                child: Center(
-                  child: SketchIcon(
-                    type: SketchIconType.back,
-                    size: 18,
-                    color: theme.ink,
+            Semantics(
+              button: true,
+              label: 'Back',
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onBack,
+                child: SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: Center(
+                    child: SketchIcon(
+                      type: SketchIconType.back,
+                      size: 18,
+                      color: theme.ink,
+                    ),
                   ),
                 ),
               ),

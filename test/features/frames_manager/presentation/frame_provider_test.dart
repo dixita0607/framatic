@@ -50,6 +50,29 @@ void main() {
     });
   });
 
+  group('FrameProvider state exposure', () {
+    test('frames returns an immutable snapshot', () async {
+      final repository = _FakeFrameRepository(
+        frames: [_frame(id: 1, title: '16:9', width: 16, height: 9)],
+        order: ['1'],
+      );
+      final provider = FrameProvider(repository);
+      addTearDown(provider.dispose);
+      await _waitForInitialization(provider);
+
+      final snapshot = provider.frames;
+
+      expect(() => snapshot.clear(), throwsUnsupportedError);
+
+      await provider.createFrame(
+        Frame(title: 'Panorama', width: 3, height: 1, isCustom: true),
+      );
+
+      expect(snapshot.map((frame) => frame.id), [1]);
+      expect(provider.frames.map((frame) => frame.id), [100, 1]);
+    });
+  });
+
   group('FrameProvider mutations', () {
     test('createFrame inserts new frame first and persists order', () async {
       final repository = _FakeFrameRepository(

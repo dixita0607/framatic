@@ -15,7 +15,7 @@ class FrameProvider extends ChangeNotifier {
     _initialize();
   }
 
-  List<Frame> get frames => _frames;
+  List<Frame> get frames => List<Frame>.unmodifiable(_frames);
   bool get isLoading => _isLoading;
   Frame? get activeFrame => _activeFrameId == null
       ? null
