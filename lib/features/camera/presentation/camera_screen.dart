@@ -181,7 +181,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 64),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Column(
                   mainAxisAlignment: .start,
                   children: [
