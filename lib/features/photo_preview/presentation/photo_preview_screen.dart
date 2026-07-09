@@ -36,6 +36,7 @@ class PhotoPreviewScreen extends StatelessWidget {
                       mainAxisAlignment: .spaceEvenly,
                       children: [
                         CircularActionButton(
+                          key: const ValueKey('preview_discard_button'),
                           icon: SketchIconType.close,
                           label: 'Retake',
                           onPressed: provider.isSaving
@@ -46,6 +47,7 @@ class PhotoPreviewScreen extends StatelessWidget {
                                 },
                         ),
                         CircularActionButton(
+                          key: const ValueKey('preview_save_button'),
                           icon: SketchIconType.check,
                           label: 'Save',
                           onPressed: provider.isSaving

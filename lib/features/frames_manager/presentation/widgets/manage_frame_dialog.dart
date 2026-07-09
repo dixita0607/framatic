@@ -68,6 +68,7 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
           mainAxisSize: .min,
           children: [
             SketchFormInput(
+              key: const ValueKey('frame_name_input'),
               controller: _nameController,
               label: 'Frame Name',
               hint: 'e.g. Ultra Wide',
@@ -87,6 +88,7 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
               children: [
                 Expanded(
                   child: SketchFormInput(
+                    key: const ValueKey('frame_width_input'),
                     controller: _widthController,
                     keyboardType: .number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -106,6 +108,7 @@ class _ManageFrameDialogState extends State<ManageFrameDialog> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: SketchFormInput(
+                    key: const ValueKey('frame_height_input'),
                     controller: _heightController,
                     keyboardType: .number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:framatic/core/errors/app_error.dart';
 import 'package:framatic/core/extensions/error_extension.dart';
+import 'package:framatic/core/models/frame.dart';
 import 'package:framatic/core/sketch_ui/sketch_ui.dart';
 import 'package:framatic/features/camera/domain/camera_constants.dart';
 import 'package:framatic/features/camera/presentation/camera_provider.dart';
@@ -15,8 +16,16 @@ import 'package:framatic/features/photo_preview/presentation/photo_preview_provi
 import 'package:framatic/features/photo_preview/presentation/photo_preview_screen.dart';
 import 'package:provider/provider.dart';
 
+typedef CameraViewportBuilder =
+    Widget Function(BuildContext context, Frame activeFrame);
+
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+  const CameraScreen({super.key, this.cameraViewportBuilder});
+
+  // Integration tests can provide a fake viewport here so the camera controls
+  // render without needing a platform-backed CameraController. Production leaves
+  // this null and uses the real CameraArea below.
+  final CameraViewportBuilder? cameraViewportBuilder;
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -130,8 +139,11 @@ class _CameraScreenState extends State<CameraScreen> {
             );
           }
 
-          // Show loading when initializing or controller is null
-          if (cameraProvider.isLoading || cameraProvider.controller == null) {
+          // A real camera screen cannot render without a CameraController, but
+          // tests may supply cameraViewportBuilder to exercise the surrounding UI.
+          if (cameraProvider.isLoading ||
+              (cameraProvider.controller == null &&
+                  widget.cameraViewportBuilder == null)) {
             return const Center(child: SketchProgress(size: 42));
           }
 
@@ -160,13 +172,14 @@ class _CameraScreenState extends State<CameraScreen> {
               Expanded(
                 child: Stack(
                   children: [
-                    CameraArea(
-                      controller: cameraProvider.controller!,
-                      activeFrame: activeFrame,
-                      onScaleStart: _onScaleStart,
-                      onScaleUpdate: _onScaleUpdate,
-                      showGuides: _showGuides,
-                    ),
+                    widget.cameraViewportBuilder?.call(context, activeFrame) ??
+                        CameraArea(
+                          controller: cameraProvider.controller!,
+                          activeFrame: activeFrame,
+                          onScaleStart: _onScaleStart,
+                          onScaleUpdate: _onScaleUpdate,
+                          showGuides: _showGuides,
+                        ),
                     Positioned(
                       right: 18,
                       top: 18,
@@ -202,12 +215,14 @@ class _CameraScreenState extends State<CameraScreen> {
                       crossAxisAlignment: .center,
                       children: [
                         SketchIconButton(
+                          key: const ValueKey('frame_manager_button'),
                           icon: SketchIconType.settings,
                           onPressed: _onManageFrames,
                           tooltip: 'Manage Frames',
                         ),
 
                         CaptureButton(
+                          key: const ValueKey('capture_button'),
                           isCapturing:
                               cameraProvider.isCapturing || _isPreparingPreview,
                           onPressed: _isPreparingPreview ? null : _capturePhoto,
@@ -238,6 +253,7 @@ class _CameraScreenState extends State<CameraScreen> {
                     SizedBox(
                       height: 48,
                       child: FrameSelector(
+                        key: const ValueKey('frame_selector'),
                         frames: frameProvider.frames,
                         activeFrame: activeFrame,
                         isLoading: frameProvider.isLoading,

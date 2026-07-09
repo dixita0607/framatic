@@ -37,6 +37,7 @@ class FrameSelector extends StatelessWidget {
             child: Builder(
               builder: (chipContext) {
                 return SketchChip(
+                  key: ValueKey('frame_selector_${frame.id}'),
                   label: frame.title,
                   selected: isSelected,
                   semanticLabel:

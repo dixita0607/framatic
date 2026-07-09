@@ -67,6 +67,7 @@ class FrameListItem extends StatelessWidget {
           ),
           if (frame.isCustom)
             _FrameRowActions(
+              frameId: frame.id,
               onEdit: () => showSketchDialog(
                 context: context,
                 builder: (_) => ManageFrameDialog(frame: frame, onSave: onEdit),
@@ -93,10 +94,15 @@ class FrameListItem extends StatelessWidget {
 }
 
 class _FrameRowActions extends StatelessWidget {
+  final int? frameId;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  const _FrameRowActions({required this.onEdit, required this.onDelete});
+  const _FrameRowActions({
+    required this.frameId,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +117,7 @@ class _FrameRowActions extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _FrameRowActionIcon(
+            key: ValueKey('edit_custom_frame_${frameId ?? 'new'}'),
             icon: SketchIconType.edit,
             label: 'Edit Frame',
             color: theme.ink,
@@ -118,6 +125,7 @@ class _FrameRowActions extends StatelessWidget {
             onPressed: onEdit,
           ),
           _FrameRowActionIcon(
+            key: ValueKey('delete_custom_frame_${frameId ?? 'new'}'),
             icon: SketchIconType.delete,
             label: 'Delete Frame',
             color: theme.danger,
@@ -138,6 +146,7 @@ class _FrameRowActionIcon extends StatelessWidget {
   final VoidCallback onPressed;
 
   const _FrameRowActionIcon({
+    super.key,
     required this.icon,
     required this.label,
     required this.color,

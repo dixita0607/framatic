@@ -65,6 +65,7 @@ class FramesManagerScreen extends StatelessWidget {
                 right: 18,
                 bottom: 18,
                 child: SketchIconButton(
+                  key: const ValueKey('add_custom_frame_button'),
                   icon: SketchIconType.add,
                   onPressed: () => _showAddFrameDialog(context),
                   tooltip: 'Add Custom Frame',
