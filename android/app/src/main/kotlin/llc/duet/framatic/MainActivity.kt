@@ -1,4 +1,4 @@
-package com.example.framatic
+package llc.duet.framatic
 
 import io.flutter.embedding.android.FlutterActivity
 
