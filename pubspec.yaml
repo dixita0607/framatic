@@ -1,7 +1,7 @@
 name: framatic
 description: "A view finder flutter application"
 publish_to: "none"
-version: 0.1.0
+version: 1.0.0-beta+1
 
 environment:
   sdk: ^3.10.7
@@ -28,3 +28,11 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   sqflite_common_ffi: ^2.4.0+2
+  flutter_launcher_icons: "^0.14.4"
+
+flutter_launcher_icons:
+  android: "framatic"
+  image_path: "assets/icon/framatic.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/framatic.png"
+  adaptive_icon_foreground_inset: 32
