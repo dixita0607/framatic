@@ -189,6 +189,40 @@ void main() {
       expect(provider.currentZoom, 1.5);
     },
   );
+
+  test(
+    'resumed lifecycle waits for first permission initialization before reinitializing',
+    () async {
+      final permissionResponse = Completer<Object?>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(permissionChannel, (call) async {
+            switch (call.method) {
+              case 'checkPermissionStatus':
+                return 0;
+              case 'requestPermissions':
+                return permissionResponse.future;
+              default:
+                fail('Unexpected permission method: ${call.method}');
+            }
+          });
+
+      final provider = CameraProvider(repository);
+      addTearDown(provider.dispose);
+      await pumpEventQueue();
+
+      provider.didChangeAppLifecycleState(AppLifecycleState.inactive);
+      provider.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await pumpEventQueue();
+      expect(repository.reinitializeCalls, 0);
+
+      permissionResponse.complete(<int, int>{1: 1});
+      await _waitForInitialization(provider);
+
+      expect(repository.initializeCalls, 1);
+      expect(repository.reinitializeCalls, 1);
+      expect(provider.error, isNull);
+    },
+  );
 }
 
 Future<void> _waitForInitialization(CameraProvider provider) async {

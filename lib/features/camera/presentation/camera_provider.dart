@@ -12,7 +12,7 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   CameraProvider(CameraRepository cameraRepository)
     : _cameraRepository = cameraRepository {
     WidgetsBinding.instance.addObserver(this);
-    _initialize();
+    _initialization = _initialize();
   }
 
   bool _isLoading = true;
@@ -23,6 +23,7 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   double _maxZoom = defaultZoomLevel;
   double _currentZoom = defaultZoomLevel;
   Future<void> _lifecycleOperation = Future.value();
+  Future<void>? _initialization;
   int _lifecycleGeneration = 0;
   bool _isDisposed = false;
 
@@ -34,7 +35,11 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
   double get maxZoom => _maxZoom;
   double get currentZoom => _currentZoom;
 
-  Future<void> retry() => _initialize();
+  Future<void> retry() {
+    final initialization = _initialize();
+    _initialization = initialization;
+    return initialization;
+  }
 
   Future<void> _initialize() async {
     _isLoading = true;
@@ -146,6 +151,12 @@ class CameraProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> _reinitialize(int generation) async {
     if (_isDisposed || generation != _lifecycleGeneration) return;
+
+    // Android's runtime permission prompt briefly inactivates the app. Wait for
+    // the first initialization to discover cameras before handling its resume.
+    await _initialization;
+    if (_isDisposed || generation != _lifecycleGeneration) return;
+
     _isLoading = true;
     _error = null;
     notifyListeners();
